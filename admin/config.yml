@@ -1,6 +1,7 @@
 backend:
   name: git-gateway
   branch: main
+  auth_type: github
 
 media_folder: "assets/images"      # Folder for uploaded images
 public_folder: "/assets/images"
