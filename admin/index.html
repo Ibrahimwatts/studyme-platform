@@ -4,28 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
-  <!-- Use production build for stability on Netlify -->
-  <script src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js" async></script>
+  <!-- Stable older version (v2.10.192) - fixes removeChild error -->
+  <script src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js" async></script>
 </head>
 <body>
   <script type="text/javascript">
-    // Delay init until everything is ready + retry
+    // Delay init to avoid timing issues
     function tryInitCMS(attempt = 1) {
       if (window.CMS && window.CMS.init) {
         window.CMS_MANUAL_INIT = true;
         window.CMS.init();
-        console.log('Decap CMS initialized successfully on attempt ' + attempt);
+        console.log('Netlify CMS initialized successfully on attempt ' + attempt);
       } else if (attempt < 10) {
-        console.log('Waiting for Decap CMS... attempt ' + attempt);
+        console.log('Waiting for CMS... attempt ' + attempt);
         setTimeout(() => tryInitCMS(attempt + 1), 500);
       } else {
-        console.error('Decap CMS failed to load after 10 attempts');
+        console.error('CMS failed to load after 10 attempts');
       }
     }
 
-    // Start after full load + small extra delay
     window.addEventListener('load', function() {
-      setTimeout(tryInitCMS, 1000); // 1 second extra delay after load
+      setTimeout(tryInitCMS, 1000);
     });
   </script>
 </body>
