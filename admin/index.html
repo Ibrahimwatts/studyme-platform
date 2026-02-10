@@ -4,26 +4,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
-  <!-- Latest stable Decap CMS -->
+  <!-- Use production build for stability on Netlify -->
   <script src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js" async></script>
 </head>
 <body>
-  <!-- Initialize only after Decap CMS is fully loaded -->
   <script type="text/javascript">
-    function initCMS() {
+    // Delay init until everything is ready + retry
+    function tryInitCMS(attempt = 1) {
       if (window.CMS && window.CMS.init) {
         window.CMS_MANUAL_INIT = true;
         window.CMS.init();
-        console.log('Decap CMS initialized successfully!');
+        console.log('Decap CMS initialized successfully on attempt ' + attempt);
+      } else if (attempt < 10) {
+        console.log('Waiting for Decap CMS... attempt ' + attempt);
+        setTimeout(() => tryInitCMS(attempt + 1), 500);
       } else {
-        console.warn('Decap CMS not yet ready — retrying in 500ms');
-        setTimeout(initCMS, 500); // Retry every 500ms until ready
+        console.error('Decap CMS failed to load after 10 attempts');
       }
     }
 
-    // Start checking once the page is fully loaded
+    // Start after full load + small extra delay
     window.addEventListener('load', function() {
-      initCMS();
+      setTimeout(tryInitCMS, 1000); // 1 second extra delay after load
     });
   </script>
 </body>
