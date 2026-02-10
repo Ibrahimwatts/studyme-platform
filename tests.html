@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Tests & Quizzes - Studyme</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header – same as other pages -->
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" placeholder="Search notes, videos, tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
+      </div>
+
+      <nav>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="hamburger">☰</label>
+
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-content">
+        <h1>Interactive Tests & Quizzes</h1>
+        <p>Test your knowledge with curriculum-aligned quizzes in Physics, Chemistry, Biology, and Mathematics (Form 1–4 / Grade 7–12). Instant feedback, score tracking, and progress reports — perfect for KCSE preparation and self-assessment.</p>
+        <p class="hero-meta">Timed mode • Detailed explanations • Dashboard tracking (premium)</p>
+      </div>
+    </section>
+
+    <section class="tests-overview">
+      <h2 class="section-title">Practice Now</h2>
+      <p class="intro-text">Try this sample Physics Form 1 quiz. Full timed tests, explanations, and progress history are available in your dashboard after login/subscription.</p>
+
+      <div class="quiz-container">
+        <div class="quiz-header">
+          <h3>Sample Quiz: Physics Form 1 – Measurements & Units</h3>
+          <div class="quiz-info">
+            <span>5 Questions</span> • <span>Multiple Choice</span> • <span>Instant Feedback</span>
+          </div>
+        </div>
+
+        <!-- Quiz Questions -->
+        <div class="quiz" id="physics-quiz">
+          <div class="question" data-correct="b">
+            <p class="question-text">1. What is the SI unit for force?</p>
+            <div class="options">
+              <label><input type="radio" name="q1" value="a"> Joule</label>
+              <label><input type="radio" name="q1" value="b"> Newton</label>
+              <label><input type="radio" name="q1" value="c"> Watt</label>
+              <label><input type="radio" name="q1" value="d"> Pascal</label>
+            </div>
+          </div>
+
+          <div class="question" data-correct="c">
+            <p class="question-text">2. Which of the following is a vector quantity?</p>
+            <div class="options">
+              <label><input type="radio" name="q2" value="a"> Mass</label>
+              <label><input type="radio" name="q2" value="b"> Time</label>
+              <label><input type="radio" name="q2" value="c"> Velocity</label>
+              <label><input type="radio" name="q2" value="d"> Temperature</label>
+            </div>
+          </div>
+
+          <div class="question" data-correct="a">
+            <p class="question-text">3. The SI unit for temperature is:</p>
+            <div class="options">
+              <label><input type="radio" name="q3" value="a"> Kelvin</label>
+              <label><input type="radio" name="q3" value="b"> Celsius</label>
+              <label><input type="radio" name="q3" value="c"> Fahrenheit</label>
+              <label><input type="radio" name="q3" value="d"> Rankine</label>
+            </div>
+          </div>
+
+          <button class="quiz-submit btn primary">Submit Quiz</button>
+          <div class="quiz-result"></div>
+        </div>
+
+        <div class="quiz-actions">
+          <a href="dashboard.html" class="btn">View All My Tests (Login Required)</a>
+          <a href="subscriptions.html" class="btn secondary">Unlock Full Test Library</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-section">
+      <h2 class="section-title">Why Our Tests Help You Succeed</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Instant Feedback</h3>
+          <p>See correct answers and explanations right after submitting.</p>
+        </div>
+        <div class="card">
+          <h3>Progress Tracking</h3>
+          <p>View scores, strengths, and areas to improve in your dashboard.</p>
+        </div>
+        <div class="card">
+          <h3>KCSE-Style Questions</h3>
+          <p>Realistic format to prepare you for actual exams.</p>
+        </div>
+        <div class="card">
+          <h3>Unlimited Attempts</h3>
+          <p>Practice as many times as needed (premium feature).</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <h2>Ready to Test Yourself?</h2>
+      <p>Log in or subscribe to access hundreds of quizzes across all subjects and track your KCSE readiness.</p>
+      <a href="subscriptions.html" class="btn primary large">Start Practicing Today</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Studyme. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a> • <a href="community.html">Contact Us</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

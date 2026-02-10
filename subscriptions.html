@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscriptions & Pricing - Studyme</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header – same as other pages -->
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" placeholder="Search notes, videos, tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
+      </div>
+
+      <nav>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="hamburger">☰</label>
+
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-content">
+        <h1>Choose Your Plan</h1>
+        <p>Unlock unlimited access to revision notes, video lessons, interactive tests, live weekend classes, community chat, downloadable PDFs, and progress tracking — all tailored for Kenyan high school success (Form 1–4 / Grade 7–12).</p>
+        <p class="hero-meta">No hidden fees • Cancel anytime • Secure M-Pesa payments</p>
+      </div>
+    </section>
+
+    <section class="pricing-section">
+      <div class="pricing-cards">
+        <!-- Free / Trial Plan -->
+        <div class="pricing-card free">
+          <div class="plan-header">
+            <h3>Free Trial</h3>
+            <div class="price">KSh 0</div>
+            <div class="period">Forever (limited)</div>
+          </div>
+          <ul class="plan-features">
+            <li>Sample revision notes</li>
+            <li>Basic interactive tests</li>
+            <li>Access to community read-only</li>
+            <li>Recorded live class previews</li>
+            <li>—</li>
+            <li>—</li>
+          </ul>
+          <a href="dashboard.html" class="btn outline">Start Free</a>
+        </div>
+
+        <!-- Monthly Plan -->
+        <div class="pricing-card popular">
+          <div class="popular-badge">Most Popular</div>
+          <div class="plan-header">
+            <h3>Monthly</h3>
+            <div class="price">KSh 500</div>
+            <div class="period">per month</div>
+          </div>
+          <ul class="plan-features">
+            <li>Full access to all revision notes & PDFs</li>
+            <li>Unlimited video lessons</li>
+            <li>All interactive tests & progress tracking</li>
+            <li>Live weekend classes + recordings</li>
+            <li>Real-time chat & community posting</li>
+            <li>Priority support</li>
+          </ul>
+          <a href="#" class="btn primary large">Subscribe Monthly</a>
+        </div>
+
+        <!-- Annual Plan -->
+        <div class="pricing-card">
+          <div class="plan-header">
+            <h3>Annual</h3>
+            <div class="price">KSh 5,000</div>
+            <div class="period">per year <span class="savings">(Save 17%)</span></div>
+          </div>
+          <ul class="plan-features">
+            <li>Everything in Monthly plan</li>
+            <li>Best value – pay once, learn all year</li>
+            <li>Exclusive annual learner badges</li>
+            <li>Priority access to new content</li>
+            <li>—</li>
+            <li>—</li>
+          </ul>
+          <a href="#" class="btn primary large">Subscribe Annually</a>
+        </div>
+      </div>
+
+      <div class="payment-instructions">
+        <h3>How to Pay via M-Pesa</h3>
+        <ol>
+          <li>Open your M-Pesa menu → Lipa na M-Pesa → Pay Bill</li>
+          <li>Enter Business Number: <strong>YOUR_PAYBILL_NUMBER</strong> (register at safaricom.com/business if needed)</li>
+          <li>Enter Account Number: your email or phone number</li>
+          <li>Enter Amount: 500 (monthly) or 5000 (annual)</li>
+          <li>Enter your M-Pesa PIN and confirm</li>
+          <li>We'll verify payment and activate your account within minutes (check your email/SMS)</li>
+        </ol>
+        <p class="note">Payments are secure and processed via Safaricom Daraja API (coming soon: instant STK Push for one-click payment).</p>
+      </div>
+    </section>
+
+    <section class="faq-section">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <h3>Can I cancel anytime?</h3>
+          <p>Yes — cancel through your dashboard or email support@studyme.com. No long-term commitment.</p>
+        </div>
+        <div class="faq-item">
+          <h3>What happens after payment?</h3>
+          <p>You'll receive instant access via email and dashboard. Log in to start learning immediately.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Is there a refund policy?</h3>
+          <p>Full refund within 7 days if you're not satisfied — contact support.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Can teachers subscribe?</h3>
+          <p>Yes — same plans. Teachers get extra tools for assigning content and viewing student progress.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <h2>Start Your Learning Journey Today</h2>
+      <p>Join thousands of Kenyan students preparing for KCSE success.</p>
+      <a href="#" class="btn primary large">Choose Your Plan</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Studyme. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a> • <a href="community.html">Contact Us</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Lessons - Studyme</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header – same as other pages -->
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" placeholder="Search notes, videos, tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
+      </div>
+
+      <nav>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="hamburger">☰</label>
+
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-content">
+        <h1>Video Lessons</h1>
+        <p>Watch clear, engaging, bite-sized video lessons tailored to the Kenyan high school curriculum (Form 1–4 / Grade 7–12). Expert explanations, visual animations, real examples, and KCSE-focused tips — perfect for visual learners.</p>
+        <p class="hero-meta">HD quality • Subtitles available • Full library + offline download (premium)</p>
+      </div>
+    </section>
+
+    <section class="videos-grid-section">
+      <h2 class="section-title">Featured Video Lessons</h2>
+      <p class="intro-text">Sample free videos shown below. Subscribe to unlock 100+ full lessons across all subjects, including complete topic series and exam walkthroughs.</p>
+
+      <div class="card-grid">
+        <!-- Physics Form 1 -->
+        <div class="card video-card">
+          <div class="video-container">
+            <iframe 
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1&controls=1" 
+              title="Physics Form 1: Measurements and SI Units – Kenyan Curriculum Lesson (10 min)" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="video-info">
+            <h3>Physics – Form 1: Measurements & Units</h3>
+            <p>Learn SI units, measuring instruments, and accuracy in physics.</p>
+            <span class="video-duration">10 min</span>
+          </div>
+        </div>
+
+        <!-- Chemistry Form 2 -->
+        <div class="card video-card">
+          <div class="video-container">
+            <iframe 
+              src="https://www.youtube.com/embed/VIDEO_ID_HERE?rel=0&modestbranding=1&controls=1" 
+              title="Chemistry Form 2: Atomic Structure & Periodic Table – KCSE Preparation (15 min)" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="video-info">
+            <h3>Chemistry – Form 2: Atomic Structure</h3>
+            <p>Protons, neutrons, electrons, atomic models, and periodic trends.</p>
+            <span class="video-duration">15 min</span>
+          </div>
+        </div>
+
+        <!-- Biology Form 3 -->
+        <div class="card video-card">
+          <div class="video-container">
+            <iframe 
+              src="https://www.youtube.com/embed/VIDEO_ID_HERE?rel=0&modestbranding=1&controls=1" 
+              title="Biology Form 3: Ecosystems & Food Chains – Kenyan High School Lesson (12 min)" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="video-info">
+            <h3>Biology – Form 3: Ecology</h3>
+            <p>Habitats, populations, food chains, energy flow, and conservation.</p>
+            <span class="video-duration">12 min</span>
+          </div>
+        </div>
+
+        <!-- Mathematics Form 4 -->
+        <div class="card video-card">
+          <div class="video-container">
+            <iframe 
+              src="https://www.youtube.com/embed/VIDEO_ID_HERE?rel=0&modestbranding=1&controls=1" 
+              title="Mathematics Form 4: Introduction to Differentiation – KCSE Math Tutorial (18 min)" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="video-info">
+            <h3>Mathematics – Form 4: Calculus Basics</h3>
+            <p>Gradients, rates of change, first principles, and basic differentiation.</p>
+            <span class="video-duration">18 min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="center-cta">
+        <p class="lead">Subscribe to unlock 100+ full lessons, downloadable notes, offline access, progress tracking, and exclusive exam prep videos.</p>
+        <a href="subscriptions.html" class="btn primary large">Subscribe Now via M-Pesa</a>
+        <p>Free users can watch sample videos • Full library requires subscription</p>
+      </div>
+    </section>
+
+    <section class="features-section">
+      <h2 class="section-title">Why Our Video Lessons Work</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Bite-Sized & Focused</h3>
+          <p>Short lessons (8–20 min) designed for quick learning and revision.</p>
+        </div>
+        <div class="card">
+          <h3>KCSE-Aligned</h3>
+          <p>Content matches the Kenyan curriculum – no irrelevant topics.</p>
+        </div>
+        <div class="card">
+          <h3>Visual & Clear</h3>
+          <p>Animations, diagrams, real-life examples, and step-by-step explanations.</p>
+        </div>
+        <div class="card">
+          <h3>Track Progress</h3>
+          <p>See watched videos and mastery levels in your dashboard.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Studyme. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a> • <a href="community.html">Contact Us</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

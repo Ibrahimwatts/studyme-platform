@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Revision Notes - Studyme</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header – same as other pages -->
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" placeholder="Search notes, videos, tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
+      </div>
+
+      <nav>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="hamburger">☰</label>
+
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-content">
+        <h1>Revision Notes</h1>
+        <p>Comprehensive, curriculum-aligned revision notes for Physics, Chemistry, Biology, and Mathematics (Form 1–4 / Grade 7–12). Clear explanations, diagrams, key formulas, and KCSE-focused summaries — perfect for quick review and deep understanding.</p>
+        <p class="hero-meta">Downloadable PDFs • Interactive highlights • Premium access unlocks full library</p>
+      </div>
+    </section>
+
+    <div class="notes-layout">
+      <!-- Sidebar: Subject & Form Navigation -->
+      <aside class="notes-sidebar">
+        <h3>Subjects</h3>
+        <ul class="subject-list">
+          <li><a href="notes.html?subject=physics" class="active">Physics</a></li>
+          <li><a href="notes.html?subject=chemistry">Chemistry</a></li>
+          <li><a href="notes.html?subject=biology">Biology</a></li>
+          <li><a href="notes.html?subject=mathematics">Mathematics</a></li>
+        </ul>
+
+        <h3>Forms / Grades</h3>
+        <ul class="form-list">
+          <li><a href="#" class="active">Form 1</a></li>
+          <li><a href="#">Form 2</a></li>
+          <li><a href="#">Form 3</a></li>
+          <li><a href="#">Form 4</a></li>
+        </ul>
+
+        <div class="premium-promo">
+          <h4>Unlock Full Notes</h4>
+          <p>Download PDFs, access all forms, and get printable versions with subscription.</p>
+          <a href="subscriptions.html" class="btn small">Subscribe Now</a>
+        </div>
+      </aside>
+
+      <!-- Main content area -->
+      <section class="notes-content">
+        <h2>Physics – Form 1: Introduction to Physics</h2>
+
+        <div class="content-card">
+          <h3>1. What is Physics?</h3>
+          <p>Physics is the scientific study of matter, energy, and the fundamental laws of nature. It helps us understand how the universe behaves — from tiny particles to massive galaxies.</p>
+          <ul class="key-points">
+            <li>Branches: Mechanics, Thermodynamics, Electromagnetism, Optics, Modern Physics</li>
+            <li>Importance in KCSE: Foundation for all science subjects and real-world applications</li>
+          </ul>
+        </div>
+
+        <div class="content-card">
+          <h3>2. Measurements & SI Units</h3>
+          <p>Accurate measurement is essential in physics. We use the International System of Units (SI).</p>
+          <table class="notes-table">
+            <thead>
+              <tr>
+                <th>Quantity</th>
+                <th>SI Unit</th>
+                <th>Symbol</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Length</td><td>metre</td><td>m</td></tr>
+              <tr><td>Mass</td><td>kilogram</td><td>kg</td></tr>
+              <tr><td>Time</td><td>second</td><td>s</td></tr>
+              <tr><td>Electric Current</td><td>ampere</td><td>A</td></tr>
+              <tr><td>Temperature</td><td>kelvin</td><td>K</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-card">
+          <h3>3. Scalar vs Vector Quantities</h3>
+          <p><strong>Scalar</strong>: Has magnitude only (e.g., mass, time, speed, distance, temperature).</p>
+          <p><strong>Vector</strong>: Has magnitude and direction (e.g., velocity, force, displacement, acceleration, weight).</p>
+          <ul class="key-points">
+            <li>Scalar addition: Simple arithmetic</li>
+            <li>Vector addition: Head-to-tail method or parallelogram law</li>
+          </ul>
+        </div>
+
+        <div class="premium-lock">
+          <h3>Premium Content</h3>
+          <p>Full detailed notes, diagrams, worked examples, KCSE past paper questions, and downloadable PDF are available to subscribers.</p>
+          <a href="subscriptions.html" class="btn primary">Unlock Full Notes</a>
+        </div>
+
+        <div class="next-steps">
+          <a href="videos.html" class="btn">Watch Related Video Lessons</a>
+          <a href="tests.html" class="btn secondary">Take Practice Test</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Studyme. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a> • <a href="community.html">Contact Us</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

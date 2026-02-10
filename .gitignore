@@ -1,0 +1,4 @@
+echo node_modules/ > .gitignore
+echo .vscode/ >> .gitignore
+echo *.log >> .gitignore
+echo Thumbs.db >> .gitignore
