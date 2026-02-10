@@ -4,12 +4,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <!-- Latest Decap CMS (v3 stable) -->
+  <script src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 </head>
 <body>
+  <!-- Wait for Decap CMS to load before initializing -->
   <script type="text/javascript">
-    window.CMS_MANUAL_INIT = true
-    CMS.init()
+    // Wait for the script to load
+    window.addEventListener('load', function() {
+      if (typeof window.CMS !== 'undefined') {
+        window.CMS_MANUAL_INIT = true;
+        window.CMS.init();
+        console.log('Decap CMS initialized successfully');
+      } else {
+        console.error('Decap CMS failed to load');
+      }
+    });
   </script>
 </body>
 </html>
