@@ -1,7 +1,7 @@
 backend:
   name: git-gateway
   branch: main
-  auth_type: github   # This forces GitHub-only login (no email/password form)
+  auth_type: github   # Forces GitHub-only login – hides email/password
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
