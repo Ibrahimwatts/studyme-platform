@@ -1,7 +1,8 @@
 backend:
   name: git-gateway
   branch: main
-  auth_type: github   # Forces GitHub-only login – hides email/password
+  auth_type: github           # Forces GitHub-only login (hides email/password)
+  auth_endpoint: https://api.github.com   # Required for Vercel (GitHub OAuth endpoint)
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
