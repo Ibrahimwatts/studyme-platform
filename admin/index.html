@@ -4,40 +4,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
-  <!-- Stable v2 with defer to avoid timing crash -->
-  <script defer src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js"></script>
+  <!-- Stable older version (v2.10.192) - fixes removeChild error -->
+  <script src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js" async></script>
 </head>
 <body>
-  <!-- No script tag ne<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Studyme Admin - Content Editor</title>
-  
-  
-  </script>
-
-  <!-- 2. Existing CMS script with defer -->
-  <script defer src="https://unpkg.com"></script>
-</head>
-<body>
-  <!-- Netlify CMS will automatically mount here -->
-  
-  <!-- 3. Script to handle the redirect after login -->
-  <script>
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", user => {
-        if (!user) {
-          window.netlifyIdentity.on("login", () => {
-            document.location.href = "/admin/";
-          });
-        }
-      });
+  <script type="text/javascript">
+    // Delay init to avoid timing issues
+    function tryInitCMS(attempt = 1) {
+      if (window.CMS && window.CMS.init) {
+        window.CMS_MANUAL_INIT = true;
+        window.CMS.init();
+        console.log('Netlify CMS initialized successfully on attempt ' + attempt);
+      } else if (attempt < 10) {
+        console.log('Waiting for CMS... attempt ' + attempt);
+        setTimeout(() => tryInitCMS(attempt + 1), 500);
+      } else {
+        console.error('CMS failed to load after 10 attempts');
+      }
     }
+
+    window.addEventListener('load', function() {
+      setTimeout(tryInitCMS, 1000);
+    });
   </script>
-</body>
-</html>
-eded – library auto-inits on load with defer -->
 </body>
 </html>
