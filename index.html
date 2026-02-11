@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Studyme - Digital Learning Platform for High School</title>
   <link rel="stylesheet" href="styles.css">
-
-  
-  </script>
 </head>
 <body>
 
@@ -37,15 +34,109 @@
           <li><a href="community.html">Community</a></li>
           <li><a href="classes.html">Live Classes</a></li>
           <li><a href="subscriptions.html">Subscribe</a></li>
-          
-          
-          <li>Log In</div></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <!-- Rest of your <main> content remains exactly the same -->
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <h2>Transform Your High School Learning</h2>
+        <p>Master Physics, Chemistry, Biology, and Mathematics with expert-led resources aligned to the Kenyan curriculum (Form 1–4 / Grade 7–12). Access revision notes, video lessons, interactive tests, live weekend classes, and community support — all in one place.</p>
+        <div class="hero-ctas">
+          <a href="subjects.html" class="btn primary large">Explore Subjects</a>
+          <a href="subscriptions.html" class="btn secondary large">Start Free Trial</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="featured-subjects">
+      <h2 class="section-title">Core Subjects</h2>
+      <div class="card-grid">
+        <div class="card subject-card">
+          <div class="subject-icon">⚛️</div>
+          <h3>Physics</h3>
+          <p>Mechanics, electricity, waves & modern physics – KCSE-ready.</p>
+          <a href="notes.html?subject=physics" class="btn small">Start →</a>
+        </div>
+        <div class="card subject-card">
+          <div class="subject-icon">🧪</div>
+          <h3>Chemistry</h3>
+          <p>Organic & inorganic chemistry, practicals, and lab simulations.</p>
+          <a href="notes.html?subject=chemistry" class="btn small">Start →</a>
+        </div>
+        <div class="card subject-card">
+          <div class="subject-icon">🌿</div>
+          <h3>Biology</h3>
+          <p>Cell biology, genetics, ecology – with interactive diagrams.</p>
+          <a href="notes.html?subject=biology" class="btn small">Start →</a>
+        </div>
+        <div class="card subject-card">
+          <div class="subject-icon">📐</div>
+          <h3>Mathematics</h3>
+          <p>Algebra, geometry, calculus – practice problems & solutions.</p>
+          <a href="notes.html?subject=mathematics" class="btn small">Start →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 class="section-title">About Studyme</h2>
+      <p>Studyme is dedicated to making high-quality, curriculum-aligned education accessible to every high school student in Kenya. We partner with experienced educators to deliver engaging notes, videos, tests, live sessions, and community tools — empowering learners to excel in KCSE and beyond.</p>
+    </section>
+
+    <section class="why">
+      <h2 class="section-title">Why Choose Studyme?</h2>
+      <div class="why-grid">
+        <div class="why-item">
+          <h3>Free Trial Resources</h3>
+          <p>Access sample notes and tests without commitment.</p>
+        </div>
+        <div class="why-item">
+          <h3>Live Weekend Classes</h3>
+          <p>Interactive sessions with qualified teachers.</p>
+        </div>
+        <div class="why-item">
+          <h3>Progress Tracking</h3>
+          <p>Personalized dashboard for students & teachers.</p>
+        </div>
+        <div class="why-item">
+          <h3>Community & Support</h3>
+          <p>Discuss, ask questions, and collaborate in real time.</p>
+        </div>
+        <div class="why-item">
+          <h3>Affordable Access</h3>
+          <p>Subscriptions from KSh 500/month via M-Pesa.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="testimonials">
+      <h2 class="section-title">What Learners Say</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial">
+          <p>“The video lessons and tests helped me improve my Physics grade dramatically!”</p>
+          <cite>— Form 3 Student, Nyamira</cite>
+        </div>
+        <div class="testimonial">
+          <p>“Affordable, clear explanations, and great community support. Highly recommend.”</p>
+          <cite>— Form 4 Student</cite>
+        </div>
+        <div class="testimonial">
+          <p>“Live classes feel like real tuition – I finally understand Math concepts.”</p>
+          <cite>— Form 2 Learner</cite>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <h2>Ready to Excel?</h2>
+      <p>Join thousands of students preparing for KCSE success. Start today — free trial available.</p>
+      <a href="subscriptions.html" class="btn primary large">Get Started Now</a>
+    </section>
+  </main>
 
   <footer>
     <p>&copy; 2026 Studyme. All rights reserved.</p>
@@ -55,18 +146,5 @@
   </footer>
 
   <script src="script.js"></script>
-
-  <!-- 3. ADD THIS: Script to automatically redirect admins to the backend after they log in -->
-  <script>
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", user => {
-        if (!user) {
-          window.netlifyIdentity.on("login", () => {
-            document.location.href = "/admin/";
-          });
-        }
-      });
-    }
-  </script>
 </body>
 </html>
