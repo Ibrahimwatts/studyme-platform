@@ -8,6 +8,36 @@
   <script defer src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js"></script>
 </head>
 <body>
-  <!-- No script tag needed – library auto-inits on load with defer -->
+  <!-- No script tag ne<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studyme Admin - Content Editor</title>
+  
+  
+  </script>
+
+  <!-- 2. Existing CMS script with defer -->
+  <script defer src="https://unpkg.com"></script>
+</head>
+<body>
+  <!-- Netlify CMS will automatically mount here -->
+  
+  <!-- 3. Script to handle the redirect after login -->
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", user => {
+        if (!user) {
+          window.netlifyIdentity.on("login", () => {
+            document.location.href = "/admin/";
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+eded – library auto-inits on load with defer -->
 </body>
 </html>
