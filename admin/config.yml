@@ -1,9 +1,8 @@
 backend:
   name: git-gateway
   branch: main
-  auth_type: github
 
-media_folder: "assets/images"      # Folder for uploaded images
+media_folder: "assets/images"
 public_folder: "/assets/images"
 
 collections:
@@ -16,7 +15,7 @@ collections:
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Subject", name: "subject", widget: "select", options: ["Physics", "Chemistry", "Biology", "Mathematics"]}
       - {label: "Form/Grade", name: "form", widget: "select", options: ["Form 1", "Form 2", "Form 3", "Form 4"]}
-      - {label: "YouTube Embed ID", name: "youtube_id", widget: "string"}
+      - {label: "YouTube ID", name: "youtube_id", widget: "string"}
       - {label: "Duration (minutes)", name: "duration", widget: "number"}
       - {label: "Description", name: "description", widget: "text"}
 
@@ -29,10 +28,10 @@ collections:
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Subject", name: "subject", widget: "select", options: ["Physics", "Chemistry", "Biology", "Mathematics"]}
       - {label: "Form/Grade", name: "form", widget: "select", options: ["Form 1", "Form 2", "Form 3", "Form 4"]}
-      - {label: "Content (Markdown supported)", name: "body", widget: "markdown"}
+      - {label: "Content", name: "body", widget: "markdown"}
 
   - name: "classes"
-    label: "Live Classes Schedule"
+    label: "Live Classes"
     folder: "data/classes"
     create: true
     slug: "{{slug}}"
@@ -40,5 +39,5 @@ collections:
       - {label: "Subject", name: "subject", widget: "select", options: ["Physics", "Chemistry", "Biology", "Mathematics"]}
       - {label: "Day & Time (EAT)", name: "time", widget: "string"}
       - {label: "Topic", name: "topic", widget: "string"}
-      - {label: "Zoom/YouTube Link", name: "link", widget: "string"}
+      - {label: "Link (Zoom/YouTube)", name: "link", widget: "string"}
       - {label: "Description", name: "description", widget: "text"}
