@@ -7,9 +7,12 @@
 
   <!-- Decap CMS -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- Custom login form – will be completely removed after successful login -->
+  <!-- Custom login form – removed after login -->
   <div id="login-form">
     <h2>Login to Studyme Admin</h2>
     <input type="email" id="email" placeholder="Email" required />
@@ -20,20 +23,20 @@
     <button id="githubBtn">Login with GitHub</button>
   </div>
 
-  <!-- Empty container – CMS mounts here. Must be clean when CMS starts -->
+  <!-- Empty container for Decap CMS -->
   <div id="cms-container"></div>
 
   <script type="module">
     window.addEventListener('load', async () => {
-      console.log("Page fully loaded – starting auth setup");
+      console.log("Page fully loaded");
 
-      // Dynamically import Supabase
+      const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';
+
       let supabase;
+
       try {
         const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-        const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';
-
         supabase = createClient(supabaseUrl, supabaseKey);
         console.log("Supabase client created successfully");
       } catch (err) {
@@ -55,26 +58,19 @@
 
           localStorage.setItem('supabase_token', data.session.access_token);
 
-          // CRITICAL: Remove the entire login form from DOM BEFORE CMS init
-          const loginForm = document.getElementById('login-form');
-          if (loginForm && loginForm.parentNode) {
-            loginForm.parentNode.removeChild(loginForm);
-            console.log("Custom login form completely removed from DOM");
-          }
+          // Completely clear the body except for CMS container
+          document.body.innerHTML = '';
+          const cmsContainer = document.createElement('div');
+          cmsContainer.id = 'cms-container';
+          document.body.appendChild(cmsContainer);
 
-          // Show CMS container
-          const cmsContainer = document.getElementById('cms-container');
-          cmsContainer.style.display = 'block';
-
-          // Delay CMS init to allow DOM to fully update
+          // Init CMS after clearing
           setTimeout(() => {
             if (window.CMS) {
-              window.CMS.init();
-              console.log("Decap CMS initialized after form removal and delay");
-            } else {
-              console.warn("Decap CMS script not ready yet");
+              window.CMS.init({ config: '/admin/config.yml' });
+              console.log("Decap CMS initialized after clearing DOM");
             }
-          }, 1500); // 1.5 seconds – increased for safety
+          }, 1000);
 
           alert("Logged in successfully! Dashboard loading...");
         } catch (err) {
@@ -120,12 +116,15 @@
 
       // Auto-login if token exists
       if (localStorage.getItem('supabase_token')) {
-        const loginForm = document.getElementById('login-form');
-        if (loginForm && loginForm.parentNode) loginForm.parentNode.removeChild(loginForm);
-        document.getElementById('cms-container').style.display = 'block';
+        document.body.innerHTML = '';
+        const cmsContainer = document.createElement('div');
+        cmsContainer.id = 'cms-container';
+        document.body.appendChild(cmsContainer);
         setTimeout(() => {
-          if (window.CMS) window.CMS.init();
-        }, 1500);
+          if (window.CMS) {
+            window.CMS.init({ config: '/admin/config.yml' });
+          }
+        }, 1000);
       }
     });
   </script>
