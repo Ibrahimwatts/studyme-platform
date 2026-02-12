@@ -7,9 +7,6 @@
 
   <!-- Decap CMS -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div id="login-form">
@@ -24,49 +21,56 @@
 
   <div id="cms-container"></div>
 
-  <script>
-    // Wait for full page load
-    window.addEventListener('load', function() {
-      console.log("Page fully loaded");
+  <div id="status"></div>
 
-      // Your real Supabase values
-      const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';
+  <script type="module">
+    window.addEventListener('load', async () => {
+      const status = document.getElementById('status');
+      status.textContent = "Loading Supabase library... (may take a few seconds)";
 
-      let supabaseClient;
+      let supabase;
 
-      if (typeof Supabase === 'undefined') {
-        console.error("Supabase library not loaded");
-        alert("Supabase library failed to load. Refresh the page.");
-        return;
+      // Retry mechanism for slow CDN
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+          console.log("Supabase module imported successfully on attempt " + attempt);
+
+          const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
+          const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';
+
+          supabase = createClient(supabaseUrl, supabaseKey);
+          console.log("Supabase client created successfully");
+          status.textContent = "Supabase ready! You can now log in.";
+          break; // success – exit retry loop
+        } catch (err) {
+          console.error("Attempt " + attempt + " failed:", err);
+          status.textContent = "Loading Supabase... (attempt " + attempt + "/3)";
+          if (attempt === 3) {
+            status.textContent = "Failed to load Supabase after 3 attempts. Refresh or try later.";
+            alert("Failed to load Supabase library. Refresh the page.");
+            return;
+          }
+          await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2 seconds before retry
+        }
       }
 
-      try {
-        supabaseClient = Supabase.createClient(supabaseUrl, supabaseKey);
-        console.log("Supabase client ready");
-      } catch (err) {
-        console.error("Supabase init failed:", err);
-        alert("Supabase connection failed.");
-        return;
-      }
+      if (!supabase) return; // exit if failed
 
       async function login() {
         console.log("Login clicked");
         const email = document.getElementById('email')?.value?.trim();
         const password = document.getElementById('password')?.value?.trim();
 
-        if (!email || !password) return alert("Enter email and password");
+        if (!email || !password) return alert("Please enter email and password");
 
         try {
-          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
           if (error) throw error;
 
           localStorage.setItem('supabase_token', data.session.access_token);
 
-          // Remove login form completely to avoid DOM interference
-          const loginForm = document.getElementById('login-form');
-          if (loginForm) loginForm.remove();
-
+          document.getElementById('login-form').remove();
           document.getElementById('cms-container').style.display = 'block';
 
           setTimeout(() => {
@@ -76,7 +80,7 @@
             }
           }, 800);
 
-          alert("Logged in! Dashboard loading...");
+          alert("Logged in successfully! Dashboard loading...");
         } catch (err) {
           alert("Login failed: " + err.message);
         }
@@ -87,13 +91,13 @@
         const email = document.getElementById('email')?.value?.trim();
         const password = document.getElementById('password')?.value?.trim();
 
-        if (!email || !password) return alert("Enter email and password");
+        if (!email || !password) return alert("Please enter email and password");
 
         try {
-          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          const { data, error } = await supabase.auth.signUp({ email, password });
           if (error) throw error;
 
-          alert("Sign up successful! Check email for confirmation.");
+          alert("Sign up successful! Check your email for confirmation link.");
         } catch (err) {
           alert("Sign up failed: " + err.message);
         }
@@ -102,7 +106,7 @@
       async function githubLogin() {
         console.log("GitHub clicked");
         try {
-          const { error } = await supabaseClient.auth.signInWithOAuth({
+          const { error } = await supabase.auth.signInWithOAuth({
             provider: 'github',
             options: { redirectTo: window.location.origin + '/admin/' }
           });
@@ -119,7 +123,7 @@
 
       // Auto-login
       if (localStorage.getItem('supabase_token')) {
-        document.getElementById('login-form')?.remove();
+        document.getElementById('login-form').remove();
         document.getElementById('cms-container').style.display = 'block';
         setTimeout(() => {
           if (window.CMS) window.CMS.init();
