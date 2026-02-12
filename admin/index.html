@@ -6,7 +6,7 @@
   <title>Studyme Admin - Content Editor</title>
   <!-- Decap CMS -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
-  <!-- Supabase JS – only once -->
+  <!-- Supabase JS client – loaded ONLY ONCE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -20,10 +20,11 @@
   </div>
 
   <script>
-    // Replace these with your real Supabase values
-    const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';     // ← YOUR Project URL
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';           // ← YOUR anon public key
+    // Replace with your REAL Supabase values (from Supabase dashboard → Settings → API)
+    const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';  // ← YOUR Project URL
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';     // ← YOUR anon public key
 
+    // Create the Supabase client (only once)
     const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
 
     async function login() {
@@ -36,7 +37,7 @@
         localStorage.setItem('supabase_token', data.session.access_token);
         document.getElementById('login-form').style.display = 'none';
         if (window.CMS) window.CMS.init();
-        alert('Logged in! Dashboard should load.');
+        alert('Logged in successfully! Dashboard loading...');
       }
     }
 
@@ -47,16 +48,23 @@
       if (error) {
         alert('Sign up failed: ' + error.message);
       } else {
-        alert('Check your email for confirmation link!');
+        alert('Sign up successful! Check your email for confirmation link.');
       }
     }
 
     async function githubLogin() {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
-      if (error) alert('GitHub login failed: ' + error.message);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin + '/admin/'
+        }
+      });
+      if (error) {
+        alert('GitHub login failed: ' + error.message);
+      }
     }
 
-    // Auto-init CMS if already logged in
+    // If already logged in, hide form and init CMS
     if (localStorage.getItem('supabase_token')) {
       document.getElementById('login-form').style.display = 'none';
       if (window.CMS) window.CMS.init();
