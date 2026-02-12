@@ -4,9 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
+  <!-- Decap CMS latest stable -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 </head>
 <body>
-  <!-- Auto-init – no custom script needed -->
+  <!-- Force immediate redirect to GitHub OAuth on Vercel -->
+  <script>
+    // Redirect to GitHub login if not authenticated
+    if (!localStorage.getItem('decap-cms-token')) {
+      const clientId = 'Ov23liTbc0tY7XRKz3BD';  // ← Replace with your Client ID
+      const redirectUri = 'https://studymekenya.vercel.app/admin/';  // ← Your Vercel admin URL
+      const scope = 'repo,read:user';
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+      window.location.href = authUrl;
+    }
+  </script>
 </body>
 </html>
