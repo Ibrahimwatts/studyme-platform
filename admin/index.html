@@ -7,9 +7,6 @@
 
   <!-- Decap CMS -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
-
-  <!-- Supabase JS – load only once -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div id="login-form">
@@ -26,109 +23,95 @@
     <!-- Decap CMS mounts here -->
   </div>
 
-  <script>
-    // Wait until the page AND all scripts are fully loaded
-    window.addEventListener('load', function() {
-      console.log("Page and all scripts fully loaded");
+  <div id="status" ></div>
 
-      // Your real Supabase values
-      const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';
-
-      let supabase;
-
-      // Check if Supabase loaded
-      if (typeof Supabase === 'undefined') {
-        console.error("Supabase library is not loaded yet");
-        alert("Supabase library failed to load. Try refreshing the page or check your internet.");
-        return;
-      }
+  <script type="module">
+    // Wait for page load
+    window.addEventListener('load', async () => {
+      const status = document.getElementById('status');
+      status.textContent = "Loading Supabase...";
 
       try {
-        supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-        console.log("Supabase client initialized successfully");
-      } catch (err) {
-        console.error("Supabase initialization failed:", err);
-        alert("Supabase connection failed. Check your keys or internet.");
-        return;
-      }
+        // Dynamically import Supabase (more reliable than static script tag)
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
 
-      // Login function
-      async function login() {
-        console.log("Login button clicked");
-        const email = document.getElementById('email')?.value?.trim();
-        const password = document.getElementById('password')?.value?.trim();
+        const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';
 
-        if (!email || !password) {
-          alert("Please enter email and password");
-          return;
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        console.log("Supabase client created successfully");
+        status.textContent = "Supabase ready! You can now log in.";
+
+        // Login function
+        async function login() {
+          console.log("Login clicked");
+          const email = document.getElementById('email')?.value?.trim();
+          const password = document.getElementById('password')?.value?.trim();
+
+          if (!email || !password) return alert("Please enter email and password");
+
+          try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+
+            localStorage.setItem('supabase_token', data.session.access_token);
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('cms-container').style.display = 'block';
+
+            if (window.CMS) window.CMS.init();
+            alert("Logged in successfully!");
+          } catch (err) {
+            alert("Login failed: " + (err.message || "Unknown error"));
+          }
         }
 
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) throw error;
+        // Sign Up function
+        async function signup() {
+          console.log("Sign Up clicked");
+          const email = document.getElementById('email')?.value?.trim();
+          const password = document.getElementById('password')?.value?.trim();
 
-          localStorage.setItem('supabase_token', data.session.access_token);
+          if (!email || !password) return alert("Please enter email and password");
+
+          try {
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) throw error;
+
+            alert("Sign up successful! Check your email for confirmation link.");
+          } catch (err) {
+            alert("Sign up failed: " + (err.message || "Unknown error"));
+          }
+        }
+
+        // GitHub login
+        async function githubLogin() {
+          console.log("GitHub clicked");
+          try {
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: 'github',
+              options: { redirectTo: window.location.origin + '/admin/' }
+            });
+            if (error) throw error;
+          } catch (err) {
+            alert("GitHub login failed: " + (err.message || "Unknown error"));
+          }
+        }
+
+        // Attach listeners
+        document.getElementById('loginBtn')?.addEventListener('click', login);
+        document.getElementById('signupBtn')?.addEventListener('click', signup);
+        document.getElementById('githubBtn')?.addEventListener('click', githubLogin);
+
+        // Auto-login if token exists
+        if (localStorage.getItem('supabase_token')) {
           document.getElementById('login-form').style.display = 'none';
           document.getElementById('cms-container').style.display = 'block';
-
           if (window.CMS) window.CMS.init();
-          alert("Logged in successfully! Dashboard loading...");
-        } catch (err) {
-          alert("Login failed: " + (err.message || "Unknown error"));
-          console.error("Login error:", err);
         }
-      }
-
-      // Sign Up function
-      async function signup() {
-        console.log("Sign Up button clicked");
-        const email = document.getElementById('email')?.value?.trim();
-        const password = document.getElementById('password')?.value?.trim();
-
-        if (!email || !password) {
-          alert("Please enter email and password");
-          return;
-        }
-
-        try {
-          const { data, error } = await supabase.auth.signUp({ email, password });
-          if (error) throw error;
-
-          alert("Sign up successful! Check your email for confirmation link.");
-          console.log("Sign up response:", data);
-        } catch (err) {
-          alert("Sign up failed: " + (err.message || "Unknown error"));
-          console.error("Sign up error:", err);
-        }
-      }
-
-      // GitHub login
-      async function githubLogin() {
-        console.log("GitHub button clicked");
-        try {
-          const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'github',
-            options: { redirectTo: window.location.origin + '/admin/' }
-          });
-          if (error) throw error;
-        } catch (err) {
-          alert("GitHub login failed: " + (err.message || "Unknown error"));
-          console.error("GitHub error:", err);
-        }
-      }
-
-      // Attach button listeners
-      document.getElementById('loginBtn')?.addEventListener('click', login);
-      document.getElementById('signupBtn')?.addEventListener('click', signup);
-      document.getElementById('githubBtn')?.addEventListener('click', githubLogin);
-
-      // Auto-login if token exists
-      if (localStorage.getItem('supabase_token')) {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('cms-container').style.display = 'block';
-        if (window.CMS) window.CMS.init();
-        console.log("Auto-logged in via token");
+      } catch (err) {
+        console.error("Failed to load Supabase:", err);
+        status.textContent = "Failed to load Supabase library. Try refreshing or check your internet.";
+        alert("Failed to load Supabase. Refresh the page or try later.");
       }
     });
   </script>
