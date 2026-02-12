@@ -5,46 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
 
-  <!-- Decap CMS – load once with defer -->
+  <!-- Decap CMS – defer to load after DOM -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 
   <!-- Supabase JS – load once -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <!-- Login form -->
   <div id="login-form">
     <h2>Login to Studyme Admin</h2>
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required />
     <br><br>
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="githubLogin()">Login with GitHub</button>
+    <button id="loginBtn">Login</button>
+    <button id="signupBtn">Sign Up</button>
+    <button id="githubBtn">Login with GitHub</button>
   </div>
 
   <div id="cms-container">
     <!-- Decap CMS will mount here -->
   </div>
 
+  <!-- All JavaScript – moved BEFORE buttons for correct definition -->
   <script>
-    // ==================== REPLACE THESE WITH YOUR REAL VALUES ====================
-    const supabaseUrl  = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';      // ← YOUR Project URL
-    const supabaseKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';  // ← YOUR anon public key
-    // =============================================================================
+    // === YOUR REAL SUPABASE VALUES (already filled) ===
+    const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';
 
-    let supabase;
+    // Initialize Supabase client
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+    console.log("Supabase client initialized");
 
-    try {
-      supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-      console.log("Supabase client initialized successfully");
-    } catch (err) {
-      console.error("Failed to initialize Supabase:", err);
-      alert("Supabase connection failed. Check your URL and key in the code.");
-    }
-
+    // Login function
     async function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      console.log("Login button clicked");
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
 
       if (!email || !password) {
         alert("Please enter email and password");
@@ -59,24 +56,23 @@
         document.getElementById('login-form').style.display = 'none';
         document.getElementById('cms-container').style.display = 'block';
 
-        // Initialize Decap CMS
         if (window.CMS) {
           window.CMS.init();
-          console.log("CMS initialized after login");
-        } else {
-          console.warn("Decap CMS not loaded yet");
+          console.log("Decap CMS initialized after login");
         }
 
-        alert("Logged in successfully!");
-      } catch (error) {
-        alert("Login failed: " + (error.message || "Unknown error"));
-        console.error(error);
+        alert("Logged in successfully! Dashboard loading...");
+      } catch (err) {
+        alert("Login failed: " + (err.message || "Unknown error"));
+        console.error("Login error:", err);
       }
     }
 
+    // Sign Up function
     async function signup() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      console.log("Sign Up button clicked");
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
 
       if (!email || !password) {
         alert("Please enter email and password");
@@ -89,33 +85,42 @@
 
         alert("Sign up successful! Check your email for confirmation link.");
         console.log("Sign up response:", data);
-      } catch (error) {
-        alert("Sign up failed: " + (error.message || "Unknown error"));
-        console.error(error);
+      } catch (err) {
+        alert("Sign up failed: " + (err.message || "Unknown error"));
+        console.error("Sign up error:", err);
       }
     }
 
+    // GitHub login
     async function githubLogin() {
+      console.log("GitHub button clicked");
       try {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'github',
-          options: {
-            redirectTo: window.location.origin + '/admin/'
-          }
+          options: { redirectTo: window.location.origin + '/admin/' }
         });
         if (error) throw error;
-      } catch (error) {
-        alert("GitHub login failed: " + (error.message || "Unknown error"));
-        console.error(error);
+      } catch (err) {
+        alert("GitHub login failed: " + (err.message || "Unknown error"));
+        console.error("GitHub error:", err);
       }
     }
 
     // Auto-login if token exists
-    if (localStorage.getItem('supabase_token')) {
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('cms-container').style.display = 'block';
-      if (window.CMS) window.CMS.init();
-    }
+    window.addEventListener('load', function() {
+      console.log("Page loaded – checking for existing token");
+      if (localStorage.getItem('supabase_token')) {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('cms-container').style.display = 'block';
+        if (window.CMS) window.CMS.init();
+        console.log("Auto-logged in via token");
+      }
+
+      // Attach event listeners (safer than inline onclick)
+      document.getElementById('loginBtn').addEventListener('click', login);
+      document.getElementById('signupBtn').addEventListener('click', signup);
+      document.getElementById('githubBtn').addEventListener('click', githubLogin);
+    });
   </script>
 </body>
 </html>
