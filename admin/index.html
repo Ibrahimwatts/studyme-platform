@@ -8,7 +8,7 @@
   <!-- Decap CMS -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 
-  <!-- Supabase JS -->
+  <!-- Supabase JS – load only once -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -27,9 +27,9 @@
   </div>
 
   <script>
-    // Wait for Supabase to be ready
+    // Wait until the page AND all scripts are fully loaded
     window.addEventListener('load', function() {
-      console.log("Page fully loaded");
+      console.log("Page and all scripts fully loaded");
 
       // Your real Supabase values
       const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co';
@@ -37,9 +37,10 @@
 
       let supabase;
 
+      // Check if Supabase loaded
       if (typeof Supabase === 'undefined') {
-        console.error("Supabase library did not load. Check network or CDN.");
-        alert("Supabase library failed to load. Check your internet or try again later.");
+        console.error("Supabase library is not loaded yet");
+        alert("Supabase library failed to load. Try refreshing the page or check your internet.");
         return;
       }
 
@@ -54,7 +55,7 @@
 
       // Login function
       async function login() {
-        console.log("Login clicked");
+        console.log("Login button clicked");
         const email = document.getElementById('email')?.value?.trim();
         const password = document.getElementById('password')?.value?.trim();
 
@@ -81,7 +82,7 @@
 
       // Sign Up function
       async function signup() {
-        console.log("Sign Up clicked");
+        console.log("Sign Up button clicked");
         const email = document.getElementById('email')?.value?.trim();
         const password = document.getElementById('password')?.value?.trim();
 
@@ -104,7 +105,7 @@
 
       // GitHub login
       async function githubLogin() {
-        console.log("GitHub clicked");
+        console.log("GitHub button clicked");
         try {
           const { error } = await supabase.auth.signInWithOAuth({
             provider: 'github',
@@ -117,7 +118,7 @@
         }
       }
 
-      // Attach listeners
+      // Attach button listeners
       document.getElementById('loginBtn')?.addEventListener('click', login);
       document.getElementById('signupBtn')?.addEventListener('click', signup);
       document.getElementById('githubBtn')?.addEventListener('click', githubLogin);
