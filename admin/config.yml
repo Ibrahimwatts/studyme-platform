@@ -1,9 +1,10 @@
 backend:
   name: github
-  repo: ibrahimwatts/studyme-platform
+  repo: ibrahimwatts/studyme-platform  # your exact repo
   branch: main
+  # Optional: add auth_type if needed, but direct github backend uses OAuth
 
-media_folder: "assets/images"      # ← only ONE media_folder
+media_folder: "assets/images"
 public_folder: "/assets/images"
 
 collections:
