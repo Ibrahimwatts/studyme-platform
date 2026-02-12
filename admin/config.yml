@@ -2,14 +2,8 @@ backend:
   name: github
   repo: ibrahimwatts/studyme-platform
   branch: main
-  # token line removed completely
 
-media_folder: "assets/images"
-public_folder: "/assets/images"
-
-collections:    #            # Paste your GitHub PAT here (ghp_...)
-
-media_folder: "assets/images"
+media_folder: "assets/images"      # ← only ONE media_folder
 public_folder: "/assets/images"
 
 collections:
