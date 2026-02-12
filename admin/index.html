@@ -4,20 +4,58 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
-  <!-- Decap CMS latest stable -->
+  <!-- Decap CMS -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
+  <!-- Supabase JS client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- Force immediate redirect to GitHub OAuth on Vercel -->
+  <div id="login-form">
+    <h2>Login to Studyme Admin</h2>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Sign Up</button>
+    <button onclick="githubLogin()">Login with GitHub</button>
+  </div>
+
   <script>
-    // Redirect to GitHub login if not authenticated
-    if (!localStorage.getItem('decap-cms-token')) {
-      const clientId = 'Ov23liTbc0tY7XRKz3BD';  // ← Replace with your Client ID
-      const redirectUri = 'https://studymekenya.vercel.app/admin/';  // ← Your Vercel admin URL
-      const scope = 'repo,read:user';
-      const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
-      window.location.href = authUrl;
+    const supabaseUrl = 'https://dtbbbzjuqbniqhzxzotg.supabase.co'; // ← paste your Project URL
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0YmJiemp1cWJuaXFoenh6b3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NTg1MDUsImV4cCI6MjA4NjQzNDUwNX0.UrxMPml8LuVZr9u8z-Yu-I8Di61xyP4Ulp2ivxjE0As';     // ← paste your anon public key
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert('Login failed: ' + error.message);
+      else {
+        localStorage.setItem('supabase_token', data.session.access_token);
+        initCMS();
+      }
     }
+
+    async function signup() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) alert('Sign up failed: ' + error.message);
+      else alert('Check your email for confirmation link!');
+    }
+
+    async function githubLogin() {
+      const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
+      if (error) alert('GitHub login failed: ' + error.message);
+    }
+
+    function initCMS() {
+      document.getElementById('login-form').style.display = 'none';
+      // Decap CMS will now initialize (you can add manual init if needed)
+      if (window.CMS) window.CMS.init();
+    }
+
+    // Check if already logged in
+    if (localStorage.getItem('supabase_token')) initCMS();
   </script>
 </body>
 </html>

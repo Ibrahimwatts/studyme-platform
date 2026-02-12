@@ -1,5 +1,5 @@
 backend:
-  name: git-gateway
+  name: github
   repo: ibrahimwatts/studyme-platform  # your exact repo
   branch: main
   # Optional: add auth_type if needed, but direct github backend uses OAuth
