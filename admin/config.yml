@@ -1,8 +1,13 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: ibrahimwatts/studyme-platform
   branch: main
-  auth_type: github           # Forces GitHub-only login (hides email/password)
-  auth_endpoint: https://api.github.com   # Required for Vercel (GitHub OAuth endpoint)
+  # token line removed completely
+
+media_folder: "assets/images"
+public_folder: "/assets/images"
+
+collections:    #            # Paste your GitHub PAT here (ghp_...)
 
 media_folder: "assets/images"
 public_folder: "/assets/images"

@@ -4,20 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin - Content Editor</title>
-  <!-- Latest Decap CMS -->
   <script defer src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 </head>
 <body>
-  <!-- Force GitHub login redirect on Vercel -->
-  <script>
-    // Redirect to GitHub OAuth immediately if no auth token (bypasses email/password)
-    window.addEventListener('load', function() {
-      // Check if already authenticated (Decap CMS sets a localStorage token)
-      if (!localStorage.getItem('netlifySiteURL') && !localStorage.getItem('cms-auth-token')) {
-        // Redirect to GitHub auth endpoint
-        window.location.href = 'https://github.com/login/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=https://api.netlify.com/auth/done&scope=repo,user';
-      }
-    });
-  </script>
+  <!-- Auto-init – no custom script needed -->
 </body>
 </html>
