@@ -1,8 +1,7 @@
 backend:
   name: github
-  repo: Ibrahimwatts/studyme-platform          # ← your exact username/repo
+  repo: Ibrahimwatts/studyme-platform
   branch: main
-  # No auth_type: github needed – direct backend uses OAuth automatically
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
