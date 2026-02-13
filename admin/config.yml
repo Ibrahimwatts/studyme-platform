@@ -1,12 +1,12 @@
 backend:
   name: github
-  repo: Ibrahimwatts/studyme-platform   # ← your exact repo name
-  branch: main                          # or your branch name
-  # No auth_type needed – GitHub handles OAuth directly
+  repo: Ibrahimwatts/studyme-platform   # Your exact repo name
+  branch: main                           # Your branch (usually main or master)
 
 media_folder: "assets/images"
 public_folder: "/assets/images"
 
+# Your collections go here (keep them as-is)
 collections:
   - name: "videos"
     label: "Video Lessons"
@@ -20,6 +20,8 @@ collections:
       - {label: "YouTube ID", name: "youtube_id", widget: "string"}
       - {label: "Duration (minutes)", name: "duration", widget: "number"}
       - {label: "Description", name: "description", widget: "text"}
+
+  # ... rest of your collections ...
 
   - name: "notes"
     label: "Revision Notes"
