@@ -2,13 +2,13 @@ import { defineConfig } from "tinacms";
 
 export default defineConfig({
   branch: "main",
-  clientId: null, // Leave null for local dev; Vercel will use env vars
-  clientSecret: null, // Leave null; use Vercel env vars
+  clientId: process.env.TINA_CLIENT_ID || "Ov23liTbc0tY7XRKz3BD", // fallback for local
+  clientSecret: process.env.TINA_CLIENT_SECRET || null, // Vercel env var only
   repo: "Ibrahimwatts/studyme-platform",
   baseBranch: "main",
   build: {
-    publicFolder: "public", // Adjust if your public folder is different
-    outputFolder: "admin", // Admin panel will be at /admin
+    publicFolder: "public",
+    outputFolder: "admin",
   },
   media: {
     tina: {
