@@ -1,0 +1,26 @@
+fragment VideosParts on Videos {
+  __typename
+  title
+  subject
+  form
+  youtube_id
+  duration
+  description
+}
+
+fragment NotesParts on Notes {
+  __typename
+  title
+  subject
+  form
+  body
+}
+
+fragment ClassesParts on Classes {
+  __typename
+  subject
+  time
+  topic
+  link
+  description
+}
