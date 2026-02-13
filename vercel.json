@@ -9,6 +9,10 @@
       "destination": "/my-tina-app/static/admin/index.html"
     },
     {
+      "source": "/my-tina-app/static/admin/:path*",
+      "destination": "/my-tina-app/static/admin/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
