@@ -3,58 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Studyme Admin - Loading...</title>
+  <title>Studyme Admin</title>
 
-  <!-- Decap CMS -->
+  <!-- Decap CMS – auto-mounts -->
   <script src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 </head>
 <body>
-  <div >
-    <h2>Studyme Admin</h2>
-    <p id="status">Redirecting to Google Sign-in... please wait</p>
-  </div>
-
-  <div id="cms-container"></div>
-
-  <script>
-    const GOOGLE_CLIENT_ID = '800060754892-8eb1k1fnfnn86jfnp0dr5f38muf446hl.apps.googleusercontent.com';
-
-    // Check if callback from Google
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-
-    if (code) {
-      document.getElementById('status').innerHTML = `
-        <h3>Google Login Successful</h3>
-        <p>Authorization received. Dashboard loading...</p>
-      `;
-
-      window.history.replaceState({}, document.title, window.location.pathname);
-
-      setTimeout(() => {
-        const container = document.getElementById('cms-container');
-        container.style.display = 'block';
-
-        if (window.CMS) {
-          window.CMS.init();
-          console.log("Decap CMS initialized");
-        }
-      }, 1200);
-    } else {
-      // Redirect to Google – use serverless function for callback
-      const redirectUri = window.location.origin + '/api/auth/google';
-      const scope = 'openid email profile';
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-                      `client_id=${GOOGLE_CLIENT_ID}` +
-                      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-                      `&response_type=code` +
-                      `&scope=${encodeURIComponent(scope)}` +
-                      `&access_type=offline` +
-                      `&prompt=consent`;
-
-      document.getElementById('status').textContent = "Redirecting to Google...";
-      window.location.href = authUrl;
-    }
-  </script>
+  <!-- Nothing here – Decap CMS takes full control -->
 </body>
 </html>
