@@ -5,10 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Studyme Admin</title>
 
-  <!-- Decap CMS – latest stable, auto-mounts -->
+  <!-- Decap CMS -->
   <script src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 </head>
 <body>
-  <!-- No custom code, no form, no scripts below – CMS takes over -->
+  <script>
+    // Force Google login redirect if not authenticated
+    if (!localStorage.getItem('supabase_token') && !localStorage.getItem('cms-auth-token')) {
+      const clientId = '800060754892-8eb1k1fnfnn86jfnp0dr5f38muf446hl.apps.googleusercontent.com';  // ← replace with your real Google Client ID
+      const redirectUri = window.location.origin + '/admin/';
+      const scope = 'openid email profile https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+
+      window.location.href = authUrl;
+    }
+  </script>
 </body>
 </html>
