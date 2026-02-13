@@ -1,12 +1,18 @@
 {
-  "rewrites": [
+  "builds": [
     {
-      "source": "/config.yml",
-      "destination": "/admin/config.yml"
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/admin/(.*)",
+      "dest": "/admin/index.html"
     },
     {
-      "source": "/admin/:path*",
-      "destination": "/admin/index.html"
+      "src": "/(.*)",
+      "dest": "/"
     }
   ]
 }
