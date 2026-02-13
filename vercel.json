@@ -1,18 +1,16 @@
 {
-  "builds": [
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/admin/(.*)",
-      "dest": "/admin/index.html"
+      "source": "/admin/:path*",
+      "destination": "/admin/index.html"
     },
     {
-      "src": "/(.*)",
-      "dest": "/"
+      "source": "/tina/admin/:path*",
+      "destination": "/tina/admin/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
