@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/admin/:path*",
-      "destination": "/admin/index.html"
+      "destination": "/my-tina-app/static/admin/index.html"
     },
     {
       "source": "/tina/admin/:path*",
-      "destination": "/tina/admin/index.html"
+      "destination": "/my-tina-app/static/admin/index.html"
     },
     {
       "source": "/(.*)",
