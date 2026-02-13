@@ -9,7 +9,7 @@
   <script src="https://unpkg.com/decap-cms@3.3.0/dist/decap-cms.js"></script>
 </head>
 <body>
-  <div>
+  <div >
     <h2>Studyme Admin</h2>
     <p id="status">Redirecting to Google Sign-in... please wait</p>
   </div>
@@ -19,33 +19,29 @@
   <script>
     const GOOGLE_CLIENT_ID = '800060754892-8eb1k1fnfnn86jfnp0dr5f38muf446hl.apps.googleusercontent.com';
 
-    // Check if this is the callback from Google
+    // Check if callback from Google
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
     if (code) {
-      // Google callback received – let serverless function handle token exchange
       document.getElementById('status').innerHTML = `
-        <h3>Processing Google Login...</h3>
-        <p>Waiting for token exchange...</p>
+        <h3>Google Login Successful</h3>
+        <p>Authorization received. Dashboard loading...</p>
       `;
 
-      // The serverless function already redirected us here with token in query/hash
-      // Let Decap CMS initialize
+      window.history.replaceState({}, document.title, window.location.pathname);
+
       setTimeout(() => {
         const container = document.getElementById('cms-container');
         container.style.display = 'block';
 
         if (window.CMS) {
           window.CMS.init();
-          console.log("Decap CMS initialized after Google callback");
+          console.log("Decap CMS initialized");
         }
       }, 1200);
-
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
     } else {
-      // Redirect to Google with callback to our serverless function
+      // Redirect to Google – use serverless function for callback
       const redirectUri = window.location.origin + '/api/auth/google';
       const scope = 'openid email profile';
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
