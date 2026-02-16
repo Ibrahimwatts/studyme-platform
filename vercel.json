@@ -2,15 +2,15 @@
   "rewrites": [
     {
       "source": "/admin/:path*",
-      "destination": "/my-tina-app/static/admin/index.html"
+      "destination": "/my-tina-app/public/admin/index.html"
     },
     {
       "source": "/tina/admin/:path*",
-      "destination": "/my-tina-app/static/admin/index.html"
+      "destination": "/my-tina-app/public/admin/index.html"
     },
     {
-      "source": "/my-tina-app/static/admin/:path*",
-      "destination": "/my-tina-app/static/admin/index.html"
+      "source": "/my-tina-app/public/admin/:path*",
+      "destination": "/my-tina-app/public/admin/index.html"
     },
     {
       "source": "/(.*)",
