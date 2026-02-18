@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Studyme Admin - Manage Content</title>
-  <link rel="stylesheet" href="styles.css"> <!-- Reuse your existing styles -->
+  <link rel="stylesheet" href="styles.css">
   <style>
-    /* Quick admin-specific styles — move to styles.css later if you want */
+    /* Your existing styles unchanged */
     .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
     .section { margin-bottom: 3rem; border-bottom: 1px solid #eee; padding-bottom: 2rem; }
     .section h2 { margin-bottom: 1.5rem; }
@@ -26,7 +26,7 @@
     #error-message { color: red; margin-top: 1rem; font-weight: bold; }
   </style>
 
-  <!-- Supabase CDN (unpkg - reliable) -->
+  <!-- Supabase CDN -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -174,11 +174,11 @@
       if (typeof supabase === 'undefined') {
         console.error('Supabase library failed to load');
         document.getElementById('error-message').innerHTML = 
-          'Failed to load Supabase library.<br>Check internet and refresh.<br>Try another browser if issue continues.';
+          'Failed to load Supabase. Check internet and refresh.<br>Try another browser if issue continues.';
         return;
       }
 
-      console.log('Supabase library loaded successfully');
+      console.log('Supabase loaded OK');
 
       const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
@@ -188,12 +188,11 @@
       const loginSection = document.getElementById('login-section');
       const dashboardSection = document.getElementById('dashboard-section');
 
-      // Clean any existing hash from URL
+      // Clean URL hash after login
       if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname);
       }
 
-      // Check auth state
       async function checkAuth() {
         try {
           const { data: { user } } = await supabaseClient.auth.getUser();
@@ -209,15 +208,15 @@
           }
         } catch (err) {
           console.error('Auth check failed:', err);
-          document.getElementById('error-message').textContent = 'Auth check failed: ' + err.message;
         }
       }
 
       // Login with Google - FIXED REDIRECT
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         try {
-          const redirectTo = window.location.origin + window.location.pathname;
-          console.log('Redirecting to:', redirectTo); // Debug: open console to verify
+          // Force redirect to LIVE domain + clean path
+          const redirectTo = 'https://studymekenya.vercel.app/admin.html';
+          console.log('Using redirectTo:', redirectTo);
 
           const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
@@ -242,7 +241,7 @@
         }
       });
 
-      // Load content functions (unchanged)
+      // Load content functions (unchanged from previous)
       async function loadAllContent() {
         try {
           await loadVideoLessons();
@@ -342,7 +341,7 @@
         }
       });
 
-      // Repeat similar for notes-form and classes-form (add if missing)
+      // Repeat similar for notes-form and classes-form
 
       checkAuth();
     });
