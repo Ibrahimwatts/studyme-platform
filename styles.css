@@ -537,3 +537,26 @@ footer {
   .section-title { font-size: 2rem; }
   .card-grid, .pricing-cards, .faq-grid { grid-template-columns: 1fr; }
 }
+/* =======================================
+   Admin panel specific styles
+   ======================================= */
+
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.section {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 2rem;
+}
+
+/* ... paste all the rest here ... */
+
+#error-message {
+  color: red;
+  margin-top: 1rem;
+  font-weight: bold;
+}
