@@ -172,10 +172,9 @@
     // Wait for Supabase library to load
     window.addEventListener('load', function () {
       if (typeof supabase === 'undefined') {
-        console.error('Supabase library failed to load from CDN');
+        console.error('Supabase library failed to load');
         document.getElementById('error-message').innerHTML = 
-          'Failed to load Supabase. Check internet and refresh.<br>' +
-          'If the problem persists, try another browser.';
+          'Failed to load Supabase library.<br>Check internet and refresh.<br>Try another browser if issue continues.';
         return;
       }
 
@@ -189,7 +188,7 @@
       const loginSection = document.getElementById('login-section');
       const dashboardSection = document.getElementById('dashboard-section');
 
-      // Clean URL hash after login (remove #access_token etc.)
+      // Clean any existing hash from URL
       if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname);
       }
@@ -218,7 +217,7 @@
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         try {
           const redirectTo = window.location.origin + window.location.pathname;
-          console.log('Redirecting to:', redirectTo); // debug log
+          console.log('Redirecting to:', redirectTo); // Debug: open console to verify
 
           const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
@@ -243,7 +242,7 @@
         }
       });
 
-      // Load all content (unchanged)
+      // Load content functions (unchanged)
       async function loadAllContent() {
         try {
           await loadVideoLessons();
@@ -343,7 +342,7 @@
         }
       });
 
-      // ... (repeat similar for notes-form and classes-form as before)
+      // Repeat similar for notes-form and classes-form (add if missing)
 
       checkAuth();
     });
