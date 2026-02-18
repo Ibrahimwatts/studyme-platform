@@ -23,6 +23,7 @@
     .btn-danger { background: #dc3545; color: white; }
     .hidden { display: none; }
     #login-section { text-align: center; padding: 4rem 2rem; }
+    #error-message { color: red; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -33,6 +34,7 @@
       <h1>Studyme Admin Panel</h1>
       <p>Log in with Google to manage content</p>
       <button id="google-login-btn" class="btn btn-primary">Login with Google</button>
+      <div id="error-message"></div>
     </section>
 
     <!-- Admin Dashboard (hidden until logged in) -->
@@ -161,184 +163,200 @@
         </form>
       </div>
     </section>
-  </main>
+  </div>
 
   <script>
-    // Your real Supabase keys
-    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
-
-    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-
-    // Check auth state on load
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
-        loadAllContent();
-      } else {
-        loginSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
+    // Wait for Supabase library to load from CDN
+    window.addEventListener('load', function() {
+      if (typeof supabase === 'undefined') {
+        console.error('Supabase library failed to load');
+        document.getElementById('error-message').textContent = 'Failed to load Supabase library. Check internet and refresh.';
+        return;
       }
-    }
 
-    // Login with Google
-    document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-      await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.href }
+      // Your real Supabase keys
+      const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+      const loginSection = document.getElementById('login-section');
+      const dashboardSection = document.getElementById('dashboard-section');
+
+      // Check if user is already logged in
+      async function checkAuth() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user) {
+          loginSection.classList.add('hidden');
+          dashboardSection.classList.remove('hidden');
+          document.getElementById('user-name').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
+          loadAllContent();
+        } else {
+          loginSection.classList.remove('hidden');
+          dashboardSection.classList.add('hidden');
+        }
+      }
+
+      // Login with Google
+      document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.href
+          }
+        });
+        if (error) {
+          console.error('Login error:', error);
+          document.getElementById('error-message').textContent = 'Login failed: ' + error.message;
+        }
       });
-    });
 
-    // Logout
-    document.getElementById('logout-btn')?.addEventListener('click', async () => {
-      await supabase.auth.signOut();
+      // Logout
+      document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        checkAuth();
+      });
+
+      // Load all content lists
+      async function loadAllContent() {
+        await loadVideoLessons();
+        await loadRevisionNotes();
+        await loadLiveClasses();
+      }
+
+      // Load Video Lessons
+      async function loadVideoLessons() {
+        const container = document.getElementById('video-list');
+        container.innerHTML = '<p>Loading...</p>';
+        const { data, error } = await supabaseClient.from('video_lessons').select('*');
+        if (error) return container.innerHTML = '<p>Error loading.</p>';
+        container.innerHTML = '';
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <strong>${item.title}</strong><br>
+            ${item.subject} - ${item.form}<br>
+            YouTube: ${item.youtube_id}<br>
+            <div class="item-actions">
+              <button onclick="deleteItem('video_lessons', '${item.id}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      // Load Revision Notes
+      async function loadRevisionNotes() {
+        const container = document.getElementById('notes-list');
+        container.innerHTML = '<p>Loading...</p>';
+        const { data, error } = await supabaseClient.from('revision_notes').select('*');
+        if (error) return container.innerHTML = '<p>Error loading.</p>';
+        container.innerHTML = '';
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <strong>${item.title}</strong><br>
+            ${item.subject} - ${item.form}<br>
+            <div class="item-actions">
+              <button onclick="deleteItem('revision_notes', '${item.id}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      // Load Live Classes
+      async function loadLiveClasses() {
+        const container = document.getElementById('classes-list');
+        container.innerHTML = '<p>Loading...</p>';
+        const { data, error } = await supabaseClient.from('live_classes').select('*');
+        if (error) return container.innerHTML = '<p>Error loading.</p>';
+        container.innerHTML = '';
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <strong>${item.topic}</strong><br>
+            ${item.subject} - ${item.time}<br>
+            Link: <a href="${item.link}" target="_blank">${item.link}</a><br>
+            <div class="item-actions">
+              <button onclick="deleteItem('live_classes', '${item.id}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      // Delete item
+      window.deleteItem = async function(table, id) {
+        if (!confirm('Delete this item?')) return;
+        const { error } = await supabaseClient.from(table).delete().eq('id', id);
+        if (error) alert('Error deleting: ' + error.message);
+        else loadAllContent();
+      };
+
+      // Add Video Lesson form
+      document.getElementById('video-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          title: document.getElementById('video-title').value,
+          subject: document.getElementById('video-subject').value,
+          form: document.getElementById('video-form').value,
+          youtube_id: document.getElementById('video-youtube').value,
+          duration: Number(document.getElementById('video-duration').value),
+          description: document.getElementById('video-desc').value
+        };
+        const { error } = await supabaseClient.from('video_lessons').insert([data]);
+        if (error) alert('Error adding: ' + error.message);
+        else {
+          alert('Added successfully!');
+          e.target.reset();
+          loadAllContent();
+        }
+      });
+
+      // Add Revision Note form
+      document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          title: document.getElementById('notes-title').value,
+          subject: document.getElementById('notes-subject').value,
+          form: document.getElementById('notes-form').value,
+          body: document.getElementById('notes-body').value
+        };
+        const { error } = await supabaseClient.from('revision_notes').insert([data]);
+        if (error) alert('Error adding: ' + error.message);
+        else {
+          alert('Added successfully!');
+          e.target.reset();
+          loadAllContent();
+        }
+      });
+
+      // Add Live Class form
+      document.getElementById('classes-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          subject: document.getElementById('class-subject').value,
+          time: document.getElementById('class-time').value,
+          topic: document.getElementById('class-topic').value,
+          link: document.getElementById('class-link').value,
+          description: document.getElementById('class-desc').value
+        };
+        const { error } = await supabaseClient.from('live_classes').insert([data]);
+        if (error) alert('Error adding: ' + error.message);
+        else {
+          alert('Added successfully!');
+          e.target.reset();
+          loadAllContent();
+        }
+      });
+
+      // Initial auth check
       checkAuth();
     });
-
-    // Load all content lists
-    async function loadAllContent() {
-      await loadVideoLessons();
-      await loadRevisionNotes();
-      await loadLiveClasses();
-    }
-
-    // Load Video Lessons
-    async function loadVideoLessons() {
-      const container = document.getElementById('video-list');
-      container.innerHTML = '<p>Loading...</p>';
-      const { data, error } = await supabase.from('video_lessons').select('*');
-      if (error) return container.innerHTML = '<p>Error loading.</p>';
-      container.innerHTML = '';
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item-card';
-        div.innerHTML = `
-          <strong>${item.title}</strong><br>
-          ${item.subject} - ${item.form}<br>
-          YouTube: ${item.youtube_id}<br>
-          <div class="item-actions">
-            <button onclick="deleteItem('video_lessons', '${item.id}')">Delete</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    // Load Revision Notes (similar pattern)
-    async function loadRevisionNotes() {
-      const container = document.getElementById('notes-list');
-      container.innerHTML = '<p>Loading...</p>';
-      const { data, error } = await supabase.from('revision_notes').select('*');
-      if (error) return container.innerHTML = '<p>Error loading.</p>';
-      container.innerHTML = '';
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item-card';
-        div.innerHTML = `
-          <strong>${item.title}</strong><br>
-          ${item.subject} - ${item.form}<br>
-          <div class="item-actions">
-            <button onclick="deleteItem('revision_notes', '${item.id}')">Delete</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    // Load Live Classes
-    async function loadLiveClasses() {
-      const container = document.getElementById('classes-list');
-      container.innerHTML = '<p>Loading...</p>';
-      const { data, error } = await supabase.from('live_classes').select('*');
-      if (error) return container.innerHTML = '<p>Error loading.</p>';
-      container.innerHTML = '';
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item-card';
-        div.innerHTML = `
-          <strong>${item.topic}</strong><br>
-          ${item.subject} - ${item.time}<br>
-          Link: <a href="${item.link}" target="_blank">${item.link}</a><br>
-          <div class="item-actions">
-            <button onclick="deleteItem('live_classes', '${item.id}')">Delete</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    // Delete item
-    async function deleteItem(table, id) {
-      if (!confirm('Delete this item?')) return;
-      const { error } = await supabase.from(table).delete().eq('id', id);
-      if (error) alert('Error deleting');
-      else loadAllContent();
-    }
-
-    // Add Video Lesson form
-    document.getElementById('video-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = {
-        title: document.getElementById('video-title').value,
-        subject: document.getElementById('video-subject').value,
-        form: document.getElementById('video-form').value,
-        youtube_id: document.getElementById('video-youtube').value,
-        duration: Number(document.getElementById('video-duration').value),
-        description: document.getElementById('video-desc').value
-      };
-      const { error } = await supabase.from('video_lessons').insert([data]);
-      if (error) alert('Error adding');
-      else {
-        alert('Added!');
-        e.target.reset();
-        loadAllContent();
-      }
-    });
-
-    // Add Revision Note form (similar)
-    document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = {
-        title: document.getElementById('notes-title').value,
-        subject: document.getElementById('notes-subject').value,
-        form: document.getElementById('notes-form').value,
-        body: document.getElementById('notes-body').value
-      };
-      const { error } = await supabase.from('revision_notes').insert([data]);
-      if (error) alert('Error adding');
-      else {
-        alert('Added!');
-        e.target.reset();
-        loadAllContent();
-      }
-    });
-
-    // Add Live Class form
-    document.getElementById('classes-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = {
-        subject: document.getElementById('class-subject').value,
-        time: document.getElementById('class-time').value,
-        topic: document.getElementById('class-topic').value,
-        link: document.getElementById('class-link').value,
-        description: document.getElementById('class-desc').value
-      };
-      const { error } = await supabase.from('live_classes').insert([data]);
-      if (error) alert('Error adding');
-      else {
-        alert('Added!');
-        e.target.reset();
-        loadAllContent();
-      }
-    });
-
-    // Initial auth check
-    document.addEventListener('DOMContentLoaded', checkAuth);
   </script>
 </body>
 </html>
