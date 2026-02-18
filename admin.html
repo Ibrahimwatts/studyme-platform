@@ -30,6 +30,7 @@
 <body>
 
   <div class="admin-container">
+    <!-- Login Prompt -->
     <section id="login-section">
       <h1>Studyme Admin Panel</h1>
       <p>Log in with Google to manage content</p>
@@ -37,6 +38,7 @@
       <div id="error-message"></div>
     </section>
 
+    <!-- Admin Dashboard -->
     <section id="dashboard-section" class="hidden">
       <div>
         <h1>Admin Dashboard</h1>
@@ -168,11 +170,11 @@
     window.addEventListener('load', function () {
       if (typeof supabase === 'undefined') {
         console.error('Supabase library failed to load');
-        document.getElementById('error-message').innerHTML = 'Failed to load Supabase. Refresh or check internet.';
+        document.getElementById('error-message').innerHTML = 'Failed to load Supabase library. Refresh page.';
         return;
       }
 
-      console.log('Supabase loaded');
+      console.log('Supabase loaded successfully');
 
       const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
@@ -182,33 +184,40 @@
       const loginSection = document.getElementById('login-section');
       const dashboardSection = document.getElementById('dashboard-section');
 
-      // Clean hash on page load
+      // Clean URL hash on load
       if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname);
       }
 
       async function checkAuth() {
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (user) {
-          loginSection.classList.add('hidden');
-          dashboardSection.classList.remove('hidden');
-          document.getElementById('user-name').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
-          // loadAllContent(); // uncomment when you add the load functions
-        } else {
-          loginSection.classList.remove('hidden');
-          dashboardSection.classList.add('hidden');
+        try {
+          const { data: { user } } = await supabaseClient.auth.getUser();
+          if (user) {
+            loginSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            document.getElementById('user-name').textContent = 
+              user.user_metadata?.full_name || user.email.split('@')[0];
+            // loadAllContent();  // Uncomment when ready
+          } else {
+            loginSection.classList.remove('hidden');
+            dashboardSection.classList.add('hidden');
+          }
+        } catch (err) {
+          console.error('Auth check failed:', err);
         }
       }
 
-      // Login - FIXED: hard-coded production URL
+      // Login - FORCED PRODUCTION REDIRECT
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         const redirectTo = 'https://studymekenya.vercel.app/admin.html';
-        console.log('Redirecting to:', redirectTo);
+        console.log('Forcing redirect to:', redirectTo);
 
         try {
           const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo }
+            options: {
+              redirectTo: redirectTo
+            }
           });
           if (error) throw error;
         } catch (err) {
@@ -217,10 +226,23 @@
         }
       });
 
+      // Logout
       document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        await supabaseClient.auth.signOut();
-        checkAuth();
+        try {
+          await supabaseClient.auth.signOut();
+          checkAuth();
+        } catch (err) {
+          console.error('Logout error:', err);
+        }
       });
+
+      // Your load functions (add back if you have them)
+      async function loadAllContent() {
+        console.log('Loading content...');
+        // loadVideoLessons();
+        // loadRevisionNotes();
+        // loadLiveClasses();
+      }
 
       checkAuth();
     });
