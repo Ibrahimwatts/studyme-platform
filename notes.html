@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <!-- Header – same as other pages -->
   <header>
     <div class="header-container">
       <div class="logo">
@@ -51,7 +53,7 @@
     </section>
 
     <div class="notes-layout">
-      <!-- Sidebar: Subject & Form Navigation -->
+      <!-- Sidebar remains static -->
       <aside class="notes-sidebar">
         <h3>Subjects</h3>
         <ul class="subject-list">
@@ -76,60 +78,10 @@
         </div>
       </aside>
 
-      <!-- Main content area -->
-      <section class="notes-content">
-        <h2>Physics – Form 1: Introduction to Physics</h2>
-
-        <div class="content-card">
-          <h3>1. What is Physics?</h3>
-          <p>Physics is the scientific study of matter, energy, and the fundamental laws of nature. It helps us understand how the universe behaves — from tiny particles to massive galaxies.</p>
-          <ul class="key-points">
-            <li>Branches: Mechanics, Thermodynamics, Electromagnetism, Optics, Modern Physics</li>
-            <li>Importance in KCSE: Foundation for all science subjects and real-world applications</li>
-          </ul>
-        </div>
-
-        <div class="content-card">
-          <h3>2. Measurements & SI Units</h3>
-          <p>Accurate measurement is essential in physics. We use the International System of Units (SI).</p>
-          <table class="notes-table">
-            <thead>
-              <tr>
-                <th>Quantity</th>
-                <th>SI Unit</th>
-                <th>Symbol</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Length</td><td>metre</td><td>m</td></tr>
-              <tr><td>Mass</td><td>kilogram</td><td>kg</td></tr>
-              <tr><td>Time</td><td>second</td><td>s</td></tr>
-              <tr><td>Electric Current</td><td>ampere</td><td>A</td></tr>
-              <tr><td>Temperature</td><td>kelvin</td><td>K</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="content-card">
-          <h3>3. Scalar vs Vector Quantities</h3>
-          <p><strong>Scalar</strong>: Has magnitude only (e.g., mass, time, speed, distance, temperature).</p>
-          <p><strong>Vector</strong>: Has magnitude and direction (e.g., velocity, force, displacement, acceleration, weight).</p>
-          <ul class="key-points">
-            <li>Scalar addition: Simple arithmetic</li>
-            <li>Vector addition: Head-to-tail method or parallelogram law</li>
-          </ul>
-        </div>
-
-        <div class="premium-lock">
-          <h3>Premium Content</h3>
-          <p>Full detailed notes, diagrams, worked examples, KCSE past paper questions, and downloadable PDF are available to subscribers.</p>
-          <a href="subscriptions.html" class="btn primary">Unlock Full Notes</a>
-        </div>
-
-        <div class="next-steps">
-          <a href="videos.html" class="btn">Watch Related Video Lessons</a>
-          <a href="tests.html" class="btn secondary">Take Practice Test</a>
-        </div>
+      <!-- Dynamic notes from Supabase -->
+      <section class="notes-content" id="notes-container">
+        <h2>Loading Revision Notes...</h2>
+        <!-- Notes will load here -->
       </section>
     </div>
   </main>
@@ -142,5 +94,58 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic loading script -->
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Load all revision notes
+    async function loadRevisionNotes() {
+      const container = document.getElementById('notes-container');
+      if (!container) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('revision_notes')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+          container.innerHTML = '<p>No revision notes available yet. Subscribe to unlock premium content!</p>';
+          return;
+        }
+
+        data.forEach(note => {
+          const card = document.createElement('div');
+          card.className = 'content-card';
+          card.innerHTML = `
+            <h2>${note.title}</h2>
+            <p class="note-meta">${note.subject} • ${note.form}</p>
+            <div class="note-body">
+              ${note.body ? note.body.substring(0, 400) + '...' : 'No content preview available'}
+            </div>
+            <a href="#" class="btn small">Read Full Note (Premium)</a>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error loading revision notes:', err);
+        container.innerHTML = '<p>Failed to load revision notes. Please try again later.</p>';
+      }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadRevisionNotes();
+    });
+  </script>
 </body>
 </html>

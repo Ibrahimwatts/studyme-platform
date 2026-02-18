@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Community - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -47,6 +50,14 @@
         <h1>Learner Community</h1>
         <p>Connect with fellow students, ask questions, share study tips, discuss difficult topics, and get help from peers and moderators — all in a supportive environment built for Kenyan high school learners.</p>
         <p class="hero-meta">Active discussions • Real-time chat (premium) • Moderated for respectful learning</p>
+      </div>
+    </section>
+
+    <!-- New: Dynamic Community Stats from Supabase -->
+    <section class="community-stats">
+      <h2 class="section-title">Community at a Glance</h2>
+      <div id="stats-container" class="card-grid">
+        <p id="stats-loading">Loading community stats...</p>
       </div>
     </section>
 
@@ -122,5 +133,65 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic community stats script -->
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Load community stats (counts from tables)
+    async function loadCommunityStats() {
+      const container = document.getElementById('stats-container');
+      const loadingText = document.getElementById('stats-loading');
+
+      if (!container) return;
+
+      try {
+        const { count: videoCount } = await supabase
+          .from('video_lessons')
+          .select('*', { count: 'exact', head: true });
+
+        const { count: notesCount } = await supabase
+          .from('revision_notes')
+          .select('*', { count: 'exact', head: true });
+
+        const { count: classesCount } = await supabase
+          .from('live_classes')
+          .select('*', { count: 'exact', head: true });
+
+        loadingText.remove();
+
+        container.innerHTML = `
+          <div class="card stat-card">
+            <div class="stat-value">${videoCount || 0}</div>
+            <div class="stat-label">Video Lessons</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">${notesCount || 0}</div>
+            <div class="stat-label">Revision Notes</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">${classesCount || 0}</div>
+            <div class="stat-label">Live Classes</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">Soon</div>
+            <div class="stat-label">Active Discussions</div>
+          </div>
+        `;
+      } catch (err) {
+        console.error('Error loading community stats:', err);
+        loadingText.textContent = 'Failed to load stats.';
+      }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCommunityStats();
+    });
+  </script>
 </body>
 </html>

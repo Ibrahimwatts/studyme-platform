@@ -1,7 +1,65 @@
-// script.js - Studyme Platform JavaScript
+// script.js - Studyme Platform JavaScript (Updated with Supabase Auth)
 // Shared across all pages
 
-// ==================== Quiz Functionality ====================
+// ==================== Supabase Initialization ====================
+const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+// ==================== Auth Functions ====================
+async function loginWithGoogle() {
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.href // return to current page after login
+      }
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error('Google login error:', err.message);
+    alert('Login failed: ' + err.message);
+  }
+}
+
+async function logout() {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    alert('You have been logged out.');
+    updateAuthUI();
+  } catch (err) {
+    console.error('Logout error:', err.message);
+    alert('Logout failed: ' + err.message);
+  }
+}
+
+// Update UI based on auth state
+async function updateAuthUI() {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const loginBtns = document.querySelectorAll('.login-btn');
+  const logoutBtns = document.querySelectorAll('.logout-btn');
+  const userGreeting = document.querySelector('.user-greeting');
+
+  if (user) {
+    loginBtns.forEach(btn => btn.style.display = 'none');
+    logoutBtns.forEach(btn => btn.style.display = 'inline-block');
+
+    const name = user.user_metadata?.full_name || user.email.split('@')[0];
+    if (userGreeting) {
+      userGreeting.textContent = `Welcome, ${name}`;
+      userGreeting.style.display = 'inline';
+    }
+  } else {
+    loginBtns.forEach(btn => btn.style.display = 'inline-block');
+    logoutBtns.forEach(btn => btn.style.display = 'none');
+    if (userGreeting) userGreeting.style.display = 'none';
+  }
+}
+
+// ==================== Quiz Functionality (unchanged) ====================
 function initQuizzes() {
   document.querySelectorAll('.quiz').forEach(quiz => {
     const submitBtn = quiz.querySelector('.quiz-submit');
@@ -32,7 +90,6 @@ function initQuizzes() {
           question.classList.add('wrong');
           question.classList.remove('correct');
         } else {
-          // No answer selected → neutral
           question.classList.remove('correct', 'wrong');
         }
       });
@@ -48,73 +105,38 @@ function initQuizzes() {
   });
 }
 
-// ==================== Simple "Login" Simulation ====================
-function simulateLogin(role = 'student') {
-  // In real app → replace with Netlify Identity / Supabase / Firebase Auth
-  const user = {
-    name: role === 'teacher' ? 'Teacher Jane' : 'Student Ibrahim',
-    role: role,
-    loggedIn: true,
-    timestamp: new Date().toISOString()
-  };
-
-  localStorage.setItem('studyme_user', JSON.stringify(user));
-  updateAuthUI();
-  alert(`Welcome, ${user.name}! (${user.role} mode)`);
-}
-
-function logout() {
-  localStorage.removeItem('studyme_user');
-  updateAuthUI();
-  alert('You have been logged out.');
-}
-
-function updateAuthUI() {
-  const user = JSON.parse(localStorage.getItem('studyme_user'));
-
-  // Update login/logout buttons (you can add these in HTML)
-  const loginBtns = document.querySelectorAll('.login-btn, .student-login, .teacher-login');
-  const logoutBtns = document.querySelectorAll('.logout-btn');
-  const userGreeting = document.querySelector('.user-greeting');
-
-  if (user && user.loggedIn) {
-    loginBtns.forEach(btn => btn.style.display = 'none');
-    logoutBtns.forEach(btn => btn.style.display = 'inline-block');
-    if (userGreeting) {
-      userGreeting.textContent = `Welcome, ${user.name}`;
-      userGreeting.style.display = 'inline';
-    }
-  } else {
-    loginBtns.forEach(btn => btn.style.display = 'inline-block');
-    logoutBtns.forEach(btn => btn.style.display = 'none');
-    if (userGreeting) userGreeting.style.display = 'none';
-  }
-}
-
-// ==================== Dark Mode Toggle (optional) ====================
+// ==================== Dark Mode Toggle (unchanged) ====================
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
   const isDark = document.body.classList.contains('dark-mode');
   localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
 }
 
-// Load saved preference
 if (localStorage.getItem('darkMode') === 'enabled' ||
     (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
   document.body.classList.add('dark-mode');
 }
 
 // ==================== Initialize on page load ====================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Initialize quizzes if any exist on the page
   initQuizzes();
 
-  // Update UI based on auth state
-  updateAuthUI();
+  // Check and update auth UI
+  await updateAuthUI();
 
-  // Attach global event listeners (example)
+  // Listen for auth state changes (auto-update after login/logout)
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    await updateAuthUI();
+  });
+
+  // Attach global event listeners
   document.addEventListener('click', e => {
-    if (e.target.matches('.logout-btn')) {
+    if (e.target.matches('#google-login-btn')) {
+      e.preventDefault();
+      loginWithGoogle();
+    }
+    if (e.target.matches('#logout-btn')) {
       e.preventDefault();
       logout();
     }
@@ -123,6 +145,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-
-// Export functions if using modules later
-// export { simulateLogin, logout, initQuizzes };

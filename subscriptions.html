@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subscriptions & Pricing - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -159,5 +162,31 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic script: show subscription status or stats if needed -->
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Example: Check if user is subscribed (optional future feature)
+    async function checkSubscriptionStatus() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // You can query a 'subscriptions' table later
+        console.log('Logged in user:', user);
+        // Update UI to show "You are subscribed" or something
+      } else {
+        console.log('Not logged in');
+      }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      checkSubscriptionStatus();
+    });
+  </script>
 </body>
 </html>

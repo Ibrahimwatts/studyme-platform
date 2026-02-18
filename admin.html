@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studyme Admin - Manage Content</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Reuse your existing styles -->
+  <style>
+    /* Quick admin-specific styles — move to styles.css later if you want */
+    .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .section { margin-bottom: 3rem; border-bottom: 1px solid #eee; padding-bottom: 2rem; }
+    .section h2 { margin-bottom: 1.5rem; }
+    .item-list { display: grid; gap: 1rem; }
+    .item-card { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; background: #fafafa; }
+    .item-actions { margin-top: 0.5rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px;
+    }
+    .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-primary { background: #0070f3; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .hidden { display: none; }
+    #login-section { text-align: center; padding: 4rem 2rem; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-container">
+    <!-- Login Prompt -->
+    <section id="login-section">
+      <h1>Studyme Admin Panel</h1>
+      <p>Log in with Google to manage content</p>
+      <button id="google-login-btn" class="btn btn-primary">Login with Google</button>
+    </section>
+
+    <!-- Admin Dashboard (hidden until logged in) -->
+    <section id="dashboard-section" class="hidden">
+      <div>
+        <h1>Admin Dashboard</h1>
+        <button id="logout-btn" class="btn">Log Out</button>
+      </div>
+      <p>Welcome, <span id="user-name">User</span></p>
+
+      <!-- Video Lessons -->
+      <div class="section">
+        <h2>Video Lessons</h2>
+        <div id="video-list" class="item-list"></div>
+
+        <h3>Add New Video Lesson</h3>
+        <form id="video-form">
+          <div class="form-group">
+            <label for="video-title">Title</label>
+            <input type="text" id="video-title" required>
+          </div>
+          <div class="form-group">
+            <label for="video-subject">Subject</label>
+            <select id="video-subject" required>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Mathematics">Mathematics</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="video-form">Form</label>
+            <select id="video-form" required>
+              <option value="Form 1">Form 1</option>
+              <option value="Form 2">Form 2</option>
+              <option value="Form 3">Form 3</option>
+              <option value="Form 4">Form 4</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="video-youtube">YouTube ID</label>
+            <input type="text" id="video-youtube" required>
+          </div>
+          <div class="form-group">
+            <label for="video-duration">Duration (minutes)</label>
+            <input type="number" id="video-duration" required min="1">
+          </div>
+          <div class="form-group">
+            <label for="video-desc">Description</label>
+            <textarea id="video-desc"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Video Lesson</button>
+        </form>
+      </div>
+
+      <!-- Revision Notes -->
+      <div class="section">
+        <h2>Revision Notes</h2>
+        <div id="notes-list" class="item-list"></div>
+
+        <h3>Add New Revision Note</h3>
+        <form id="notes-form">
+          <div class="form-group">
+            <label for="notes-title">Title</label>
+            <input type="text" id="notes-title" required>
+          </div>
+          <div class="form-group">
+            <label for="notes-subject">Subject</label>
+            <select id="notes-subject" required>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Mathematics">Mathematics</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="notes-form">Form</label>
+            <select id="notes-form" required>
+              <option value="Form 1">Form 1</option>
+              <option value="Form 2">Form 2</option>
+              <option value="Form 3">Form 3</option>
+              <option value="Form 4">Form 4</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="notes-body">Body (notes content)</label>
+            <textarea id="notes-body" rows="6" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Revision Note</button>
+        </form>
+      </div>
+
+      <!-- Live Classes -->
+      <div class="section">
+        <h2>Live Classes</h2>
+        <div id="classes-list" class="item-list"></div>
+
+        <h3>Add New Live Class</h3>
+        <form id="classes-form">
+          <div class="form-group">
+            <label for="class-subject">Subject</label>
+            <select id="class-subject" required>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Mathematics">Mathematics</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="class-time">Day & Time (EAT)</label>
+            <input type="text" id="class-time" required placeholder="e.g. Saturday 10:00 AM – 11:30 AM">
+          </div>
+          <div class="form-group">
+            <label for="class-topic">Topic</label>
+            <input type="text" id="class-topic" required>
+          </div>
+          <div class="form-group">
+            <label for="class-link">Link (Zoom/Meet/etc)</label>
+            <input type="url" id="class-link" required>
+          </div>
+          <div class="form-group">
+            <label for="class-desc">Description</label>
+            <textarea id="class-desc"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Live Class</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+
+    // Check auth state on load
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        loadAllContent();
+      } else {
+        loginSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+      }
+    }
+
+    // Login with Google
+    document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.href }
+      });
+    });
+
+    // Logout
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      checkAuth();
+    });
+
+    // Load all content lists
+    async function loadAllContent() {
+      await loadVideoLessons();
+      await loadRevisionNotes();
+      await loadLiveClasses();
+    }
+
+    // Load Video Lessons
+    async function loadVideoLessons() {
+      const container = document.getElementById('video-list');
+      container.innerHTML = '<p>Loading...</p>';
+      const { data, error } = await supabase.from('video_lessons').select('*');
+      if (error) return container.innerHTML = '<p>Error loading.</p>';
+      container.innerHTML = '';
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.innerHTML = `
+          <strong>${item.title}</strong><br>
+          ${item.subject} - ${item.form}<br>
+          YouTube: ${item.youtube_id}<br>
+          <div class="item-actions">
+            <button onclick="deleteItem('video_lessons', '${item.id}')">Delete</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Load Revision Notes (similar pattern)
+    async function loadRevisionNotes() {
+      const container = document.getElementById('notes-list');
+      container.innerHTML = '<p>Loading...</p>';
+      const { data, error } = await supabase.from('revision_notes').select('*');
+      if (error) return container.innerHTML = '<p>Error loading.</p>';
+      container.innerHTML = '';
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.innerHTML = `
+          <strong>${item.title}</strong><br>
+          ${item.subject} - ${item.form}<br>
+          <div class="item-actions">
+            <button onclick="deleteItem('revision_notes', '${item.id}')">Delete</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Load Live Classes
+    async function loadLiveClasses() {
+      const container = document.getElementById('classes-list');
+      container.innerHTML = '<p>Loading...</p>';
+      const { data, error } = await supabase.from('live_classes').select('*');
+      if (error) return container.innerHTML = '<p>Error loading.</p>';
+      container.innerHTML = '';
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.innerHTML = `
+          <strong>${item.topic}</strong><br>
+          ${item.subject} - ${item.time}<br>
+          Link: <a href="${item.link}" target="_blank">${item.link}</a><br>
+          <div class="item-actions">
+            <button onclick="deleteItem('live_classes', '${item.id}')">Delete</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Delete item
+    async function deleteItem(table, id) {
+      if (!confirm('Delete this item?')) return;
+      const { error } = await supabase.from(table).delete().eq('id', id);
+      if (error) alert('Error deleting');
+      else loadAllContent();
+    }
+
+    // Add Video Lesson form
+    document.getElementById('video-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        title: document.getElementById('video-title').value,
+        subject: document.getElementById('video-subject').value,
+        form: document.getElementById('video-form').value,
+        youtube_id: document.getElementById('video-youtube').value,
+        duration: Number(document.getElementById('video-duration').value),
+        description: document.getElementById('video-desc').value
+      };
+      const { error } = await supabase.from('video_lessons').insert([data]);
+      if (error) alert('Error adding');
+      else {
+        alert('Added!');
+        e.target.reset();
+        loadAllContent();
+      }
+    });
+
+    // Add Revision Note form (similar)
+    document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        title: document.getElementById('notes-title').value,
+        subject: document.getElementById('notes-subject').value,
+        form: document.getElementById('notes-form').value,
+        body: document.getElementById('notes-body').value
+      };
+      const { error } = await supabase.from('revision_notes').insert([data]);
+      if (error) alert('Error adding');
+      else {
+        alert('Added!');
+        e.target.reset();
+        loadAllContent();
+      }
+    });
+
+    // Add Live Class form
+    document.getElementById('classes-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        subject: document.getElementById('class-subject').value,
+        time: document.getElementById('class-time').value,
+        topic: document.getElementById('class-topic').value,
+        link: document.getElementById('class-link').value,
+        description: document.getElementById('class-desc').value
+      };
+      const { error } = await supabase.from('live_classes').insert([data]);
+      if (error) alert('Error adding');
+      else {
+        alert('Added!');
+        e.target.reset();
+        loadAllContent();
+      }
+    });
+
+    // Initial auth check
+    document.addEventListener('DOMContentLoaded', checkAuth);
+  </script>
+</body>
+</html>

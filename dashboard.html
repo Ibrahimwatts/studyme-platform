@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Dashboard - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -43,23 +46,25 @@
 
   <main>
     <!-- Not logged in state -->
-    <section class="page-hero login-prompt">
+    <section class="page-hero login-prompt" id="login-section">
       <div class="page-hero-content">
         <h1>Your Personal Dashboard</h1>
         <p>Track your learning progress, view test results, access assigned materials, see upcoming live classes, and get teacher feedback — all in one place.</p>
         <p class="hero-meta">Personalized experience available after login</p>
 
         <div class="auth-buttons">
-          <button class="btn primary large" onclick="alert('Student login coming soon – Netlify Identity integration in progress')">Student Login</button>
-          <button class="btn secondary large" onclick="alert('Teacher login coming soon – Netlify Identity integration in progress')">Teacher Login</button>
-          <p class="auth-note">Don't have an account? <a href="subscriptions.html">Subscribe now</a> or <a href="#">Sign up free</a> to get started.</p>
+          <button id="google-login-btn" class="btn primary large">Login with Google</button>
+          <p class="auth-note">Don't have an account? <a href="subscriptions.html">Subscribe now</a> or sign up with Google above.</p>
         </div>
       </div>
     </section>
 
-    <!-- Placeholder for logged-in student view (hidden until auth is added) -->
-    <section class="dashboard-overview hidden">
-      <h2 class="section-title">Welcome back, [Student Name]</h2>
+    <!-- Logged-in dashboard (hidden until login) -->
+    <section class="dashboard-overview hidden" id="dashboard-section">
+      <div class="dashboard-header">
+        <h2>Welcome back, <span id="user-name">Student</span></h2>
+        <button id="logout-btn" class="btn outline small">Log Out</button>
+      </div>
 
       <div class="card-grid stats-grid">
         <div class="card stat-card">
@@ -75,7 +80,7 @@
           <div class="stat-label">Average Score</div>
         </div>
         <div class="card stat-card">
-          <div class="stat-value">3</div>
+          <div class="stat-value" id="upcoming-classes-count">Loading...</div>
           <div class="stat-label">Upcoming Live Classes</div>
         </div>
       </div>
@@ -94,10 +99,9 @@
 
         <div class="card">
           <h3>Upcoming Schedule</h3>
-          <ul class="schedule-list">
-            <li><strong>Physics Live</strong> – Sat 10:00 AM EAT</li>
-            <li><strong>Mathematics Revision</strong> – Sun 2:00 PM EAT</li>
-          </ul>
+          <div id="upcoming-classes-list">
+            <p>Loading upcoming classes...</p>
+          </div>
           <a href="classes.html" class="btn small">View Full Schedule</a>
         </div>
       </div>
@@ -105,13 +109,6 @@
       <div class="center-cta">
         <a href="subjects.html" class="btn primary">Continue Learning</a>
       </div>
-    </section>
-
-    <!-- Placeholder for logged-in teacher view -->
-    <section class="teacher-dashboard hidden">
-      <h2 class="section-title">Teacher Dashboard</h2>
-      <p>Manage classes, assign tests, review student progress, and moderate community discussions.</p>
-      <!-- Add teacher-specific cards later -->
     </section>
   </main>
 
@@ -123,5 +120,90 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic dashboard script -->
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const userNameSpan = document.getElementById('user-name');
+    const upcomingClassesCount = document.getElementById('upcoming-classes-count');
+    const upcomingClassesList = document.getElementById('upcoming-classes-list');
+
+    // Check if user is already logged in
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        userNameSpan.textContent = user.user_metadata.full_name || user.email.split('@')[0];
+        loadUpcomingClasses();
+      } else {
+        loginSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+      }
+    }
+
+    // Load upcoming live classes
+    async function loadUpcomingClasses() {
+      try {
+        const { data, error, count } = await supabase
+          .from('live_classes')
+          .select('*', { count: 'exact' })
+          .order('time', { ascending: true });
+
+        if (error) throw error;
+
+        upcomingClassesCount.textContent = count || 0;
+
+        upcomingClassesList.innerHTML = '';
+        if (data.length === 0) {
+          upcomingClassesList.innerHTML = '<p>No upcoming classes scheduled.</p>';
+          return;
+        }
+
+        data.forEach(cls => {
+          const item = document.createElement('p');
+          item.innerHTML = `<strong>${cls.subject}</strong> – ${cls.time} – ${cls.topic} <br><a href="${cls.link}" target="_blank">Join</a>`;
+          upcomingClassesList.appendChild(item);
+        });
+      } catch (err) {
+        console.error('Error loading classes:', err);
+        upcomingClassesList.innerHTML = '<p>Failed to load schedule.</p>';
+      }
+    }
+
+    // Google login button
+    document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.href // stay on dashboard after login
+        }
+      });
+      if (error) console.error('Login error:', error);
+    });
+
+    // Logout button
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      checkUser();
+    });
+
+    // Check auth state on load
+    document.addEventListener('DOMContentLoaded', () => {
+      checkUser();
+
+      // Listen for auth state changes (e.g., after login redirect)
+      supabase.auth.onAuthStateChange((event, session) => {
+        checkUser();
+      });
+    });
+  </script>
 </body>
 </html>

@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video Lessons - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <!-- Header – same as other pages -->
   <header>
     <div class="header-container">
       <div class="logo">
@@ -51,85 +53,16 @@
     </section>
 
     <section class="videos-grid-section">
-      <h2 class="section-title">Featured Video Lessons</h2>
-      <p class="intro-text">Sample free videos shown below. Subscribe to unlock 100+ full lessons across all subjects, including complete topic series and exam walkthroughs.</p>
+      <h2 class="section-title">All Video Lessons</h2>
+      <p class="intro-text">Browse our full collection below. Free samples shown — subscribe to unlock 100+ complete lessons, offline access, and progress tracking.</p>
 
-      <div class="card-grid">
-        <!-- Physics Form 1 -->
-        <div class="card video-card">
-          <div class="video-container">
-            <iframe 
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1&controls=1" 
-              title="Physics Form 1: Measurements and SI Units – Kenyan Curriculum Lesson (10 min)" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen>
-            </iframe>
-          </div>
-          <div class="video-info">
-            <h3>Physics – Form 1: Measurements & Units</h3>
-            <p>Learn SI units, measuring instruments, and accuracy in physics.</p>
-            <span class="video-duration">10 min</span>
-          </div>
-        </div>
-
-        <!-- Chemistry Form 2 -->
-        <div class="card video-card">
-          <div class="video-container">
-            <iframe 
-              src="https://www.youtube.com/embed/VIDEO_ID_HERE?rel=0&modestbranding=1&controls=1" 
-              title="Chemistry Form 2: Atomic Structure & Periodic Table – KCSE Preparation (15 min)" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen>
-            </iframe>
-          </div>
-          <div class="video-info">
-            <h3>Chemistry – Form 2: Atomic Structure</h3>
-            <p>Protons, neutrons, electrons, atomic models, and periodic trends.</p>
-            <span class="video-duration">15 min</span>
-          </div>
-        </div>
-
-        <!-- Biology Form 3 -->
-        <div class="card video-card">
-          <div class="video-container">
-            <iframe 
-              src="https://www.youtube.com/embed/VIDEO_ID_HERE?rel=0&modestbranding=1&controls=1" 
-              title="Biology Form 3: Ecosystems & Food Chains – Kenyan High School Lesson (12 min)" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen>
-            </iframe>
-          </div>
-          <div class="video-info">
-            <h3>Biology – Form 3: Ecology</h3>
-            <p>Habitats, populations, food chains, energy flow, and conservation.</p>
-            <span class="video-duration">12 min</span>
-          </div>
-        </div>
-
-        <!-- Mathematics Form 4 -->
-        <div class="card video-card">
-          <div class="video-container">
-            <iframe 
-              src="https://www.youtube.com/embed/VIDEO_ID_HERE?rel=0&modestbranding=1&controls=1" 
-              title="Mathematics Form 4: Introduction to Differentiation – KCSE Math Tutorial (18 min)" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen>
-            </iframe>
-          </div>
-          <div class="video-info">
-            <h3>Mathematics – Form 4: Calculus Basics</h3>
-            <p>Gradients, rates of change, first principles, and basic differentiation.</p>
-            <span class="video-duration">18 min</span>
-          </div>
-        </div>
+      <!-- Dynamic content from Supabase -->
+      <div id="videos-container" class="card-grid">
+        <p id="videos-loading">Loading video lessons...</p>
       </div>
 
       <div class="center-cta">
-        <p class="lead">Subscribe to unlock 100+ full lessons, downloadable notes, offline access, progress tracking, and exclusive exam prep videos.</p>
+        <p class="lead">Subscribe to unlock full library, downloadable notes, offline access, progress tracking, and exclusive exam prep videos.</p>
         <a href="subscriptions.html" class="btn primary large">Subscribe Now via M-Pesa</a>
         <p>Free users can watch sample videos • Full library requires subscription</p>
       </div>
@@ -166,5 +99,69 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic loading script -->
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Load all video lessons
+    async function loadVideoLessons() {
+      const container = document.getElementById('videos-container');
+      const loadingText = document.getElementById('videos-loading');
+
+      if (!container) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('video_lessons')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        loadingText.remove();
+
+        if (data.length === 0) {
+          container.innerHTML = '<p>No video lessons available yet. Subscribe to unlock premium content!</p>';
+          return;
+        }
+
+        data.forEach(lesson => {
+          const card = document.createElement('div');
+          card.className = 'card video-card';
+          card.innerHTML = `
+            <div class="video-container">
+              <iframe 
+                src="https://www.youtube.com/embed/${lesson.youtube_id}" 
+                title="${lesson.title}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+              </iframe>
+            </div>
+            <div class="video-info">
+              <h3>${lesson.title}</h3>
+              <p>${lesson.subject} • ${lesson.form}</p>
+              <p>Duration: ${lesson.duration} min</p>
+              <p>${lesson.description || ''}</p>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error loading video lessons:', err);
+        loadingText.textContent = 'Failed to load video lessons. Please try again later.';
+      }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadVideoLessons();
+    });
+  </script>
 </body>
 </html>

@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Studyme - Digital Learning Platform for High School</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -52,6 +55,14 @@
       </div>
     </section>
 
+    <!-- Dynamic Featured Video Lessons from Supabase -->
+    <section class="featured-content">
+      <h2 class="section-title">Featured Video Lessons</h2>
+      <div id="featured-videos-container" class="card-grid">
+        <p id="videos-loading">Loading featured videos...</p>
+      </div>
+    </section>
+
     <section class="featured-subjects">
       <h2 class="section-title">Core Subjects</h2>
       <div class="card-grid">
@@ -59,25 +70,25 @@
           <div class="subject-icon">⚛️</div>
           <h3>Physics</h3>
           <p>Mechanics, electricity, waves & modern physics – KCSE-ready.</p>
-          <a href="notes.html?subject=physics" class="btn small">Start →</a>
+          <a href="notes.html?subject=physics" class="btn small">Revision Notes</a>
         </div>
         <div class="card subject-card">
           <div class="subject-icon">🧪</div>
           <h3>Chemistry</h3>
           <p>Organic & inorganic chemistry, practicals, and lab simulations.</p>
-          <a href="notes.html?subject=chemistry" class="btn small">Start →</a>
+          <a href="notes.html?subject=chemistry" class="btn small">Revision Notes</a>
         </div>
         <div class="card subject-card">
           <div class="subject-icon">🌿</div>
           <h3>Biology</h3>
           <p>Cell biology, genetics, ecology – with interactive diagrams.</p>
-          <a href="notes.html?subject=biology" class="btn small">Start →</a>
+          <a href="notes.html?subject=biology" class="btn small">Revision Notes</a>
         </div>
         <div class="card subject-card">
           <div class="subject-icon">📐</div>
           <h3>Mathematics</h3>
           <p>Algebra, geometry, calculus – practice problems & solutions.</p>
-          <a href="notes.html?subject=mathematics" class="btn small">Start →</a>
+          <a href="notes.html?subject=mathematics" class="btn small">Revision Notes</a>
         </div>
       </div>
     </section>
@@ -146,5 +157,59 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic loading script for index.html -->
+  <script>
+    // Your Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Load featured video lessons on homepage
+    async function loadFeaturedVideos() {
+      const container = document.getElementById('featured-videos-container');
+      const loadingText = document.getElementById('videos-loading');
+
+      if (!container) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('video_lessons')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(4); // Show only 4 featured videos
+
+        if (error) throw error;
+
+        loadingText.remove();
+
+        if (data.length === 0) {
+          container.innerHTML = '<p>No featured videos yet.</p>';
+          return;
+        }
+
+        data.forEach(lesson => {
+          const card = document.createElement('div');
+          card.className = 'card featured-video-card';
+          card.innerHTML = `
+            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
+            <h3>${lesson.title}</h3>
+            <p>${lesson.subject} • ${lesson.form}</p>
+            <p>${lesson.duration} min</p>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error loading featured videos:', err);
+        loadingText.textContent = 'Failed to load videos.';
+      }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadFeaturedVideos();
+    });
+  </script>
 </body>
 </html>

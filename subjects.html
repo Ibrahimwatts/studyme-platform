@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subjects - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <!-- Header – same as other pages -->
   <header>
     <div class="header-container">
       <div class="logo">
@@ -51,8 +53,10 @@
 
     <section class="subjects-grid-section">
       <h2 class="section-title">Our Subjects</h2>
-      <div class="card-grid">
-        <!-- Physics -->
+      <div class="card-grid" id="subjects-container">
+        <!-- Dynamic stats will load here -->
+
+        <!-- Static fallback cards -->
         <div class="card subject-card">
           <div class="subject-icon">⚛️</div>
           <h3>Physics</h3>
@@ -63,7 +67,6 @@
           </div>
         </div>
 
-        <!-- Chemistry -->
         <div class="card subject-card">
           <div class="subject-icon">🧪</div>
           <h3>Chemistry</h3>
@@ -74,7 +77,6 @@
           </div>
         </div>
 
-        <!-- Biology -->
         <div class="card subject-card">
           <div class="subject-icon">🌿</div>
           <h3>Biology</h3>
@@ -85,7 +87,6 @@
           </div>
         </div>
 
-        <!-- Mathematics -->
         <div class="card subject-card">
           <div class="subject-icon">📐</div>
           <h3>Mathematics</h3>
@@ -112,5 +113,56 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic loading script -->
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Load subject stats (count of lessons/notes/classes)
+    async function loadSubjectStats() {
+      try {
+        const { count: videoCount } = await supabase
+          .from('video_lessons')
+          .select('*', { count: 'exact', head: true });
+
+        const { count: notesCount } = await supabase
+          .from('revision_notes')
+          .select('*', { count: 'exact', head: true });
+
+        const { count: classesCount } = await supabase
+          .from('live_classes')
+          .select('*', { count: 'exact', head: true });
+
+        // Display counts under each subject card
+        const cards = document.querySelectorAll('.subject-card');
+        cards.forEach(card => {
+          const subject = card.querySelector('h3').textContent;
+          let statsText = '';
+
+          if (subject === 'Physics') {
+            statsText = `Videos: ${videoCount || 0} • Notes: ${notesCount || 0} • Classes: ${classesCount || 0}`;
+          } else if (subject === 'Chemistry') {
+            statsText = `Videos: ${videoCount || 0} • Notes: ${notesCount || 0} • Classes: ${classesCount || 0}`;
+          } // Add for Biology and Math if you want per-subject counts later
+
+          const actions = card.querySelector('.card-actions');
+          if (actions) {
+            actions.innerHTML += `<p class="stats">${statsText}</p>`;
+          }
+        });
+      } catch (err) {
+        console.error('Error loading subject stats:', err);
+      }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSubjectStats();
+    });
+  </script>
 </body>
 </html>

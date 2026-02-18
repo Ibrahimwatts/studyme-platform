@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Classes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -52,58 +55,11 @@
 
     <section class="schedule-section">
       <h2 class="section-title">Upcoming Live Class Schedule</h2>
-      <div class="card-grid">
-        <!-- Physics -->
-        <div class="card schedule-card">
-          <div class="schedule-header">
-            <span class="subject-tag physics">Physics</span>
-            <span class="time">Saturday 10:00 AM – 11:30 AM EAT</span>
-          </div>
-          <p>Mechanics, Electricity, Waves & Modern Physics – live problem solving & Q&A</p>
-          <div class="card-actions">
-            <a href="#" class="btn small">Join Live (Coming Soon)</a>
-            <a href="dashboard.html" class="btn small secondary">View Recordings</a>
-          </div>
-        </div>
+      <p class="intro-text">See all upcoming live classes below. Full Zoom/YouTube links and recordings appear in your dashboard after login/subscription.</p>
 
-        <!-- Chemistry -->
-        <div class="card schedule-card">
-          <div class="schedule-header">
-            <span class="subject-tag chemistry">Chemistry</span>
-            <span class="time">Saturday 2:00 PM – 3:30 PM EAT</span>
-          </div>
-          <p>Organic & Inorganic Chemistry, Practical Techniques – concept deep dives</p>
-          <div class="card-actions">
-            <a href="#" class="btn small">Join Live (Coming Soon)</a>
-            <a href="dashboard.html" class="btn small secondary">View Recordings</a>
-          </div>
-        </div>
-
-        <!-- Biology -->
-        <div class="card schedule-card">
-          <div class="schedule-header">
-            <span class="subject-tag biology">Biology</span>
-            <span class="time">Sunday 10:00 AM – 11:30 AM EAT</span>
-          </div>
-          <p>Cell Biology, Genetics, Ecology & Human Physiology – interactive diagrams</p>
-          <div class="card-actions">
-            <a href="#" class="btn small">Join Live (Coming Soon)</a>
-            <a href="dashboard.html" class="btn small secondary">View Recordings</a>
-          </div>
-        </div>
-
-        <!-- Mathematics -->
-        <div class="card schedule-card">
-          <div class="schedule-header">
-            <span class="subject-tag math">Mathematics</span>
-            <span class="time">Sunday 2:00 PM – 3:30 PM EAT</span>
-          </div>
-          <p>Algebra, Geometry, Calculus & Statistics – step-by-step exam prep</p>
-          <div class="card-actions">
-            <a href="#" class="btn small">Join Live (Coming Soon)</a>
-            <a href="dashboard.html" class="btn small secondary">View Recordings</a>
-          </div>
-        </div>
+      <!-- Dynamic live classes from Supabase -->
+      <div id="classes-container" class="card-grid">
+        <p id="classes-loading">Loading upcoming classes...</p>
       </div>
 
       <div class="center-cta">
@@ -140,5 +96,64 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- Supabase dynamic loading script -->
+  <script>
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Load all live classes
+    async function loadLiveClasses() {
+      const container = document.getElementById('classes-container');
+      const loadingText = document.getElementById('classes-loading');
+
+      if (!container) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('live_classes')
+          .select('*')
+          .order('time', { ascending: true }); // Order by time (you can change to 'created_at' if preferred)
+
+        if (error) throw error;
+
+        loadingText.remove();
+
+        if (data.length === 0) {
+          container.innerHTML = '<p>No upcoming live classes scheduled yet. Check back soon!</p>';
+          return;
+        }
+
+        data.forEach(classItem => {
+          const card = document.createElement('div');
+          card.className = 'card schedule-card';
+          card.innerHTML = `
+            <div class="schedule-header">
+              <span class="subject-tag ${classItem.subject.toLowerCase()}">${classItem.subject}</span>
+              <span class="time">${classItem.time}</span>
+            </div>
+            <p><strong>${classItem.topic}</strong></p>
+            <p>${classItem.description || ''}</p>
+            <div class="card-actions">
+              <a href="${classItem.link}" class="btn small" target="_blank">Join Live</a>
+              <a href="dashboard.html" class="btn small secondary">View Recording (Premium)</a>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error loading live classes:', err);
+        loadingText.textContent = 'Failed to load live classes. Please try again later.';
+      }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLiveClasses();
+    });
+  </script>
 </body>
 </html>
