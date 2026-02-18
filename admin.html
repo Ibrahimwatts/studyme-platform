@@ -214,13 +214,16 @@
         }
       }
 
-      // Login with Google
+      // Login with Google - FIXED REDIRECT
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         try {
+          const redirectTo = window.location.origin + window.location.pathname;
+          console.log('Redirecting to:', redirectTo); // debug log
+
           const { error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: {
-              redirectTo: window.location.origin + window.location.pathname
+              redirectTo: redirectTo
             }
           });
           if (error) throw error;
@@ -240,7 +243,7 @@
         }
       });
 
-      // Load all content
+      // Load all content (unchanged)
       async function loadAllContent() {
         try {
           await loadVideoLessons();
@@ -340,7 +343,7 @@
         }
       });
 
-      // Repeat for notes-form and classes-form (copy pattern above)
+      // ... (repeat similar for notes-form and classes-form as before)
 
       checkAuth();
     });
