@@ -1,19 +1,23 @@
-// script.js - Studyme Platform JavaScript (Updated with Supabase Auth)
-// Shared across all pages
+// script.js - Studyme Platform JavaScript (Updated & Enhanced)
+// Shared across all pages - Admin + Frontend
 
-// ==================== Supabase Initialization ====================
-const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+// ==================== Safe Supabase Initialization ====================
+const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+// Safe init - only create if not already defined
+if (!window.supabase) {
+  window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log('Supabase client initialized (shared script.js)');
+}
 
-// ==================== Auth Functions ====================
+// ==================== Auth Functions (unchanged) ====================
 async function loginWithGoogle() {
   try {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await window.supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href // return to current page after login
+        redirectTo: window.location.origin + '/admin.html' // redirect to admin after login
       }
     });
     if (error) throw error;
@@ -25,7 +29,7 @@ async function loginWithGoogle() {
 
 async function logout() {
   try {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await window.supabase.auth.signOut();
     if (error) throw error;
     alert('You have been logged out.');
     updateAuthUI();
@@ -35,9 +39,9 @@ async function logout() {
   }
 }
 
-// Update UI based on auth state
+// Update UI based on auth state (unchanged)
 async function updateAuthUI() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await window.supabase.auth.getUser();
 
   const loginBtns = document.querySelectorAll('.login-btn');
   const logoutBtns = document.querySelectorAll('.logout-btn');
@@ -57,6 +61,63 @@ async function updateAuthUI() {
     logoutBtns.forEach(btn => btn.style.display = 'none');
     if (userGreeting) userGreeting.style.display = 'none';
   }
+}
+
+// ==================== Global Data Fetch Helpers ====================
+// These can be used in notes.html, videos.html, tests.html, etc.
+
+async function fetchRevisionNotes(filters = {}) {
+  try {
+    let query = window.supabase
+      .from('revision_notes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    // Apply filters (e.g. subject)
+    if (filters.subject) {
+      query = query.ilike('subject', `%${filters.subject}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('Error fetching revision notes:', err);
+    return [];
+  }
+}
+
+async function fetchVideoLessons(filters = {}) {
+  try {
+    let query = window.supabase
+      .from('video_lessons')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (filters.subject) {
+      query = query.ilike('subject', `%${filters.subject}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('Error fetching videos:', err);
+    return [];
+  }
+}
+
+// Optional: Real-time subscription for new notes (live updates)
+function subscribeToNewNotes(callback) {
+  const channel = window.supabase
+    .channel('public:revision_notes')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'revision_notes' }, payload => {
+      console.log('New note added:', payload.new);
+      callback(payload.new);
+    })
+    .subscribe();
+
+  return () => window.supabase.removeChannel(channel); // cleanup
 }
 
 // ==================== Quiz Functionality (unchanged) ====================
@@ -126,13 +187,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   await updateAuthUI();
 
   // Listen for auth state changes (auto-update after login/logout)
-  supabase.auth.onAuthStateChange(async (event, session) => {
+  window.supabase.auth.onAuthStateChange(async (event, session) => {
     await updateAuthUI();
   });
 
   // Attach global event listeners
   document.addEventListener('click', e => {
-    if (e.target.matches('#google-login-btn')) {
+    if (e.target.matches('#google-login-btn, .login-btn')) {
       e.preventDefault();
       loginWithGoogle();
     }
@@ -144,4 +205,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       toggleDarkMode();
     }
   });
+
+  console.log('Studyme shared script loaded successfully');
 });

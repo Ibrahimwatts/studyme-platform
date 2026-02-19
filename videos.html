@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video Lessons - Studyme</title>
   <link rel="stylesheet" href="styles.css">
-
-  <!-- Supabase JS client (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -52,21 +49,40 @@
       </div>
     </section>
 
-    <section class="videos-grid-section">
-      <h2 class="section-title">All Video Lessons</h2>
-      <p class="intro-text">Browse our full collection below. Free samples shown — subscribe to unlock 100+ complete lessons, offline access, and progress tracking.</p>
+    <div class="videos-layout">
+      <!-- Sidebar (added for subject filtering) -->
+      <aside class="videos-sidebar">
+        <h3>Subjects</h3>
+        <ul class="subject-list" id="subject-list">
+          <li><a href="#" data-subject="Physics" class="active">Physics</a></li>
+          <li><a href="#" data-subject="Chemistry">Chemistry</a></li>
+          <li><a href="#" data-subject="Biology">Biology</a></li>
+          <li><a href="#" data-subject="Mathematics">Mathematics</a></li>
+        </ul>
 
-      <!-- Dynamic content from Supabase -->
-      <div id="videos-container" class="card-grid">
-        <p id="videos-loading">Loading video lessons...</p>
-      </div>
+        <div class="premium-promo">
+          <h4>Unlock Full Library</h4>
+          <p>Watch 100+ complete lessons, download offline, track progress with subscription.</p>
+          <a href="subscriptions.html" class="btn small">Subscribe Now</a>
+        </div>
+      </aside>
 
-      <div class="center-cta">
-        <p class="lead">Subscribe to unlock full library, downloadable notes, offline access, progress tracking, and exclusive exam prep videos.</p>
-        <a href="subscriptions.html" class="btn primary large">Subscribe Now via M-Pesa</a>
-        <p>Free users can watch sample videos • Full library requires subscription</p>
-      </div>
-    </section>
+      <!-- Dynamic videos -->
+      <section class="videos-content">
+        <h2 class="section-title">All Video Lessons</h2>
+        <p class="intro-text">Browse our full collection below. Free samples shown — subscribe to unlock complete lessons, offline access, and progress tracking.</p>
+
+        <div id="videos-container" class="card-grid">
+          <p id="videos-loading">Loading video lessons...</p>
+        </div>
+
+        <div class="center-cta">
+          <p class="lead">Subscribe to unlock full library, downloadable notes, offline access, progress tracking, and exclusive exam prep videos.</p>
+          <a href="subscriptions.html" class="btn primary large">Subscribe Now via M-Pesa</a>
+          <p>Free users can watch sample videos • Full library requires subscription</p>
+        </div>
+      </section>
+    </div>
 
     <section class="features-section">
       <h2 class="section-title">Why Our Video Lessons Work</h2>
@@ -98,69 +114,111 @@
     </div>
   </footer>
 
+  <!-- Shared script (must define window.supabase safely) -->
   <script src="script.js"></script>
 
-  <!-- Supabase dynamic loading script -->
+  <!-- Page-specific logic -->
   <script>
-    // Your real Supabase keys
-    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!window.supabase) {
+        console.error('Supabase not loaded from script.js');
+        document.getElementById('videos-container').innerHTML = '<p>Error: Supabase client not available.</p>';
+        return;
+      }
 
-    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-
-    // Load all video lessons
-    async function loadVideoLessons() {
       const container = document.getElementById('videos-container');
       const loadingText = document.getElementById('videos-loading');
+      const subjectLinks = document.querySelectorAll('#subject-list a');
 
-      if (!container) return;
+      // Get subject from URL or default to all
+      const urlParams = new URLSearchParams(window.location.search);
+      let currentSubject = urlParams.get('subject') || null; // null = show all
 
-      try {
-        const { data, error } = await supabase
-          .from('video_lessons')
-          .select('*')
-          .order('created_at', { ascending: false });
+      // Highlight active subject
+      subjectLinks.forEach(link => {
+        const isActive = !currentSubject || link.dataset.subject.toLowerCase() === currentSubject.toLowerCase();
+        link.classList.toggle('active', isActive);
+      });
 
-        if (error) throw error;
+      // Load videos
+      async function loadVideos(subject = null) {
+        container.innerHTML = '<p class="loading">Loading video lessons...</p>';
 
-        loadingText.remove();
+        try {
+          let query = window.supabase
+            .from('video_lessons')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-        if (data.length === 0) {
-          container.innerHTML = '<p>No video lessons available yet. Subscribe to unlock premium content!</p>';
-          return;
+          if (subject) {
+            query = query.ilike('subject', `%${subject}%`);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+
+          container.innerHTML = '';
+
+          if (data.length === 0) {
+            container.innerHTML = `<p>No video lessons found${subject ? ` for ${subject}` : ''} yet. Subscribe to unlock premium content!</p>`;
+            return;
+          }
+
+          data.forEach(lesson => {
+            const card = document.createElement('div');
+            card.className = 'card video-card';
+            card.innerHTML = `
+              <div class="video-container">
+                <iframe 
+                  src="https://www.youtube.com/embed/${lesson.youtube_id}" 
+                  title="${lesson.title}" 
+                  frameborder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowfullscreen>
+                </iframe>
+              </div>
+              <div class="video-info">
+                <h3>${lesson.title}</h3>
+                <p>${lesson.subject} • ${lesson.form}</p>
+                <p>Duration: ${lesson.duration} min</p>
+                ${lesson.description ? `<p class="desc">${lesson.description}</p>` : ''}
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        } catch (err) {
+          console.error('Error loading videos:', err);
+          container.innerHTML = '<p>Failed to load video lessons. Please try again later.</p>';
         }
-
-        data.forEach(lesson => {
-          const card = document.createElement('div');
-          card.className = 'card video-card';
-          card.innerHTML = `
-            <div class="video-container">
-              <iframe 
-                src="https://www.youtube.com/embed/${lesson.youtube_id}" 
-                title="${lesson.title}" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-              </iframe>
-            </div>
-            <div class="video-info">
-              <h3>${lesson.title}</h3>
-              <p>${lesson.subject} • ${lesson.form}</p>
-              <p>Duration: ${lesson.duration} min</p>
-              <p>${lesson.description || ''}</p>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error('Error loading video lessons:', err);
-        loadingText.textContent = 'Failed to load video lessons. Please try again later.';
       }
-    }
 
-    // Run when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      loadVideoLessons();
+      // Initial load
+      loadVideos(currentSubject);
+
+      // Sidebar click handler (filter without reload)
+      subjectLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const subject = link.dataset.subject;
+          currentSubject = subject;
+
+          // Update active class
+          subjectLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+
+          // Update URL without reload
+          const newUrl = new URL(window.location);
+          if (subject) {
+            newUrl.searchParams.set('subject', subject.toLowerCase());
+          } else {
+            newUrl.searchParams.delete('subject');
+          }
+          window.history.pushState({}, '', newUrl);
+
+          loadVideos(subject);
+        });
+      });
     });
   </script>
 </body>
