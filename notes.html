@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
-  
-  <!-- CORRECTED: Full Supabase CDN URL -->
-  <script src="https://unpkg.com"></script>
 </head>
 <body>
 
@@ -92,42 +89,41 @@
     </div>
   </footer>
 
-  <!-- Load script.js which initializes window.supabase -->
+  <!-- Load shared script first -->
   <script src="script.js"></script>
 
+  <!-- Page-specific logic – waits safely for supabase -->
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Retry logic if script.js takes a moment
-      if (!window.supabase) {
-        console.warn('Supabase not immediately ready, waiting 150ms...');
-        await new Promise(r => setTimeout(r, 150));
-      }
-
-      if (!window.supabase) {
-        console.error('Supabase not loaded from script.js');
-        document.getElementById('notes-container').innerHTML = '<p>Error: Supabase client not available. Please refresh.</p>';
-        return;
-      }
-
+    // Wait for the page to fully load (including script.js)
+    window.addEventListener('load', function() {
       const container = document.getElementById('notes-container');
-      const subjectLinks = document.querySelectorAll('#subject-list a');
 
-      const urlParams = new URLSearchParams(window.location.search);
-      let currentSubject = urlParams.get('subject') || 'Physics';
+      // Safety check with short retry
+      function tryLoadNotes(attempt = 1) {
+        if (window.supabase) {
+          console.log('Supabase ready – loading notes (attempt ' + attempt + ')');
+          loadRevisionNotes();
+          return;
+        }
 
-      // Load initial state
-      subjectLinks.forEach(link => {
-        link.classList.toggle('active', link.dataset.subject.toLowerCase() === currentSubject.toLowerCase());
-      });
+        if (attempt >= 5) {
+          console.error('Supabase still not available after retries');
+          container.innerHTML = '<p style="color:red;">Error: Failed to connect to database. Please refresh or check your connection.</p>';
+          return;
+        }
 
-      async function loadNotes(subject) {
-        container.innerHTML = '<p class="loading">Loading Revision Notes...</p>';
+        console.warn('Supabase not ready yet – retrying in 300ms (attempt ' + attempt + ')');
+        setTimeout(() => tryLoadNotes(attempt + 1), 300);
+      }
+
+      // Fetch and render notes
+      async function loadRevisionNotes() {
+        container.innerHTML = '<p>Loading Revision Notes...</p>';
 
         try {
           const { data, error } = await window.supabase
             .from('revision_notes')
             .select('*')
-            .ilike('subject', `%${subject}%`) 
             .order('created_at', { ascending: false });
 
           if (error) throw error;
@@ -135,7 +131,7 @@
           container.innerHTML = '';
 
           if (!data || data.length === 0) {
-            container.innerHTML = `<p>No revision notes found for ${subject} yet.</p>`;
+            container.innerHTML = '<p>No revision notes available yet. Subscribe to unlock premium content!</p>';
             return;
           }
 
@@ -143,39 +139,24 @@
             const card = document.createElement('div');
             card.className = 'content-card';
             card.innerHTML = `
-              <h3>${note.title}</h3>
-              <p class="note-meta">${note.subject} • ${note.form}</p>
+              <h3>${note.title || 'Untitled Note'}</h3>
+              <p class="note-meta">${note.subject || '?'} • ${note.form || '?'}</p>
               <div class="note-body">
-                ${note.body ? note.body.substring(0, 300) + (note.body.length > 300 ? '...' : '') : 'No preview available'}
+                ${note.body ? note.body.substring(0, 400) + (note.body.length > 400 ? '...' : '') : 'No preview available'}
               </div>
-              <a href="#" class="btn small premium-btn">Read Full Note</a>
+              ${note.pdf_url ? `<a href="${note.pdf_url}" target="_blank" class="btn small">Download PDF</a>` : ''}
+              <a href="#" class="btn small premium-btn">Read Full Note (Premium)</a>
             `;
             container.appendChild(card);
           });
         } catch (err) {
-          console.error('Error loading notes:', err);
-          container.innerHTML = '<p>Failed to load revision notes. Check your internet or Supabase RLS policies.</p>';
+          console.error('Error loading revision notes:', err.message || err);
+          container.innerHTML = '<p style="color:red;">Failed to load notes: ' + (err.message || 'Unknown error') + '</p>';
         }
       }
 
-      loadNotes(currentSubject);
-
-      subjectLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const subject = link.dataset.subject;
-          currentSubject = subject;
-
-          subjectLinks.forEach(l => l.classList.remove('active'));
-          link.classList.add('active');
-
-          const newUrl = new URL(window.location);
-          newUrl.searchParams.set('subject', subject.toLowerCase());
-          window.history.pushState({}, '', newUrl);
-
-          loadNotes(subject);
-        });
-      });
+      // Start trying to load
+      tryLoadNotes();
     });
   </script>
 </body>

@@ -1,4 +1,4 @@
-// script.js - Studyme Platform JavaScript (Updated & Enhanced)
+// script.js - Studyme Platform JavaScript (Updated & Fixed)
 // Shared across all pages - Admin + Frontend
 
 // ==================== Safe Supabase Initialization ====================
@@ -13,17 +13,19 @@ function initSupabase() {
   if (typeof supabase !== 'undefined') {
     if (!window.supabase) {
       window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase client initialized (shared script.js)');
+      console.log('Supabase client initialized globally (shared script.js)');
+    } else {
+      console.log('Supabase already initialized - reusing');
     }
   } else {
-    console.error('Supabase library (CDN) not detected. Please ensure the script tag is in your HTML.');
+    console.warn('Supabase library (CDN) not yet detected. Retrying soon...');
   }
 }
 
 // Run immediately
 initSupabase();
 
-// ==================== Auth Functions (unchanged) ====================
+// ==================== Auth Functions ====================
 async function loginWithGoogle() {
   try {
     if (!window.supabase) throw new Error('Supabase client not initialized');
@@ -53,8 +55,10 @@ async function logout() {
   }
 }
 
+// Update UI based on auth state
 async function updateAuthUI() {
   if (!window.supabase) return;
+
   const { data: { user } } = await window.supabase.auth.getUser();
 
   const loginBtns = document.querySelectorAll('.login-btn');
@@ -120,21 +124,29 @@ async function fetchVideoLessons(filters = {}) {
   }
 }
 
-// ==================== Quiz & Dark Mode Logic (unchanged) ====================
+// ==================== Quiz Functionality ====================
 function initQuizzes() {
   document.querySelectorAll('.quiz').forEach(quiz => {
     const submitBtn = quiz.querySelector('.quiz-submit');
     const resultEl = quiz.querySelector('.quiz-result');
+
     if (!submitBtn || !resultEl) return;
 
     submitBtn.addEventListener('click', () => {
-      let score = 0, total = 0;
+      let score = 0;
+      let total = 0;
+
       quiz.querySelectorAll('.question').forEach(question => {
         const radios = question.querySelectorAll('input[type="radio"]');
         const correctValue = question.dataset.correct;
         let selectedValue = null;
-        radios.forEach(radio => { if (radio.checked) selectedValue = radio.value; });
+
+        radios.forEach(radio => {
+          if (radio.checked) selectedValue = radio.value;
+        });
+
         total++;
+
         if (selectedValue === correctValue) {
           score++;
           question.classList.add('correct');
@@ -142,24 +154,37 @@ function initQuizzes() {
         } else if (selectedValue !== null) {
           question.classList.add('wrong');
           question.classList.remove('correct');
+        } else {
+          question.classList.remove('correct', 'wrong');
         }
       });
+
       const percentage = Math.round((score / total) * 100);
-      resultEl.innerHTML = `<strong>${score}/${total} correct (${percentage}%)</strong>`;
+      resultEl.innerHTML = `
+        <strong>${score}/${total} correct (${percentage}%)</strong><br>
+        ${percentage >= 80 ? 'Excellent! Keep it up!' : percentage >= 50 ? 'Good effort – review and try again.' : 'More practice needed – you’ve got this!'}
+      `;
       resultEl.classList.add('visible');
+      resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
 }
 
+// ==================== Dark Mode Toggle ====================
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
   const isDark = document.body.classList.contains('dark-mode');
   localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
 }
 
+if (localStorage.getItem('darkMode') === 'enabled' ||
+    (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.body.classList.add('dark-mode');
+}
+
 // ==================== Initialize on page load ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  // Re-attempt init if it failed initially due to CDN lag
+  // Re-attempt init if CDN was delayed
   initSupabase();
 
   if (window.supabase) {
@@ -169,6 +194,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.supabase.auth.onAuthStateChange(async () => {
       await updateAuthUI();
     });
+  } else {
+    console.warn('Supabase not available after DOMContentLoaded - some features may not work');
   }
 
   // Click listener for buttons
@@ -180,6 +207,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.target.matches('#logout-btn')) {
       e.preventDefault();
       logout();
+    }
+    if (e.target.matches('#dark-mode-toggle')) {
+      toggleDarkMode();
     }
   });
 
