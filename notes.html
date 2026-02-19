@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
-  
-  <!-- Supabase CDN - must be here BEFORE script.js -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- Ensure library is in the HEAD -->
+  <script src="https://unpkg.com"></script>
 </head>
 <body>
 
@@ -17,43 +16,23 @@
         <h1>Studyme</h1>
         <span>Digital Learning Platform</span>
       </div>
-
       <div class="search-bar">
-        <input type="search" placeholder="Search notes, videos, tests..." aria-label="Search">
-        <button type="submit" aria-label="Search">Search</button>
+        <input type="search" placeholder="Search notes, videos, tests...">
+        <button type="submit">Search</button>
       </div>
-
       <nav>
-        <input type="checkbox" id="nav-toggle" class="nav-toggle">
-        <label for="nav-toggle" class="hamburger">☰</label>
-
         <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
-          <li><a href="subjects.html">Subjects</a></li>
           <li><a href="notes.html">Revision Notes</a></li>
-          <li><a href="videos.html">Video Lessons</a></li>
-          <li><a href="tests.html">Tests & Quizzes</a></li>
-          <li><a href="dashboard.html">My Dashboard</a></li>
-          <li><a href="community.html">Community</a></li>
-          <li><a href="classes.html">Live Classes</a></li>
-          <li><a href="subscriptions.html">Subscribe</a></li>
           <li><a href="#" class="login-btn">Log In</a></li>
+          <li><a href="#" class="logout-btn">Log Out</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="page-hero">
-      <div class="page-hero-content">
-        <h1>Revision Notes</h1>
-        <p>Comprehensive, curriculum-aligned revision notes for Physics, Chemistry, Biology, and Mathematics (Form 1–4 / Grade 7–12). Clear explanations, diagrams, key formulas, and KCSE-focused summaries — perfect for quick review and deep understanding.</p>
-        <p class="hero-meta">Downloadable PDFs • Interactive highlights • Premium access unlocks full library</p>
-      </div>
-    </section>
-
     <div class="notes-layout">
-      <!-- Sidebar -->
       <aside class="notes-sidebar">
         <h3>Subjects</h3>
         <ul class="subject-list" id="subject-list">
@@ -62,128 +41,73 @@
           <li><a href="#" data-subject="Biology">Biology</a></li>
           <li><a href="#" data-subject="Mathematics">Mathematics</a></li>
         </ul>
-
-        <h3>Forms / Grades</h3>
-        <ul class="form-list">
-          <li><a href="#" class="active">Form 1</a></li>
-          <li><a href="#">Form 2</a></li>
-          <li><a href="#">Form 3</a></li>
-          <li><a href="#">Form 4</a></li>
-        </ul>
-
-        <div class="premium-promo">
-          <h4>Unlock Full Notes</h4>
-          <p>Download PDFs, access all forms, and get printable versions with subscription.</p>
-          <a href="subscriptions.html" class="btn small">Subscribe Now</a>
-        </div>
       </aside>
 
-      <!-- Dynamic notes -->
       <section class="notes-content" id="notes-container">
         <h2>Loading Revision Notes...</h2>
       </section>
     </div>
   </main>
 
-  <footer>
-    <p>© 2026 Studyme. All rights reserved.</p>
-    <div class="footer-links">
-      <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a> • <a href="community.html">Contact Us</a>
-    </div>
-  </footer>
-
-  <!-- Load shared script -->
   <script src="script.js"></script>
 
-  <!-- Page-specific logic -->
   <script>
-    // Wait for full page load (including script.js)
-    window.addEventListener('load', function() {
+    document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('notes-container');
-
-      // Safety retry mechanism
-      function tryLoadNotes(attempt = 1) {
-        if (window.supabase) {
-          console.log('Supabase is ready – loading notes (attempt ' + attempt + ')');
-          loadRevisionNotes();
-          return;
-        }
-
-        if (attempt >= 12) {
-          console.error('Supabase failed to initialize after 12 attempts');
-          container.innerHTML = '<p style="color:red; font-weight:bold;">Database connection failed. Please refresh or check your browser console.</p>';
-          return;
-        }
-
-        console.warn('Supabase not ready yet – retrying in 500ms (attempt ' + attempt + ')');
-        setTimeout(() => tryLoadNotes(attempt + 1), 500);
+      
+      // FIX: Wait for window.supabase to be fully initialized by script.js
+      let attempts = 0;
+      while ((!window.supabase || !window.supabase.from) && attempts < 10) {
+        await new Promise(r => setTimeout(r, 200));
+        attempts++;
       }
 
-      // Load notes with subject filter
-      async function loadRevisionNotes() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const subject = urlParams.get('subject') || 'Physics';
+      if (!window.supabase || !window.supabase.from) {
+        container.innerHTML = '<p style="color:red">Failed to connect to backend. Please refresh.</p>';
+        return;
+      }
 
-        container.innerHTML = '<p class="loading">Loading Revision Notes for ' + subject + '...</p>';
+      const subjectLinks = document.querySelectorAll('#subject-list a');
+      const urlParams = new URLSearchParams(window.location.search);
+      let currentSubject = urlParams.get('subject') || 'Physics';
 
+      async function loadNotes(subject) {
+        container.innerHTML = '<p>Loading...</p>';
         try {
-          let query = window.supabase
+          const { data, error } = await window.supabase
             .from('revision_notes')
             .select('*')
+            .ilike('subject', `%${subject}%`)
             .order('created_at', { ascending: false });
-
-          if (subject && subject !== 'all') {
-            query = query.ilike('subject', `%${subject}%`);
-          }
-
-          const { data, error } = await query;
 
           if (error) throw error;
 
-          container.innerHTML = '';
-
-          if (!data || data.length === 0) {
-            container.innerHTML = '<p>No revision notes found for ' + subject + ' yet. Subscribe to unlock premium content!</p>';
-            return;
-          }
-
+          container.innerHTML = data.length ? '' : `<p>No notes found for ${subject}.</p>`;
           data.forEach(note => {
             const card = document.createElement('div');
             card.className = 'content-card';
             card.innerHTML = `
-              <h3>${note.title || 'Untitled Note'}</h3>
-              <p class="note-meta">${note.subject || '?'} • ${note.form || '?'}</p>
-              <div class="note-body">
-                ${note.body ? note.body.substring(0, 400) + (note.body.length > 400 ? '...' : '') : 'No preview available'}
-              </div>
-              ${note.pdf_url ? `<a href="${note.pdf_url}" target="_blank" class="btn small">Download PDF</a>` : ''}
-              <a href="#" class="btn small premium-btn">Read Full Note (Premium)</a>
+              <h3>${note.title}</h3>
+              <p>${note.subject} • ${note.form}</p>
+              <div class="note-body">${note.body ? note.body.substring(0, 200) + '...' : ''}</div>
+              <a href="#" class="btn small">Read Full Note</a>
             `;
             container.appendChild(card);
           });
         } catch (err) {
-          console.error('Error loading revision notes:', err.message || err);
-          container.innerHTML = '<p style="color:red;">Failed to load notes: ' + (err.message || 'Unknown error') + '<br>Check console for details.</p>';
+          container.innerHTML = '<p>Error loading notes. Check RLS policies.</p>';
         }
       }
 
-      // Start loading process
-      tryLoadNotes();
+      loadNotes(currentSubject);
 
-      // Sidebar filter clicks
-      const subjectLinks = document.querySelectorAll('#subject-list a');
       subjectLinks.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
           const subject = link.dataset.subject;
           subjectLinks.forEach(l => l.classList.remove('active'));
           link.classList.add('active');
-
-          const newUrl = new URL(window.location);
-          newUrl.searchParams.set('subject', subject.toLowerCase());
-          window.history.pushState({}, '', newUrl);
-
-          loadRevisionNotes();
+          loadNotes(subject);
         });
       });
     });
