@@ -3,250 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Studyme - Learn Without Limits</title>
+  <title>Studyme - Digital Learning Platform for High School</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Google Fonts (similar to Coursera feel) -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --primary: #1a73e8;
-      --primary-dark: #0d5bd9;
-      --green: #34a853;
-      --dark: #202124;
-      --gray: #5f6368;
-      --light: #f8f9fa;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      color: var(--dark);
-      background: var(--light);
-      line-height: 1.6;
-    }
-
-    header {
-      background: white;
-      box-shadow: 0 1px 6px rgba(32,33,36,0.28);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      padding: 0.8rem 2rem;
-    }
-
-    .top-nav {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 2.5rem;
-    }
-
-    .nav-left a {
-      color: var(--dark);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 1.05rem;
-    }
-
-    .nav-left a:hover {
-      color: var(--primary);
-    }
-
-    .auth-buttons {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .btn {
-      padding: 0.6rem 1.4rem;
-      border-radius: 999px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.2s;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .btn-outline {
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      background: white;
-    }
-
-    .btn-outline:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-solid {
-      background: var(--primary);
-      color: white;
-      border: none;
-    }
-
-    .btn-solid:hover {
-      background: var(--primary-dark);
-    }
-
-    .admin-btn {
-      background: #fbbc05;
-      color: #202124;
-    }
-
-    .admin-btn:hover {
-      background: #f4b400;
-    }
-
-    .hamburger {
-      display: none;
-      font-size: 1.8rem;
-      background: none;
-      border: none;
-      color: var(--dark);
-      cursor: pointer;
-    }
-
-    /* Hero */
-    .hero {
-      background: linear-gradient(135deg, #4285f4 0%, #0d47a1 100%);
-      color: white;
-      padding: 7rem 2rem 5rem;
-      text-align: center;
-    }
-
-    .hero h1 {
-      font-family: 'Poppins', sans-serif;
-      font-size: 3.2rem;
-      margin-bottom: 1.2rem;
-      line-height: 1.1;
-    }
-
-    .hero p {
-      font-size: 1.35rem;
-      max-width: 720px;
-      margin: 0 auto 2.5rem;
-      opacity: 0.95;
-    }
-
-    .search-hero {
-      max-width: 680px;
-      margin: 0 auto 2.5rem;
-    }
-
-    .search-hero input {
-      width: 100%;
-      padding: 1rem 1.5rem;
-      font-size: 1.15rem;
-      border: none;
-      border-radius: 999px 0 0 999px;
-    }
-
-    .search-hero button {
-      padding: 1rem 2rem;
-      background: var(--green);
-      color: white;
-      border: none;
-      border-radius: 0 999px 999px 0;
-      font-size: 1.15rem;
-      cursor: pointer;
-    }
-
-    .hero-ctas {
-      display: flex;
-      gap: 1.2rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 960px) {
-      .hero h1 { font-size: 2.6rem; }
-      .hero p { font-size: 1.2rem; }
-    }
-
-    @media (max-width: 768px) {
-      .hamburger { display: block; }
-      .nav-left { display: none; }
-      .nav-left.active {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        padding: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      }
-      .nav-left.active a {
-        padding: 1rem 0;
-        font-size: 1.2rem;
-      }
-      .auth-buttons {
-        margin-top: 1rem;
-      }
-    }
-  </style>
+  <!-- Stable Supabase CDN - same as videos.html, notes.html, admin.html -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
   <header>
-    <div class="top-nav">
-      <a href="index.html" class="logo">Studyme</a>
-
-      <button class="hamburger" aria-label="Toggle menu">☰</button>
-
-      <div class="nav-left">
-        <a href="subjects.html">Subjects</a>
-        <a href="notes.html">Notes</a>
-        <a href="videos.html">Videos</a>
-        <a href="tests.html">Tests</a>
-        <a href="classes.html">Live Classes</a>
-        <a href="community.html">Community</a>
+    <div class="header-container">
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
       </div>
 
-      <div class="auth-buttons">
-        <a href="dashboard.html" class="btn btn-outline">Student / Teacher Login</a>
-        <a href="admin.html" class="btn btn-solid admin-btn">Admin Login</a>
+      <div class="search-bar">
+        <input type="search" placeholder="Search subjects, notes, videos, or tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
       </div>
+
+      <nav>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="hamburger">☰</label>
+
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
+          <li><a href="admin.html">Admin Panel</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
+        </ul>
+      </nav>
     </div>
   </header>
 
   <main>
     <section class="hero">
       <div class="hero-content">
-        <h1>Learn without limits</h1>
-        <p>Master KCSE subjects with expert-led video lessons, revision notes, interactive tests, live weekend classes, and more — all aligned to the Kenyan curriculum (Form 1–4 / Grade 7–12).</p>
-
-        <div class="search-hero">
-          <input type="search" placeholder="What do you want to learn?">
-          <button>Search</button>
-        </div>
-
+        <h2>Transform Your High School Learning</h2>
+        <p>Master Physics, Chemistry, Biology, and Mathematics with expert-led resources aligned to the Kenyan curriculum (Form 1–4 / Grade 7–12). Access revision notes, video lessons, interactive tests, live weekend classes, and community support — all in one place.</p>
         <div class="hero-ctas">
-          <a href="subjects.html" class="btn btn-solid">Explore Subjects</a>
-          <a href="subscriptions.html" class="btn btn-outline">Start Free Trial</a>
+          <a href="subjects.html" class="btn primary large">Explore Subjects</a>
+          <a href="subscriptions.html" class="btn secondary large">Start Free Trial</a>
         </div>
       </div>
     </section>
@@ -259,7 +64,6 @@
       </div>
     </section>
 
-    <!-- Core Subjects -->
     <section class="featured-subjects">
       <h2 class="section-title">Core Subjects</h2>
       <div class="card-grid">
@@ -290,7 +94,6 @@
       </div>
     </section>
 
-    <!-- Rest of your content (about, why, testimonials, CTA) remains unchanged -->
     <section class="about">
       <h2 class="section-title">About Studyme</h2>
       <p>Studyme is dedicated to making high-quality, curriculum-aligned education accessible to every high school student in Kenya. We partner with experienced educators to deliver engaging notes, videos, tests, live sessions, and community tools — empowering learners to excel in KCSE and beyond.</p>
@@ -356,74 +159,51 @@
 
   <script src="script.js"></script>
 
-  <!-- Featured videos loading (your original logic) -->
+  <!-- Featured videos loading - fixed to use window.supabaseClient -->
   <script>
     window.addEventListener('load', async function () {
-      if (!window.supabaseClient) {
-        console.error('Supabase client not available');
-        document.getElementById('featured-videos-container').innerHTML = '<p style="color:red;">Database connection failed.</p>';
-        return;
-      }
-
       const container = document.getElementById('featured-videos-container');
       const loadingText = document.getElementById('videos-loading');
 
-      async function loadFeaturedVideos() {
-        try {
-          const { data, error } = await window.supabaseClient
-            .from('video_lessons')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(4);
-
-          if (error) throw error;
-
-          loadingText.remove();
-
-          if (data.length === 0) {
-            container.innerHTML = '<p>No featured videos yet.</p>';
-            return;
-          }
-
-          data.forEach(lesson => {
-            const card = document.createElement('div');
-            card.className = 'card featured-video-card';
-            card.innerHTML = `
-              <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
-              <h3>${lesson.title}</h3>
-              <p>${lesson.subject} • ${lesson.form}</p>
-              <p>${lesson.duration} min</p>
-            `;
-            container.appendChild(card);
-          });
-        } catch (err) {
-          console.error('Error loading featured videos:', err);
-          loadingText.textContent = 'Failed to load videos.';
-        }
+      if (!window.supabaseClient) {
+        console.error('Supabase client not available');
+        container.innerHTML = '<p style="color:red;">Database connection failed. Please refresh.</p>';
+        return;
       }
 
-      loadFeaturedVideos();
-    });
-  </script>
+      console.log('Supabase client ready - loading featured videos');
 
-  <!-- Hamburger toggle (mobile only) -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const hamburger = document.querySelector('.hamburger');
-      const navLeft = document.querySelector('.nav-left');
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('video_lessons')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(4);  // Show only 4 featured videos
 
-      hamburger.addEventListener('click', () => {
-        navLeft.classList.toggle('active');
-        hamburger.textContent = navLeft.classList.contains('active') ? '✕' : '☰';
-      });
+        if (error) throw error;
 
-      // Close when clicking outside on mobile
-      document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 900 && !e.target.closest('nav') && navLeft.classList.contains('active')) {
-          navLeft.classList.remove('active');
-          hamburger.textContent = '☰';
+        loadingText.remove();
+
+        if (data.length === 0) {
+          container.innerHTML = '<p>No featured videos yet.</p>';
+          return;
         }
-      });
+
+        data.forEach(lesson => {
+          const card = document.createElement('div');
+          card.className = 'card featured-video-card';
+          card.innerHTML = `
+            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
+            <h3>${lesson.title}</h3>
+            <p>${lesson.subject} • ${lesson.form}</p>
+            <p>${lesson.duration} min</p>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error loading featured videos:', err);
+        loadingText.textContent = 'Failed to load videos. Please try again later.';
+      }
     });
   </script>
 </body>
