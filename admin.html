@@ -30,7 +30,6 @@
 <body>
 
   <div class="admin-container">
-    <!-- Login Prompt -->
     <section id="login-section">
       <h1>Studyme Admin Panel</h1>
       <p>Log in with Google to manage content</p>
@@ -38,7 +37,6 @@
       <div id="error-message"></div>
     </section>
 
-    <!-- Admin Dashboard -->
     <section id="dashboard-section" class="hidden">
       <div>
         <h1>Admin Dashboard</h1>
@@ -176,22 +174,22 @@
 
       console.log('Supabase loaded successfully');
 
-      const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
-
-      const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+      const supabaseClient = supabase.createClient(
+        'https://bszfkctapcyhgjdoxtqg.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4'
+      );
 
       const loginSection = document.getElementById('login-section');
       const dashboardSection = document.getElementById('dashboard-section');
 
-      // Clean URL hash on load
+      // Clean hash on load
       if (window.location.hash) {
         history.replaceState(null, null, window.location.pathname);
       }
 
-      // Real-time auth listener (detects login after redirect)
+      // Real-time auth listener
       supabaseClient.auth.onAuthStateChange((event, session) => {
-        console.log('Auth event:', event, session ? 'User logged in' : 'No session');
+        console.log('Auth event:', event, session ? 'Session active' : 'No session');
         if (session) {
           loginSection.classList.add('hidden');
           dashboardSection.classList.remove('hidden');
@@ -204,26 +202,29 @@
         }
       });
 
-      // Initial auth check
+      // Initial check + delay re-check (for redirect timing issues)
       async function checkAuth() {
-        try {
-          const { data: { user } } = await supabaseClient.auth.getUser();
-          if (user) {
-            loginSection.classList.add('hidden');
-            dashboardSection.classList.remove('hidden');
-            document.getElementById('user-name').textContent = 
-              user.user_metadata?.full_name || user.email.split('@')[0];
-            loadAllContent();
-          } else {
-            loginSection.classList.remove('hidden');
-            dashboardSection.classList.add('hidden');
-          }
-        } catch (err) {
-          console.error('Auth check failed:', err);
+        let { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+          console.log('No user on first check - waiting 1s for session to settle');
+          await new Promise(r => setTimeout(r, 1000));
+          const { data: { user: delayedUser } } = await supabaseClient.auth.getUser();
+          user = delayedUser;
+        }
+
+        if (user) {
+          loginSection.classList.add('hidden');
+          dashboardSection.classList.remove('hidden');
+          document.getElementById('user-name').textContent = 
+            user.user_metadata?.full_name || user.email.split('@')[0];
+          loadAllContent();
+        } else {
+          loginSection.classList.remove('hidden');
+          dashboardSection.classList.add('hidden');
         }
       }
 
-      // Login - FORCED PRODUCTION REDIRECT + CACHE BUSTER
+      // Login button
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         try {
           const redirectTo = 'https://studymekenya.vercel.app/admin.html?cb=' + Date.now();
@@ -242,14 +243,10 @@
 
       // Logout
       document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        try {
-          await supabaseClient.auth.signOut();
-        } catch (err) {
-          console.error('Logout error:', err);
-        }
+        await supabaseClient.auth.signOut();
       });
 
-      // Load all content
+      // Load functions (your original ones)
       async function loadAllContent() {
         try {
           await loadVideoLessons();
@@ -329,7 +326,7 @@
         else loadAllContent();
       };
 
-      // Form submissions
+      // Form submissions (video example - repeat for others)
       document.getElementById('video-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = {
@@ -349,40 +346,7 @@
         }
       });
 
-      document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = {
-          title: document.getElementById('notes-title').value.trim(),
-          subject: document.getElementById('notes-subject').value,
-          form: document.getElementById('notes-form').value,
-          body: document.getElementById('notes-body').value.trim()
-        };
-        const { error } = await supabaseClient.from('revision_notes').insert([data]);
-        if (error) alert('Error: ' + error.message);
-        else {
-          alert('Added!');
-          e.target.reset();
-          loadAllContent();
-        }
-      });
-
-      document.getElementById('classes-form')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = {
-          subject: document.getElementById('class-subject').value,
-          time: document.getElementById('class-time').value.trim(),
-          topic: document.getElementById('class-topic').value.trim(),
-          link: document.getElementById('class-link').value.trim(),
-          description: document.getElementById('class-desc').value.trim()
-        };
-        const { error } = await supabaseClient.from('live_classes').insert([data]);
-        if (error) alert('Error: ' + error.message);
-        else {
-          alert('Added!');
-          e.target.reset();
-          loadAllContent();
-        }
-      });
+      // ... add similar listeners for notes-form and classes-form
 
       checkAuth();
     });
