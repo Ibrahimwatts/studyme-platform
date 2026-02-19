@@ -13,12 +13,12 @@ function initSupabase() {
   if (typeof supabase !== 'undefined') {
     if (!window.supabase) {
       window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase client initialized globally (shared script.js)');
+      console.log('SUCCESS: Supabase client initialized globally (shared script.js)');
     } else {
       console.log('Supabase already initialized - reusing');
     }
   } else {
-    console.warn('Supabase library (CDN) not yet detected. Retrying soon...');
+    console.warn('Supabase library (CDN) not yet detected. Make sure <script src="https://unpkg.com/@supabase/supabase-js@2"></script> is in <head>');
   }
 }
 
