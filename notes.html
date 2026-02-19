@@ -5,105 +5,141 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- 1. CRITICAL: Load library in HEAD so it's ready before ANY other script -->
-  <script src="https://unpkg.com"></script>
+  
+  <!-- Supabase CDN - MUST be here before script.js -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
   <header>
     <div class="header-container">
-      <div class="logo"><h1>Studyme</h1><span>Digital Learning Platform</span></div>
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" placeholder="Search notes, videos, tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
+      </div>
+
       <nav>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="hamburger">☰</label>
+
         <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
           <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
           <li><a href="#" class="login-btn">Log In</a></li>
-          <li><a href="#" class="logout-btn">Log Out</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <main class="notes-layout">
-    <aside class="notes-sidebar">
-      <h3>Subjects</h3>
-      <ul class="subject-list" id="subject-list">
-        <li><a href="#" data-subject="Physics" class="active">Physics</a></li>
-        <li><a href="#" data-subject="Chemistry">Chemistry</a></li>
-        <li><a href="#" data-subject="Biology">Biology</a></li>
-        <li><a href="#" data-subject="Mathematics">Mathematics</a></li>
-      </ul>
-    </aside>
-    <section class="notes-content" id="notes-container">
-      <h2>Loading Revision Notes...</h2>
+  <main>
+    <section class="page-hero">
+      <div class="page-hero-content">
+        <h1>Revision Notes</h1>
+        <p>Comprehensive, curriculum-aligned revision notes for Physics, Chemistry, Biology, and Mathematics (Form 1–4 / Grade 7–12). Clear explanations, diagrams, key formulas, and KCSE-focused summaries — perfect for quick review and deep understanding.</p>
+        <p class="hero-meta">Downloadable PDFs • Interactive highlights • Premium access unlocks full library</p>
+      </div>
     </section>
+
+    <div class="notes-layout">
+      <aside class="notes-sidebar">
+        <h3>Subjects</h3>
+        <ul class="subject-list" id="subject-list">
+          <li><a href="#" data-subject="Physics" class="active">Physics</a></li>
+          <li><a href="#" data-subject="Chemistry">Chemistry</a></li>
+          <li><a href="#" data-subject="Biology">Biology</a></li>
+          <li><a href="#" data-subject="Mathematics">Mathematics</a></li>
+        </ul>
+
+        <h3>Forms / Grades</h3>
+        <ul class="form-list">
+          <li><a href="#" class="active">Form 1</a></li>
+          <li><a href="#">Form 2</a></li>
+          <li><a href="#">Form 3</a></li>
+          <li><a href="#">Form 4</a></li>
+        </ul>
+
+        <div class="premium-promo">
+          <h4>Unlock Full Notes</h4>
+          <p>Download PDFs, access all forms, and get printable versions with subscription.</p>
+          <a href="subscriptions.html" class="btn small">Subscribe Now</a>
+        </div>
+      </aside>
+
+      <section class="notes-content" id="notes-container">
+        <h2>Loading Revision Notes...</h2>
+      </section>
+    </div>
   </main>
 
-  <!-- 2. Load Shared Script -->
+  <footer>
+    <p>© 2026 Studyme. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a> • <a href="community.html">Contact Us</a>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 
-  <!-- 3. Page Logic with Retry Loop -->
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
+    window.addEventListener('load', async function () {
       const container = document.getElementById('notes-container');
-      
-      // WAIT LOOP: Prevents "supabase is not a function" error
-      let attempts = 0;
-      while ((!window.supabase || !window.supabase.from) && attempts < 20) {
-        console.log("Waiting for Supabase client...");
-        await new Promise(r => setTimeout(r, 200));
-        attempts++;
-      }
 
-      if (!window.supabase || !window.supabase.from) {
-        container.innerHTML = '<p style="color:red; font-weight:bold;">Failed to connect to backend. Please refresh the page.</p>';
+      if (!window.supabase) {
+        console.error('Supabase client not available after load');
+        container.innerHTML = '<p style="color:red;">Database connection failed. Please refresh the page.</p>';
         return;
       }
 
-      const subjectLinks = document.querySelectorAll('#subject-list a');
-      const urlParams = new URLSearchParams(window.location.search);
-      let currentSubject = urlParams.get('subject') || 'Physics';
+      console.log('Supabase ready - loading notes');
 
-      async function loadNotes(subject) {
-        container.innerHTML = '<p>Fetching data...</p>';
+      async function loadRevisionNotes() {
+        container.innerHTML = '<p>Loading Revision Notes...</p>';
+
         try {
           const { data, error } = await window.supabase
             .from('revision_notes')
             .select('*')
-            .ilike('subject', `%${subject}%`)
             .order('created_at', { ascending: false });
 
           if (error) throw error;
 
-          container.innerHTML = data.length ? '' : `<p>No notes found for ${subject}.</p>`;
+          container.innerHTML = '';
+
+          if (!data || data.length === 0) {
+            container.innerHTML = '<p>No revision notes available yet.</p>';
+            return;
+          }
+
           data.forEach(note => {
             const card = document.createElement('div');
             card.className = 'content-card';
             card.innerHTML = `
-              <h3>${note.title}</h3>
+              <h3>${note.title || 'Untitled'}</h3>
               <p>${note.subject} • ${note.form}</p>
-              <div class="note-body">${note.body ? note.body.substring(0, 200) + '...' : ''}</div>
-              <a href="#" class="btn small">Read Full Note</a>
+              <p>${note.body ? note.body.substring(0, 300) + '...' : ''}</p>
+              ${note.pdf_url ? `<a href="${note.pdf_url}" target="_blank">Download PDF</a>` : ''}
             `;
             container.appendChild(card);
           });
         } catch (err) {
-          console.error("Fetch error:", err);
-          container.innerHTML = '<p>Error loading content. Please check your database connection.</p>';
+          console.error('Load error:', err);
+          container.innerHTML = '<p style="color:red;">Failed to load notes. Please check console.</p>';
         }
       }
 
-      loadNotes(currentSubject);
-
-      subjectLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const subject = link.dataset.subject;
-          subjectLinks.forEach(l => l.classList.remove('active'));
-          link.classList.add('active');
-          loadNotes(subject);
-        });
-      });
+      loadRevisionNotes();
     });
   </script>
 </body>
