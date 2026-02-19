@@ -189,48 +189,26 @@
         history.replaceState(null, null, window.location.pathname);
       }
 
-      // Real-time auth listener — this should catch SIGNED_IN after redirect
+      // Real-time auth listener – this is the key fix
       supabaseClient.auth.onAuthStateChange((event, session) => {
-        console.log('Auth event:', event, session ? 'Session exists' : 'No session');
+        console.log('Auth event:', event, session);
 
         if (session && session.user) {
-          // Show dashboard, hide login
+          // Show Dashboard, Hide Login
           loginSection.classList.add('hidden');
           dashboardSection.classList.remove('hidden');
           document.getElementById('user-name').textContent = 
             session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-
-          console.log('User logged in:', session.user.email);
+          
+          console.log('Dashboard should now be visible – user:', session.user.email);
           loadAllContent();
         } else {
-          // Show login, hide dashboard
+          // Show Login, Hide Dashboard
           loginSection.classList.remove('hidden');
           dashboardSection.classList.add('hidden');
-          console.log('No active session');
+          console.log('No active session – showing login');
         }
       });
-
-      // Initial auth check + small delay for redirect timing
-      async function checkAuth() {
-        let { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) {
-          console.log('No user on first check — waiting 1.5s for session');
-          await new Promise(r => setTimeout(r, 1500));
-          const { data: { user: delayedUser } } = await supabaseClient.auth.getUser();
-          user = delayedUser;
-        }
-
-        if (user) {
-          loginSection.classList.add('hidden');
-          dashboardSection.classList.remove('hidden');
-          document.getElementById('user-name').textContent = 
-            user.user_metadata?.full_name || user.email.split('@')[0];
-          loadAllContent();
-        } else {
-          loginSection.classList.remove('hidden');
-          dashboardSection.classList.add('hidden');
-        }
-      }
 
       // Login button with production redirect + cache buster
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
@@ -393,8 +371,16 @@
         }
       });
 
-      // Start auth check
-      checkAuth();
+      // Initial check (fallback)
+      supabaseClient.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          loginSection.classList.add('hidden');
+          dashboardSection.classList.remove('hidden');
+          document.getElementById('user-name').textContent = 
+            user.user_metadata?.full_name || user.email.split('@')[0];
+          loadAllContent();
+        }
+      });
     });
   </script>
 </body>
