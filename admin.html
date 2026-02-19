@@ -34,7 +34,7 @@
     .pdf-link { color: #0070f3; text-decoration: underline; font-size: 0.95rem; }
   </style>
 
-  <!-- Reliable Supabase CDN from jsDelivr (same as notes.html) -->
+  <!-- Reliable CDN - same as working notes.html -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -145,19 +145,18 @@
   <script src="script.js"></script>
 
   <script>
-    // Wait for full page load
-    window.addEventListener('load', function () {
+    window.addEventListener('load', async function () {
+      const loginSection = document.getElementById('login-section');
+      const dashboardSection = document.getElementById('dashboard-section');
+      const errorMessage = document.getElementById('error-message');
+
       if (!window.supabaseClient) {
-        document.getElementById('error-message').innerHTML = 'Supabase client not initialized. Refresh page.';
-        console.error('window.supabaseClient is missing');
+        errorMessage.textContent = 'Supabase client not initialized. Refresh page.';
         return;
       }
 
-      const loginSection = document.getElementById('login-section');
-      const dashboardSection = document.getElementById('dashboard-section');
-
       // Auth state listener
-      window.supabaseClient.auth.onAuthStateChange((event, session) => {
+      window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log("Auth Event:", event, session);
 
         if (session && session.user) {
@@ -166,10 +165,13 @@
           document.getElementById('user-name').textContent = 
             session.user.user_metadata?.full_name || session.user.email;
 
-          // Clear hash for clean URL
-          if (window.location.hash) {
+          // Clean URL after OAuth redirect
+          if (window.location.hash || window.location.search.includes('cb=')) {
             window.history.replaceState(null, null, window.location.pathname);
           }
+
+          // Refresh session to ensure authenticated context
+          await window.supabaseClient.auth.refreshSession();
 
           loadDashboardData();
         } else {
@@ -178,15 +180,12 @@
         }
       });
 
-      // Login button - with delay to prevent LockManager timeout
+      // Login with delay to avoid lock timeout
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         try {
-          // Small delay prevents "LockManager timed out" race condition
           await new Promise(r => setTimeout(r, 400));
 
-          const redirectTo = window.location.origin + '/admin.html?cb=' + Date.now();
-
-          console.log('Redirecting to:', redirectTo);
+          const redirectTo = window.location.origin + '/admin.html';
 
           const { error } = await window.supabaseClient.auth.signInWithOAuth({
             provider: 'google',
@@ -196,7 +195,7 @@
           if (error) throw error;
         } catch (err) {
           console.error('Login error:', err);
-          document.getElementById('error-message').textContent = 'Login failed: ' + (err.message || 'Unknown error');
+          errorMessage.textContent = 'Login failed: ' + (err.message || 'Unknown error');
         }
       });
 
@@ -210,17 +209,17 @@
       });
 
       // Initial session check
-      window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          loginSection.classList.add('hidden');
-          dashboardSection.classList.remove('hidden');
-          document.getElementById('user-name').textContent = 
-            session.user.user_metadata?.full_name || session.user.email;
-          loadDashboardData();
-        }
-      });
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        document.getElementById('user-name').textContent = 
+          session.user.user_metadata?.full_name || session.user.email;
+        await window.supabaseClient.auth.refreshSession();
+        loadDashboardData();
+      }
 
-      // Load dashboard data (your existing functions)
+      // Your existing load functions (unchanged except using window.supabaseClient)
       async function loadDashboardData() {
         console.log("Loading dashboard content...");
         try {
@@ -309,7 +308,7 @@
         }
       };
 
-      // Form submissions (unchanged except using window.supabaseClient)
+      // Form submissions (using window.supabaseClient)
       document.getElementById('video-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = {

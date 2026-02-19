@@ -1,9 +1,9 @@
-// script.js - Studyme Platform JavaScript (FINAL WORKING VERSION)
+// script.js - Studyme Platform JavaScript (UPDATED & STABLE VERSION)
 
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-// Force global Supabase initialization with full error logging
+// Global client reference
 let supabaseClient = null;
 
 function initializeSupabase() {
@@ -13,7 +13,7 @@ function initializeSupabase() {
   }
 
   if (typeof supabase === 'undefined') {
-    console.error('Supabase library not loaded from CDN. Ensure <script src="https://unpkg.com/@supabase/supabase-js@2"></script> is in <head>');
+    console.error('Supabase library not loaded from CDN. Ensure <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script> is in <head>');
     return null;
   }
 
@@ -38,27 +38,38 @@ async function loginWithGoogle() {
     alert('Database connection not ready. Please refresh.');
     return;
   }
+
   try {
+    // Critical: delay to prevent LockManager timeout error
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const redirectTo = window.location.origin + '/admin.html';
+
+    console.log('Login attempt - redirectTo:', redirectTo);
+
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/admin.html' }
+      options: { redirectTo }
     });
+
     if (error) throw error;
   } catch (err) {
-    console.error('Login error:', err.message);
-    alert('Login failed: ' + err.message);
+    console.error('Login error:', err.message || err);
+    alert('Login failed: ' + (err.message || 'Unknown error'));
   }
 }
 
 async function logout() {
   const client = initializeSupabase();
   if (!client) return;
+
   try {
     await client.auth.signOut();
     alert('Logged out successfully');
     updateAuthUI();
   } catch (err) {
     console.error('Logout error:', err.message);
+    alert('Logout failed: ' + (err.message || 'Unknown error'));
   }
 }
 
@@ -112,7 +123,7 @@ async function fetchRevisionNotes(subject = null) {
   }
 }
 
-// ... keep your other functions (initQuizzes, toggleDarkMode, etc.) unchanged ...
+// ... keep all your other functions unchanged (initQuizzes, toggleDarkMode, fetchVideoLessons, etc.) ...
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
