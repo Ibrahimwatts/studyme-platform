@@ -7,7 +7,167 @@
   <link rel="stylesheet" href="styles.css">
 
   <!-- Supabase JS client (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* Your original styles + small responsiveness fixes */
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    header {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      color: white;
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    .logo span {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .search-bar {
+      flex: 1;
+      max-width: 500px;
+      margin: 1rem 0;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: none;
+      border-radius: 50px 0 0 50px;
+      font-size: 1rem;
+    }
+
+    .search-bar button {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      border-radius: 0 50px 50px 0;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem;
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80');
+      background-size: cover;
+      color: white;
+      border-radius: 12px;
+    }
+
+    .featured-content, .featured-subjects, .about, .why, .testimonials, .cta-final {
+      margin: 4rem 0;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+    }
+
+    .subject-card {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .subject-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 1.8rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .btn.primary {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn.secondary {
+      background: #2196F3;
+      color: white;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Sidebar responsiveness - original vertical layout, stacks on small screens */
+    @media (max-width: 900px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .featured-subjects .card-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      header .header-container {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .search-bar {
+        width: 90%;
+        margin: 1rem auto;
+      }
+
+      .hero {
+        padding: 3rem 1rem;
+      }
+
+      .hero h2 {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -23,24 +183,7 @@
         <button type="submit" aria-label="Search">Search</button>
       </div>
 
-      <nav>
-        <input type="checkbox" id="nav-toggle" class="nav-toggle">
-        <label for="nav-toggle" class="hamburger">☰</label>
-
-        <ul class="nav-menu">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="subjects.html">Subjects</a></li>
-          <li><a href="notes.html">Revision Notes</a></li>
-          <li><a href="videos.html">Video Lessons</a></li>
-          <li><a href="tests.html">Tests & Quizzes</a></li>
-          <li><a href="dashboard.html">My Dashboard</a></li>
-          <li><a href="community.html">Community</a></li>
-          <li><a href="classes.html">Live Classes</a></li>
-          <li><a href="subscriptions.html">Subscribe</a></li>
-          <li><a href="admin.html">Admin Panel</a></li> <!-- ← NEW: Admin link added here -->
-          <li><a href="#" class="login-btn">Log In</a></li>
-        </ul>
-      </nav>
+      <!-- Removed hamburger - keeping original sidebar style -->
     </div>
   </header>
 
@@ -161,54 +304,50 @@
 
   <!-- Supabase dynamic loading script for index.html -->
   <script>
-    // Your Supabase keys
-    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+    window.addEventListener('load', async function () {
+      if (!window.supabaseClient) {
+        console.error('Supabase client not available');
+        document.getElementById('featured-videos-container').innerHTML = '<p style="color:red;">Database connection failed.</p>';
+        return;
+      }
 
-    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-
-    // Load featured video lessons on homepage
-    async function loadFeaturedVideos() {
       const container = document.getElementById('featured-videos-container');
       const loadingText = document.getElementById('videos-loading');
 
-      if (!container) return;
+      async function loadFeaturedVideos() {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('video_lessons')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(4);
 
-      try {
-        const { data, error } = await supabase
-          .from('video_lessons')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(4); // Show only 4 featured videos
+          if (error) throw error;
 
-        if (error) throw error;
+          loadingText.remove();
 
-        loadingText.remove();
+          if (data.length === 0) {
+            container.innerHTML = '<p>No featured videos yet.</p>';
+            return;
+          }
 
-        if (data.length === 0) {
-          container.innerHTML = '<p>No featured videos yet.</p>';
-          return;
+          data.forEach(lesson => {
+            const card = document.createElement('div');
+            card.className = 'card featured-video-card';
+            card.innerHTML = `
+              <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
+              <h3>${lesson.title}</h3>
+              <p>${lesson.subject} • ${lesson.form}</p>
+              <p>${lesson.duration} min</p>
+            `;
+            container.appendChild(card);
+          });
+        } catch (err) {
+          console.error('Error loading featured videos:', err);
+          loadingText.textContent = 'Failed to load videos.';
         }
-
-        data.forEach(lesson => {
-          const card = document.createElement('div');
-          card.className = 'card featured-video-card';
-          card.innerHTML = `
-            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
-            <h3>${lesson.title}</h3>
-            <p>${lesson.subject} • ${lesson.form}</p>
-            <p>${lesson.duration} min</p>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error('Error loading featured videos:', err);
-        loadingText.textContent = 'Failed to load videos.';
       }
-    }
 
-    // Run when page loads
-    document.addEventListener('DOMContentLoaded', () => {
       loadFeaturedVideos();
     });
   </script>
