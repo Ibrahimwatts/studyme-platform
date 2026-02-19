@@ -6,8 +6,8 @@
   <title>Live Classes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Supabase JS client (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Stable Supabase CDN - same as notes.html, videos.html, admin.html -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -97,61 +97,62 @@
 
   <script src="script.js"></script>
 
-  <!-- Supabase dynamic loading script -->
+  <!-- Page-specific logic – uses window.supabaseClient -->
   <script>
-    // Your real Supabase keys
-    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
-
-    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-
-    // Load all live classes
-    async function loadLiveClasses() {
+    window.addEventListener('load', async function () {
       const container = document.getElementById('classes-container');
       const loadingText = document.getElementById('classes-loading');
 
-      if (!container) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('live_classes')
-          .select('*')
-          .order('time', { ascending: true }); // Order by time (you can change to 'created_at' if preferred)
-
-        if (error) throw error;
-
-        loadingText.remove();
-
-        if (data.length === 0) {
-          container.innerHTML = '<p>No upcoming live classes scheduled yet. Check back soon!</p>';
-          return;
-        }
-
-        data.forEach(classItem => {
-          const card = document.createElement('div');
-          card.className = 'card schedule-card';
-          card.innerHTML = `
-            <div class="schedule-header">
-              <span class="subject-tag ${classItem.subject.toLowerCase()}">${classItem.subject}</span>
-              <span class="time">${classItem.time}</span>
-            </div>
-            <p><strong>${classItem.topic}</strong></p>
-            <p>${classItem.description || ''}</p>
-            <div class="card-actions">
-              <a href="${classItem.link}" class="btn small" target="_blank">Join Live</a>
-              <a href="dashboard.html" class="btn small secondary">View Recording (Premium)</a>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error('Error loading live classes:', err);
-        loadingText.textContent = 'Failed to load live classes. Please try again later.';
+      if (!window.supabaseClient) {
+        console.error('Supabase client not available');
+        container.innerHTML = '<p style="color:red;">Database connection failed. Please refresh.</p>';
+        return;
       }
-    }
 
-    // Run when page loads
-    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Supabase client ready - starting live classes fetch');
+
+      async function loadLiveClasses() {
+        container.innerHTML = '<p>Loading upcoming classes...</p>';
+
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('live_classes')
+            .select('*')
+            .order('time', { ascending: true }); // or 'created_at' if you prefer
+
+          if (error) throw error;
+
+          container.innerHTML = '';
+
+          if (data.length === 0) {
+            container.innerHTML = '<p>No upcoming live classes scheduled yet. Check back soon!</p>';
+            return;
+          }
+
+          data.forEach(classItem => {
+            const card = document.createElement('div');
+            card.className = 'card schedule-card';
+            card.innerHTML = `
+              <div class="schedule-header">
+                <span class="subject-tag ${classItem.subject.toLowerCase()}">${classItem.subject}</span>
+                <span class="time">${classItem.time}</span>
+              </div>
+              <p><strong>${classItem.topic}</strong></p>
+              <p>${classItem.description || ''}</p>
+              <div class="card-actions">
+                <a href="${classItem.link}" class="btn small" target="_blank">Join Live</a>
+                <a href="dashboard.html" class="btn small secondary">View Recording (Premium)</a>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        } catch (err) {
+          console.error('Error loading live classes:', err);
+          container.innerHTML = '<p style="color:red;">Failed to load classes: ' + (err.message || 'Unknown error') + '</p>';
+        }
+      }
+
+      // Initial load
       loadLiveClasses();
     });
   </script>
