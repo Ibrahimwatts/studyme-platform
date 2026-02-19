@@ -180,21 +180,20 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
-
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+  // Wait for full page load
+  window.addEventListener('load', async function () {
     const loginSection = document.getElementById('login-section');
     const dashboardSection = document.getElementById('dashboard-section');
+    const errorMessage = document.getElementById('error-message');
 
-    // Clean hash on load
-    if (window.location.hash) {
-      window.history.replaceState(null, null, window.location.pathname);
+    if (!window.supabaseClient) {
+      errorMessage.textContent = 'Supabase client not initialized. Refresh page.';
+      console.error('window.supabaseClient is missing');
+      return;
     }
 
     // Auth listener
-    supabaseClient.auth.onAuthStateChange((event, session) => {
+    window.supabaseClient.auth.onAuthStateChange((event, session) => {
       console.log("Auth Event:", event, session);
 
       if (session && session.user) {
@@ -219,13 +218,17 @@
       const redirectTo = window.location.origin + '/admin.html?cb=' + Date.now();
       console.log('Redirecting to:', redirectTo);
 
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo }
-      });
+      try {
+        await new Promise(r => setTimeout(r, 800)); // longer delay for stability
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo }
+        });
 
-      if (error) {
-        document.getElementById('error-message').innerText = error.message;
+        if (error) throw error;
+      } catch (err) {
+        console.error('Login error:', err);
+        document.getElementById('error-message').innerText = 'Login failed: ' + (err.message || 'Unknown error');
       }
     });
 
@@ -343,43 +346,63 @@
       }
     });
 
-    // Notes form with PDF upload
+    // Notes form with PDF upload - FIXED with delay & better error handling
     document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Adding...';
+
       let pdf_url = null;
       const fileInput = document.getElementById('notes-pdf');
-      if (fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        const fileName = `${Date.now()}_${file.name}`;
 
-        const { error: uploadError } = await supabaseClient.storage
-          .from('revision-pdfs')
-          .upload(fileName, file);
+      try {
+        // Small delay before any storage/auth action to avoid lock timeout
+        await new Promise(r => setTimeout(r, 800));
 
-        if (uploadError) {
-          alert('PDF upload failed: ' + uploadError.message);
-          return;
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const fileName = `${Date.now()}_${file.name}`;
+
+          console.log('Starting PDF upload:', fileName);
+
+          const { error: uploadError } = await supabaseClient.storage
+            .from('revision-pdfs')
+            .upload(fileName, file);
+
+          if (uploadError) {
+            throw new Error('PDF upload failed: ' + uploadError.message);
+          }
+
+          console.log('PDF uploaded successfully');
+
+          const { data } = supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
+          pdf_url = data.publicUrl;
         }
 
-        const { data } = supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
-        pdf_url = data.publicUrl;
-      }
+        const data = {
+          title: document.getElementById('notes-title').value.trim(),
+          subject: document.getElementById('notes-subject').value,
+          form: document.getElementById('notes-form-select').value,
+          body: document.getElementById('notes-body').value.trim(),
+          pdf_url
+        };
 
-      const data = {
-        title: document.getElementById('notes-title').value.trim(),
-        subject: document.getElementById('notes-subject').value,
-        form: document.getElementById('notes-form-select').value,
-        body: document.getElementById('notes-body').value.trim(),
-        pdf_url
-      };
+        console.log('Inserting note data:', data);
 
-      const { error } = await supabaseClient.from('revision_notes').insert([data]);
-      if (error) alert('Error: ' + error.message);
-      else {
+        const { error } = await supabaseClient.from('revision_notes').insert([data]);
+        if (error) throw error;
+
         alert('Added!');
         e.target.reset();
         loadDashboardData();
+      } catch (err) {
+        console.error('Full notes add error:', err);
+        alert('PDF upload / note add failed: ' + (err.message || 'Unknown error'));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Add Revision Note';
       }
     });
 
@@ -412,6 +435,7 @@
         loadDashboardData();
       }
     });
-  </script>
+  });
+ </script>
 </body>
 </html>
