@@ -34,7 +34,8 @@
     .pdf-link { color: #0070f3; text-decoration: underline; font-size: 0.95rem; }
   </style>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- Reliable Supabase CDN from jsDelivr (same as notes.html) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -62,12 +63,8 @@
 
         <h3>Add New Video Lesson</h3>
         <form id="video-form">
-          <div class="form-group">
-            <label for="video-title">Title</label>
-            <input type="text" id="video-title" required>
-          </div>
-          <div class="form-group">
-            <label for="video-subject">Subject</label>
+          <div class="form-group"><label for="video-title">Title</label><input type="text" id="video-title" required></div>
+          <div class="form-group"><label for="video-subject">Subject</label>
             <select id="video-subject" required>
               <option value="Physics">Physics</option>
               <option value="Chemistry">Chemistry</option>
@@ -75,8 +72,7 @@
               <option value="Mathematics">Mathematics</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="video-form-select">Form</label>
+          <div class="form-group"><label for="video-form-select">Form</label>
             <select id="video-form-select" required>
               <option value="Form 1">Form 1</option>
               <option value="Form 2">Form 2</option>
@@ -84,18 +80,9 @@
               <option value="Form 4">Form 4</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="video-youtube">YouTube ID / URL</label>
-            <input type="text" id="video-youtube" required placeholder="e.g. 7wUJlEnXNAk or full URL">
-          </div>
-          <div class="form-group">
-            <label for="video-duration">Duration (minutes)</label>
-            <input type="number" id="video-duration" required min="1">
-          </div>
-          <div class="form-group">
-            <label for="video-desc">Description</label>
-            <textarea id="video-desc" rows="4"></textarea>
-          </div>
+          <div class="form-group"><label for="video-youtube">YouTube ID / URL</label><input type="text" id="video-youtube" required placeholder="e.g. 7wUJlEnXNAk or full URL"></div>
+          <div class="form-group"><label for="video-duration">Duration (minutes)</label><input type="number" id="video-duration" required min="1"></div>
+          <div class="form-group"><label for="video-desc">Description</label><textarea id="video-desc" rows="4"></textarea></div>
           <button type="submit" class="btn btn-primary">Add Video Lesson</button>
         </form>
       </div>
@@ -107,12 +94,8 @@
 
         <h3>Add New Revision Note</h3>
         <form id="notes-form">
-          <div class="form-group">
-            <label for="notes-title">Title</label>
-            <input type="text" id="notes-title" required>
-          </div>
-          <div class="form-group">
-            <label for="notes-subject">Subject</label>
+          <div class="form-group"><label for="notes-title">Title</label><input type="text" id="notes-title" required></div>
+          <div class="form-group"><label for="notes-subject">Subject</label>
             <select id="notes-subject" required>
               <option value="Physics">Physics</option>
               <option value="Chemistry">Chemistry</option>
@@ -120,8 +103,7 @@
               <option value="Mathematics">Mathematics</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="notes-form-select">Form</label>
+          <div class="form-group"><label for="notes-form-select">Form</label>
             <select id="notes-form-select" required>
               <option value="Form 1">Form 1</option>
               <option value="Form 2">Form 2</option>
@@ -129,14 +111,8 @@
               <option value="Form 4">Form 4</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="notes-pdf">Upload PDF (optional)</label>
-            <input type="file" id="notes-pdf" accept=".pdf">
-          </div>
-          <div class="form-group">
-            <label for="notes-body">Body (notes content)</label>
-            <textarea id="notes-body" rows="6" required></textarea>
-          </div>
+          <div class="form-group"><label for="notes-pdf">Upload PDF (optional)</label><input type="file" id="notes-pdf" accept=".pdf"></div>
+          <div class="form-group"><label for="notes-body">Body (notes content)</label><textarea id="notes-body" rows="6" required></textarea></div>
           <button type="submit" class="btn btn-primary">Add Revision Note</button>
         </form>
       </div>
@@ -148,8 +124,7 @@
 
         <h3>Add New Live Class</h3>
         <form id="classes-form">
-          <div class="form-group">
-            <label for="class-subject">Subject</label>
+          <div class="form-group"><label for="class-subject">Subject</label>
             <select id="class-subject" required>
               <option value="Physics">Physics</option>
               <option value="Chemistry">Chemistry</option>
@@ -157,260 +132,259 @@
               <option value="Mathematics">Mathematics</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="class-time">Day & Time (EAT)</label>
-            <input type="text" id="class-time" required placeholder="e.g. Saturday 10:00 AM – 11:30 AM">
-          </div>
-          <div class="form-group">
-            <label for="class-topic">Topic</label>
-            <input type="text" id="class-topic" required>
-          </div>
-          <div class="form-group">
-            <label for="class-link">Link (Zoom/Meet/etc)</label>
-            <input type="url" id="class-link" required>
-          </div>
-          <div class="form-group">
-            <label for="class-desc">Description</label>
-            <textarea id="class-desc"></textarea>
-          </div>
+          <div class="form-group"><label for="class-time">Day & Time (EAT)</label><input type="text" id="class-time" required placeholder="e.g. Saturday 10:00 AM – 11:30 AM"></div>
+          <div class="form-group"><label for="class-topic">Topic</label><input type="text" id="class-topic" required></div>
+          <div class="form-group"><label for="class-link">Link (Zoom/Meet/etc)</label><input type="url" id="class-link" required></div>
+          <div class="form-group"><label for="class-desc">Description</label><textarea id="class-desc"></textarea></div>
           <button type="submit" class="btn btn-primary">Add Live Class</button>
         </form>
       </div>
     </section>
   </div>
 
+  <script src="script.js"></script>
+
   <script>
-    const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+    // Wait for full page load
+    window.addEventListener('load', function () {
+      if (!window.supabaseClient) {
+        document.getElementById('error-message').innerHTML = 'Supabase client not initialized. Refresh page.';
+        console.error('window.supabaseClient is missing');
+        return;
+      }
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const loginSection = document.getElementById('login-section');
+      const dashboardSection = document.getElementById('dashboard-section');
 
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
+      // Auth state listener
+      window.supabaseClient.auth.onAuthStateChange((event, session) => {
+        console.log("Auth Event:", event, session);
 
-    // Clean hash on load
-    if (window.location.hash) {
-      window.history.replaceState(null, null, window.location.pathname);
-    }
+        if (session && session.user) {
+          loginSection.classList.add('hidden');
+          dashboardSection.classList.remove('hidden');
+          document.getElementById('user-name').textContent = 
+            session.user.user_metadata?.full_name || session.user.email;
 
-    // Auth listener
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-      console.log("Auth Event:", event, session);
+          // Clear hash for clean URL
+          if (window.location.hash) {
+            window.history.replaceState(null, null, window.location.pathname);
+          }
 
-      if (session && session.user) {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
-        document.getElementById('user-name').textContent = 
-          session.user.user_metadata?.full_name || session.user.email;
+          loadDashboardData();
+        } else {
+          loginSection.classList.remove('hidden');
+          dashboardSection.classList.add('hidden');
+        }
+      });
 
-        if (window.location.hash) {
-          window.history.replaceState(null, null, window.location.pathname);
+      // Login button - with delay to prevent LockManager timeout
+      document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+        try {
+          // Small delay prevents "LockManager timed out" race condition
+          await new Promise(r => setTimeout(r, 400));
+
+          const redirectTo = window.location.origin + '/admin.html?cb=' + Date.now();
+
+          console.log('Redirecting to:', redirectTo);
+
+          const { error } = await window.supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo }
+          });
+
+          if (error) throw error;
+        } catch (err) {
+          console.error('Login error:', err);
+          document.getElementById('error-message').textContent = 'Login failed: ' + (err.message || 'Unknown error');
+        }
+      });
+
+      // Logout
+      document.getElementById('logout-btn')?.addEventListener('click', async () => {
+        try {
+          await window.supabaseClient.auth.signOut();
+        } catch (err) {
+          console.error('Logout error:', err);
+        }
+      });
+
+      // Initial session check
+      window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          loginSection.classList.add('hidden');
+          dashboardSection.classList.remove('hidden');
+          document.getElementById('user-name').textContent = 
+            session.user.user_metadata?.full_name || session.user.email;
+          loadDashboardData();
+        }
+      });
+
+      // Load dashboard data (your existing functions)
+      async function loadDashboardData() {
+        console.log("Loading dashboard content...");
+        try {
+          await loadVideoLessons();
+          await loadRevisionNotes();
+          await loadLiveClasses();
+        } catch (err) {
+          console.error('Load error:', err);
+        }
+      }
+
+      async function loadVideoLessons() {
+        const container = document.getElementById('video-list');
+        container.innerHTML = '<p>Loading...</p>';
+        const { data, error } = await window.supabaseClient.from('video_lessons').select('*').order('created_at', { ascending: false });
+        if (error) return container.innerHTML = '<p>Error loading videos</p>';
+        container.innerHTML = data.length === 0 ? '<p>No videos yet.</p>' : '';
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <strong>${item.title}</strong><br>
+            ${item.subject} - ${item.form}<br>
+            YouTube ID: ${item.youtube_id}<br>
+            Duration: ${item.duration} min<br>
+            ${item.description ? `<div class="desc">${item.description}</div>` : ''}
+            <div class="item-actions">
+              <button onclick="deleteItem('video_lessons', '${item.id}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      async function loadRevisionNotes() {
+        const container = document.getElementById('notes-list');
+        container.innerHTML = '<p>Loading...</p>';
+        const { data, error } = await window.supabaseClient.from('revision_notes').select('*').order('created_at', { ascending: false });
+        if (error) return container.innerHTML = '<p>Error loading notes</p>';
+        container.innerHTML = data.length === 0 ? '<p>No notes yet.</p>' : '';
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <strong>${item.title}</strong><br>
+            ${item.subject} - ${item.form}<br>
+            ${item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="pdf-link">View PDF</a><br>` : ''}
+            ${item.body ? `<div class="desc">${item.body}</div>` : ''}
+            <div class="item-actions">
+              <button onclick="deleteItem('revision_notes', '${item.id}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      async function loadLiveClasses() {
+        const container = document.getElementById('classes-list');
+        container.innerHTML = '<p>Loading...</p>';
+        const { data, error } = await window.supabaseClient.from('live_classes').select('*').order('created_at', { ascending: false });
+        if (error) return container.innerHTML = '<p>Error loading classes</p>';
+        container.innerHTML = data.length === 0 ? '<p>No classes yet.</p>' : '';
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'item-card';
+          div.innerHTML = `
+            <strong>${item.topic}</strong><br>
+            ${item.subject} • ${item.time}<br>
+            Link: <a href="${item.link}" target="_blank">${item.link}</a><br>
+            ${item.description ? `<div class="desc">${item.description}</div>` : ''}
+            <div class="item-actions">
+              <button onclick="deleteItem('live_classes', '${item.id}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      window.deleteItem = async function(table, id) {
+        if (!confirm('Delete this item?')) return;
+        const { error } = await window.supabaseClient.from(table).delete().eq('id', id);
+        if (error) {
+          alert('Delete failed: ' + error.message);
+        } else {
+          loadDashboardData();
+        }
+      };
+
+      // Form submissions (unchanged except using window.supabaseClient)
+      document.getElementById('video-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          title: document.getElementById('video-title').value.trim(),
+          subject: document.getElementById('video-subject').value,
+          form: document.getElementById('video-form-select').value,
+          youtube_id: document.getElementById('video-youtube').value.trim(),
+          duration: Number(document.getElementById('video-duration').value),
+          description: document.getElementById('video-desc').value.trim()
+        };
+        const { error } = await window.supabaseClient.from('video_lessons').insert([data]);
+        if (error) alert('Error: ' + error.message);
+        else {
+          alert('Added!');
+          e.target.reset();
+          loadDashboardData();
+        }
+      });
+
+      document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        let pdf_url = null;
+        const fileInput = document.getElementById('notes-pdf');
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const fileName = `${Date.now()}_${file.name}`;
+
+          const { error: uploadError } = await window.supabaseClient.storage
+            .from('revision-pdfs')
+            .upload(fileName, file);
+
+          if (uploadError) {
+            alert('PDF upload failed: ' + uploadError.message);
+            return;
+          }
+
+          const { data } = window.supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
+          pdf_url = data.publicUrl;
         }
 
-        loadDashboardData();
-      } else {
-        loginSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
-      }
-    });
+        const data = {
+          title: document.getElementById('notes-title').value.trim(),
+          subject: document.getElementById('notes-subject').value,
+          form: document.getElementById('notes-form-select').value,
+          body: document.getElementById('notes-body').value.trim(),
+          pdf_url
+        };
 
-    // Login
-    document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-      const redirectTo = window.location.origin + '/admin.html?cb=' + Date.now();
-      console.log('Redirecting to:', redirectTo);
-
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo }
-      });
-
-      if (error) {
-        document.getElementById('error-message').innerText = error.message;
-      }
-    });
-
-    // Logout
-    document.getElementById('logout-btn')?.addEventListener('click', async () => {
-      await supabaseClient.auth.signOut();
-    });
-
-    // Load dashboard content
-    async function loadDashboardData() {
-      console.log("Loading dashboard content...");
-      try {
-        await loadVideoLessons();
-        await loadRevisionNotes();
-        await loadLiveClasses();
-      } catch (err) {
-        console.error('Load error:', err);
-      }
-    }
-
-    async function loadVideoLessons() {
-      const container = document.getElementById('video-list');
-      container.innerHTML = '<p>Loading...</p>';
-      const { data, error } = await supabaseClient.from('video_lessons').select('*').order('created_at', { ascending: false });
-      if (error) return container.innerHTML = '<p>Error loading videos</p>';
-      container.innerHTML = data.length === 0 ? '<p>No videos yet.</p>' : '';
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item-card';
-        div.innerHTML = `
-          <strong>${item.title}</strong><br>
-          ${item.subject} - ${item.form}<br>
-          YouTube ID: ${item.youtube_id}<br>
-          Duration: ${item.duration} min<br>
-          ${item.description ? `<div class="desc">${item.description}</div>` : ''}
-          <div class="item-actions">
-            <button onclick="deleteItem('video_lessons', '${item.id}')">Delete</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    async function loadRevisionNotes() {
-      const container = document.getElementById('notes-list');
-      container.innerHTML = '<p>Loading...</p>';
-      const { data, error } = await supabaseClient.from('revision_notes').select('*').order('created_at', { ascending: false });
-      if (error) return container.innerHTML = '<p>Error loading notes</p>';
-      container.innerHTML = data.length === 0 ? '<p>No notes yet.</p>' : '';
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item-card';
-        div.innerHTML = `
-          <strong>${item.title}</strong><br>
-          ${item.subject} - ${item.form}<br>
-          ${item.pdf_url ? `<a href="${item.pdf_url}" target="_blank" class="pdf-link">View PDF</a><br>` : ''}
-          ${item.body ? `<div class="desc">${item.body}</div>` : ''}
-          <div class="item-actions">
-            <button onclick="deleteItem('revision_notes', '${item.id}')">Delete</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    async function loadLiveClasses() {
-      const container = document.getElementById('classes-list');
-      container.innerHTML = '<p>Loading...</p>';
-      const { data, error } = await supabaseClient.from('live_classes').select('*').order('created_at', { ascending: false });
-      if (error) return container.innerHTML = '<p>Error loading classes</p>';
-      container.innerHTML = data.length === 0 ? '<p>No classes yet.</p>' : '';
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item-card';
-        div.innerHTML = `
-          <strong>${item.topic}</strong><br>
-          ${item.subject} • ${item.time}<br>
-          Link: <a href="${item.link}" target="_blank">${item.link}</a><br>
-          ${item.description ? `<div class="desc">${item.description}</div>` : ''}
-          <div class="item-actions">
-            <button onclick="deleteItem('live_classes', '${item.id}')">Delete</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    window.deleteItem = async function(table, id) {
-      if (!confirm('Delete this item?')) return;
-      const { error } = await supabaseClient.from(table).delete().eq('id', id);
-      if (error) {
-        alert('Delete failed: ' + error.message);
-      } else {
-        loadDashboardData();
-      }
-    };
-
-    // Video form
-    document.getElementById('video-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = {
-        title: document.getElementById('video-title').value.trim(),
-        subject: document.getElementById('video-subject').value,
-        form: document.getElementById('video-form-select').value,
-        youtube_id: document.getElementById('video-youtube').value.trim(),
-        duration: Number(document.getElementById('video-duration').value),
-        description: document.getElementById('video-desc').value.trim()
-      };
-      const { error } = await supabaseClient.from('video_lessons').insert([data]);
-      if (error) alert('Error: ' + error.message);
-      else {
-        alert('Added!');
-        e.target.reset();
-        loadDashboardData();
-      }
-    });
-
-    // Notes form with PDF upload
-    document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      let pdf_url = null;
-      const fileInput = document.getElementById('notes-pdf');
-      if (fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        const fileName = `${Date.now()}_${file.name}`;
-
-        const { error: uploadError } = await supabaseClient.storage
-          .from('revision-pdfs')
-          .upload(fileName, file);
-
-        if (uploadError) {
-          alert('PDF upload failed: ' + uploadError.message);
-          return;
+        const { error } = await window.supabaseClient.from('revision_notes').insert([data]);
+        if (error) alert('Error: ' + error.message);
+        else {
+          alert('Added!');
+          e.target.reset();
+          loadDashboardData();
         }
+      });
 
-        const { data } = supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
-        pdf_url = data.publicUrl;
-      }
-
-      const data = {
-        title: document.getElementById('notes-title').value.trim(),
-        subject: document.getElementById('notes-subject').value,
-        form: document.getElementById('notes-form-select').value,
-        body: document.getElementById('notes-body').value.trim(),
-        pdf_url
-      };
-
-      const { error } = await supabaseClient.from('revision_notes').insert([data]);
-      if (error) alert('Error: ' + error.message);
-      else {
-        alert('Added!');
-        e.target.reset();
-        loadDashboardData();
-      }
-    });
-
-    // Classes form
-    document.getElementById('classes-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = {
-        subject: document.getElementById('class-subject').value,
-        time: document.getElementById('class-time').value.trim(),
-        topic: document.getElementById('class-topic').value.trim(),
-        link: document.getElementById('class-link').value.trim(),
-        description: document.getElementById('class-desc').value.trim()
-      };
-      const { error } = await supabaseClient.from('live_classes').insert([data]);
-      if (error) alert('Error: ' + error.message);
-      else {
-        alert('Added!');
-        e.target.reset();
-        loadDashboardData();
-      }
-    });
-
-    // Initial auth check
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
-        document.getElementById('user-name').textContent = 
-          session.user.user_metadata?.full_name || session.user.email;
-        loadDashboardData();
-      }
+      document.getElementById('classes-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+          subject: document.getElementById('class-subject').value,
+          time: document.getElementById('class-time').value.trim(),
+          topic: document.getElementById('class-topic').value.trim(),
+          link: document.getElementById('class-link').value.trim(),
+          description: document.getElementById('class-desc').value.trim()
+        };
+        const { error } = await window.supabaseClient.from('live_classes').insert([data]);
+        if (error) alert('Error: ' + error.message);
+        else {
+          alert('Added!');
+          e.target.reset();
+          loadDashboardData();
+        }
+      });
     });
   </script>
 </body>
