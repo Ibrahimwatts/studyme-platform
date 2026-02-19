@@ -34,7 +34,7 @@
     .pdf-link { color: #0070f3; text-decoration: underline; font-size: 0.95rem; }
   </style>
 
-  <!-- Stable CDN version (same as your working notes.html) -->
+  <!-- Stable CDN - same as your working notes.html -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -188,17 +188,17 @@
       const loginSection = document.getElementById('login-section');
       const dashboardSection = document.getElementById('dashboard-section');
 
-      // Clean hash on load
+      // Clean hash/params on load
       if (window.location.hash || window.location.search.includes('cb=')) {
         window.history.replaceState(null, null, window.location.pathname);
       }
 
-      // Force session recovery on load (fixes dashboard not showing after redirect)
+      // Force session recovery (fixes dashboard not showing after login redirect)
       try {
-        // Small delay to let OAuth hash settle
-        await new Promise(r => setTimeout(r, 800));
+        // Delay to let OAuth hash settle
+        await new Promise(r => setTimeout(r, 1000));
 
-        // Try to get session
+        // Try to get current session
         const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
 
         if (sessionError) console.error('getSession error:', sessionError);
@@ -211,12 +211,12 @@
             session.user.user_metadata?.full_name || session.user.email;
           loadDashboardData();
         } else {
-          // Try refreshing session (recovers after OAuth redirect)
-          console.log('No session on load - trying refreshSession...');
+          // Force refresh session to recover after OAuth redirect
+          console.log('No session on load - forcing refreshSession...');
           const { data: refreshed, error: refreshError } = await window.supabaseClient.auth.refreshSession();
 
           if (refreshError) {
-            console.error('refreshSession failed:', refreshError);
+            console.error('refreshSession failed:', refreshError.message);
           } else if (refreshed.session) {
             console.log('Session recovered via refresh:', refreshed.session.user.email);
             loginSection.classList.add('hidden');
@@ -224,13 +224,15 @@
             document.getElementById('user-name').textContent = 
               refreshed.session.user.user_metadata?.full_name || refreshed.session.user.email;
             loadDashboardData();
+          } else {
+            console.warn('No session after refresh - user likely not logged in');
           }
         }
       } catch (err) {
-        console.error('Session recovery error on load:', err);
+        console.error('Session recovery error:', err);
       }
 
-      // Auth state listener
+      // Auth listener
       window.supabaseClient.auth.onAuthStateChange((event, session) => {
         console.log("Auth Event:", event, session);
 
@@ -251,13 +253,13 @@
         }
       });
 
-      // Login button with delay
+      // Login button
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         const redirectTo = window.location.origin + '/admin.html?cb=' + Date.now();
         console.log('Redirecting to:', redirectTo);
 
         try {
-          await new Promise(r => setTimeout(r, 800)); // helps prevent lock timeout
+          await new Promise(r => setTimeout(r, 800)); // prevent lock timeout
           const { error } = await window.supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo }
@@ -292,7 +294,7 @@
       async function loadVideoLessons() {
         const container = document.getElementById('video-list');
         container.innerHTML = '<p>Loading...</p>';
-        const { data, error } = await window.supabaseClient.from('video_lessons').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('video_lessons').select('*').order('created_at', { ascending: false });
         if (error) return container.innerHTML = '<p>Error loading videos</p>';
         container.innerHTML = data.length === 0 ? '<p>No videos yet.</p>' : '';
         data.forEach(item => {
@@ -315,7 +317,7 @@
       async function loadRevisionNotes() {
         const container = document.getElementById('notes-list');
         container.innerHTML = '<p>Loading...</p>';
-        const { data, error } = await window.supabaseClient.from('revision_notes').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('revision_notes').select('*').order('created_at', { ascending: false });
         if (error) return container.innerHTML = '<p>Error loading notes</p>';
         container.innerHTML = data.length === 0 ? '<p>No notes yet.</p>' : '';
         data.forEach(item => {
@@ -337,7 +339,7 @@
       async function loadLiveClasses() {
         const container = document.getElementById('classes-list');
         container.innerHTML = '<p>Loading...</p>';
-        const { data, error } = await window.supabaseClient.from('live_classes').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('live_classes').select('*').order('created_at', { ascending: false });
         if (error) return container.innerHTML = '<p>Error loading classes</p>';
         container.innerHTML = data.length === 0 ? '<p>No classes yet.</p>' : '';
         data.forEach(item => {
@@ -358,7 +360,7 @@
 
       window.deleteItem = async function(table, id) {
         if (!confirm('Delete this item?')) return;
-        const { error } = await window.supabaseClient.from(table).delete().eq('id', id);
+        const { error } = await supabaseClient.from(table).delete().eq('id', id);
         if (error) {
           alert('Delete failed: ' + error.message);
         } else {
@@ -377,7 +379,7 @@
           duration: Number(document.getElementById('video-duration').value),
           description: document.getElementById('video-desc').value.trim()
         };
-        const { error } = await window.supabaseClient.from('video_lessons').insert([data]);
+        const { error } = await supabaseClient.from('video_lessons').insert([data]);
         if (error) alert('Error: ' + error.message);
         else {
           alert('Added!');
@@ -396,7 +398,7 @@
           const file = fileInput.files[0];
           const fileName = `${Date.now()}_${file.name}`;
 
-          const { error: uploadError } = await window.supabaseClient.storage
+          const { error: uploadError } = await supabaseClient.storage
             .from('revision-pdfs')
             .upload(fileName, file);
 
@@ -405,7 +407,7 @@
             return;
           }
 
-          const { data } = window.supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
+          const { data } = supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
           pdf_url = data.publicUrl;
         }
 
@@ -417,7 +419,7 @@
           pdf_url
         };
 
-        const { error } = await window.supabaseClient.from('revision_notes').insert([data]);
+        const { error } = await supabaseClient.from('revision_notes').insert([data]);
         if (error) alert('Error: ' + error.message);
         else {
           alert('Added!');
@@ -436,7 +438,7 @@
           link: document.getElementById('class-link').value.trim(),
           description: document.getElementById('class-desc').value.trim()
         };
-        const { error } = await window.supabaseClient.from('live_classes').insert([data]);
+        const { error } = await supabaseClient.from('live_classes').insert([data]);
         if (error) alert('Error: ' + error.message);
         else {
           alert('Added!');
