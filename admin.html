@@ -34,7 +34,7 @@
     .pdf-link { color: #0070f3; text-decoration: underline; font-size: 0.95rem; }
   </style>
 
-  <!-- Reliable CDN - same as working notes.html -->
+  <!-- Reliable CDN (same as working notes.html) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -63,8 +63,12 @@
 
         <h3>Add New Video Lesson</h3>
         <form id="video-form">
-          <div class="form-group"><label for="video-title">Title</label><input type="text" id="video-title" required></div>
-          <div class="form-group"><label for="video-subject">Subject</label>
+          <div class="form-group">
+            <label for="video-title">Title</label>
+            <input type="text" id="video-title" required>
+          </div>
+          <div class="form-group">
+            <label for="video-subject">Subject</label>
             <select id="video-subject" required>
               <option value="Physics">Physics</option>
               <option value="Chemistry">Chemistry</option>
@@ -72,7 +76,8 @@
               <option value="Mathematics">Mathematics</option>
             </select>
           </div>
-          <div class="form-group"><label for="video-form-select">Form</label>
+          <div class="form-group">
+            <label for="video-form-select">Form</label>
             <select id="video-form-select" required>
               <option value="Form 1">Form 1</option>
               <option value="Form 2">Form 2</option>
@@ -80,9 +85,18 @@
               <option value="Form 4">Form 4</option>
             </select>
           </div>
-          <div class="form-group"><label for="video-youtube">YouTube ID / URL</label><input type="text" id="video-youtube" required placeholder="e.g. 7wUJlEnXNAk or full URL"></div>
-          <div class="form-group"><label for="video-duration">Duration (minutes)</label><input type="number" id="video-duration" required min="1"></div>
-          <div class="form-group"><label for="video-desc">Description</label><textarea id="video-desc" rows="4"></textarea></div>
+          <div class="form-group">
+            <label for="video-youtube">YouTube ID / URL</label>
+            <input type="text" id="video-youtube" required placeholder="e.g. 7wUJlEnXNAk or full URL">
+          </div>
+          <div class="form-group">
+            <label for="video-duration">Duration (minutes)</label>
+            <input type="number" id="video-duration" required min="1">
+          </div>
+          <div class="form-group">
+            <label for="video-desc">Description</label>
+            <textarea id="video-desc" rows="4"></textarea>
+          </div>
           <button type="submit" class="btn btn-primary">Add Video Lesson</button>
         </form>
       </div>
@@ -94,8 +108,12 @@
 
         <h3>Add New Revision Note</h3>
         <form id="notes-form">
-          <div class="form-group"><label for="notes-title">Title</label><input type="text" id="notes-title" required></div>
-          <div class="form-group"><label for="notes-subject">Subject</label>
+          <div class="form-group">
+            <label for="notes-title">Title</label>
+            <input type="text" id="notes-title" required>
+          </div>
+          <div class="form-group">
+            <label for="notes-subject">Subject</label>
             <select id="notes-subject" required>
               <option value="Physics">Physics</option>
               <option value="Chemistry">Chemistry</option>
@@ -103,7 +121,8 @@
               <option value="Mathematics">Mathematics</option>
             </select>
           </div>
-          <div class="form-group"><label for="notes-form-select">Form</label>
+          <div class="form-group">
+            <label for="notes-form-select">Form</label>
             <select id="notes-form-select" required>
               <option value="Form 1">Form 1</option>
               <option value="Form 2">Form 2</option>
@@ -111,8 +130,14 @@
               <option value="Form 4">Form 4</option>
             </select>
           </div>
-          <div class="form-group"><label for="notes-pdf">Upload PDF (optional)</label><input type="file" id="notes-pdf" accept=".pdf"></div>
-          <div class="form-group"><label for="notes-body">Body (notes content)</label><textarea id="notes-body" rows="6" required></textarea></div>
+          <div class="form-group">
+            <label for="notes-pdf">Upload PDF (optional)</label>
+            <input type="file" id="notes-pdf" accept=".pdf">
+          </div>
+          <div class="form-group">
+            <label for="notes-body">Body (notes content)</label>
+            <textarea id="notes-body" rows="6" required></textarea>
+          </div>
           <button type="submit" class="btn btn-primary">Add Revision Note</button>
         </form>
       </div>
@@ -124,7 +149,8 @@
 
         <h3>Add New Live Class</h3>
         <form id="classes-form">
-          <div class="form-group"><label for="class-subject">Subject</label>
+          <div class="form-group">
+            <label for="class-subject">Subject</label>
             <select id="class-subject" required>
               <option value="Physics">Physics</option>
               <option value="Chemistry">Chemistry</option>
@@ -132,10 +158,22 @@
               <option value="Mathematics">Mathematics</option>
             </select>
           </div>
-          <div class="form-group"><label for="class-time">Day & Time (EAT)</label><input type="text" id="class-time" required placeholder="e.g. Saturday 10:00 AM – 11:30 AM"></div>
-          <div class="form-group"><label for="class-topic">Topic</label><input type="text" id="class-topic" required></div>
-          <div class="form-group"><label for="class-link">Link (Zoom/Meet/etc)</label><input type="url" id="class-link" required></div>
-          <div class="form-group"><label for="class-desc">Description</label><textarea id="class-desc"></textarea></div>
+          <div class="form-group">
+            <label for="class-time">Day & Time (EAT)</label>
+            <input type="text" id="class-time" required placeholder="e.g. Saturday 10:00 AM – 11:30 AM">
+          </div>
+          <div class="form-group">
+            <label for="class-topic">Topic</label>
+            <input type="text" id="class-topic" required>
+          </div>
+          <div class="form-group">
+            <label for="class-link">Link (Zoom/Meet/etc)</label>
+            <input type="url" id="class-link" required>
+          </div>
+          <div class="form-group">
+            <label for="class-desc">Description</label>
+            <textarea id="class-desc"></textarea>
+          </div>
           <button type="submit" class="btn btn-primary">Add Live Class</button>
         </form>
       </div>
@@ -145,6 +183,7 @@
   <script src="script.js"></script>
 
   <script>
+    // Wait for full page load
     window.addEventListener('load', async function () {
       const loginSection = document.getElementById('login-section');
       const dashboardSection = document.getElementById('dashboard-section');
@@ -152,6 +191,7 @@
 
       if (!window.supabaseClient) {
         errorMessage.textContent = 'Supabase client not initialized. Refresh page.';
+        console.error('window.supabaseClient is missing');
         return;
       }
 
@@ -180,12 +220,14 @@
         }
       });
 
-      // Login with delay to avoid lock timeout
+      // Login with delay to prevent LockManager timeout
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
         try {
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 500)); // prevents lock timeout
 
           const redirectTo = window.location.origin + '/admin.html';
+
+          console.log('Login attempt - redirectTo:', redirectTo);
 
           const { error } = await window.supabaseClient.auth.signInWithOAuth({
             provider: 'google',
@@ -219,7 +261,7 @@
         loadDashboardData();
       }
 
-      // Your existing load functions (unchanged except using window.supabaseClient)
+      // Load dashboard data
       async function loadDashboardData() {
         console.log("Loading dashboard content...");
         try {
@@ -235,7 +277,7 @@
         const container = document.getElementById('video-list');
         container.innerHTML = '<p>Loading...</p>';
         const { data, error } = await window.supabaseClient.from('video_lessons').select('*').order('created_at', { ascending: false });
-        if (error) return container.innerHTML = '<p>Error loading videos</p>';
+        if (error) return container.innerHTML = '<p>Error loading videos: ' + error.message + '</p>';
         container.innerHTML = data.length === 0 ? '<p>No videos yet.</p>' : '';
         data.forEach(item => {
           const div = document.createElement('div');
@@ -258,7 +300,7 @@
         const container = document.getElementById('notes-list');
         container.innerHTML = '<p>Loading...</p>';
         const { data, error } = await window.supabaseClient.from('revision_notes').select('*').order('created_at', { ascending: false });
-        if (error) return container.innerHTML = '<p>Error loading notes</p>';
+        if (error) return container.innerHTML = '<p>Error loading notes: ' + error.message + '</p>';
         container.innerHTML = data.length === 0 ? '<p>No notes yet.</p>' : '';
         data.forEach(item => {
           const div = document.createElement('div');
@@ -280,7 +322,7 @@
         const container = document.getElementById('classes-list');
         container.innerHTML = '<p>Loading...</p>';
         const { data, error } = await window.supabaseClient.from('live_classes').select('*').order('created_at', { ascending: false });
-        if (error) return container.innerHTML = '<p>Error loading classes</p>';
+        if (error) return container.innerHTML = '<p>Error loading classes: ' + error.message + '</p>';
         container.innerHTML = data.length === 0 ? '<p>No classes yet.</p>' : '';
         data.forEach(item => {
           const div = document.createElement('div');
@@ -308,9 +350,13 @@
         }
       };
 
-      // Form submissions (using window.supabaseClient)
+      // Video form
       document.getElementById('video-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Adding...';
+
         const data = {
           title: document.getElementById('video-title').value.trim(),
           subject: document.getElementById('video-subject').value,
@@ -319,36 +365,39 @@
           duration: Number(document.getElementById('video-duration').value),
           description: document.getElementById('video-desc').value.trim()
         };
-        const { error } = await window.supabaseClient.from('video_lessons').insert([data]);
-        if (error) alert('Error: ' + error.message);
-        else {
-          alert('Added!');
+
+        if (!data.title || !data.subject || !data.form || !data.youtube_id || !data.duration) {
+          alert('Please fill all required fields.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add Video Lesson';
+          return;
+        }
+
+        try {
+          const { error } = await window.supabaseClient.from('video_lessons').insert([data]);
+          if (error) throw error;
+          alert('Video lesson added!');
           e.target.reset();
           loadDashboardData();
+        } catch (err) {
+          alert('Error adding video: ' + (err.message || 'Unknown error'));
+          console.error('Video add error:', err);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add Video Lesson';
         }
       });
 
+      // Notes form with PDF upload
       document.getElementById('notes-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Adding...';
 
         let pdf_url = null;
         const fileInput = document.getElementById('notes-pdf');
-        if (fileInput.files && fileInput.files[0]) {
-          const file = fileInput.files[0];
-          const fileName = `${Date.now()}_${file.name}`;
-
-          const { error: uploadError } = await window.supabaseClient.storage
-            .from('revision-pdfs')
-            .upload(fileName, file);
-
-          if (uploadError) {
-            alert('PDF upload failed: ' + uploadError.message);
-            return;
-          }
-
-          const { data } = window.supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
-          pdf_url = data.publicUrl;
-        }
+        const file = fileInput.files[0];
 
         const data = {
           title: document.getElementById('notes-title').value.trim(),
@@ -358,17 +407,51 @@
           pdf_url
         };
 
-        const { error } = await window.supabaseClient.from('revision_notes').insert([data]);
-        if (error) alert('Error: ' + error.message);
-        else {
-          alert('Added!');
+        if (!data.title || !data.subject || !data.form || !data.body) {
+          alert('Please fill all required fields.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add Revision Note';
+          return;
+        }
+
+        try {
+          // Upload PDF if selected
+          if (file) {
+            const fileName = `${Date.now()}_${file.name}`;
+            const { error: uploadError } = await window.supabaseClient.storage
+              .from('revision-pdfs')
+              .upload(fileName, file);
+
+            if (uploadError) throw new Error('PDF upload failed: ' + uploadError.message);
+
+            const { data: urlData } = window.supabaseClient.storage.from('revision-pdfs').getPublicUrl(fileName);
+            data.pdf_url = urlData.publicUrl;
+          }
+
+          // Insert note
+          const { error } = await window.supabaseClient.from('revision_notes').insert([data]);
+          if (error) throw error;
+
+          alert('Revision note added successfully!');
           e.target.reset();
+          fileInput.value = ''; // clear file input
           loadDashboardData();
+        } catch (err) {
+          console.error('Add note error:', err);
+          alert('Error: ' + (err.message || 'Unknown error'));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add Revision Note';
         }
       });
 
+      // Classes form
       document.getElementById('classes-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Adding...';
+
         const data = {
           subject: document.getElementById('class-subject').value,
           time: document.getElementById('class-time').value.trim(),
@@ -376,12 +459,25 @@
           link: document.getElementById('class-link').value.trim(),
           description: document.getElementById('class-desc').value.trim()
         };
-        const { error } = await window.supabaseClient.from('live_classes').insert([data]);
-        if (error) alert('Error: ' + error.message);
-        else {
-          alert('Added!');
+
+        if (!data.subject || !data.time || !data.topic || !data.link) {
+          alert('Please fill all required fields.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add Live Class';
+          return;
+        }
+
+        try {
+          const { error } = await window.supabaseClient.from('live_classes').insert([data]);
+          if (error) throw error;
+          alert('Live class added!');
           e.target.reset();
           loadDashboardData();
+        } catch (err) {
+          alert('Error adding class: ' + (err.message || 'Unknown error'));
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Add Live Class';
         }
       });
     });
