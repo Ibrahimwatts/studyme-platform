@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+  
+  <!-- Supabase CDN - must be here BEFORE script.js -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -89,26 +92,26 @@
     </div>
   </footer>
 
-  <!-- Load shared script first -->
+  <!-- Load shared script -->
   <script src="script.js"></script>
 
-  <!-- Page-specific logic – waits safely for supabase -->
+  <!-- Page-specific logic -->
   <script>
-    // Wait for the page to fully load (including script.js)
+    // Wait for full page load (including script.js)
     window.addEventListener('load', function() {
       const container = document.getElementById('notes-container');
 
-      // Safety check with retries
+      // Safety retry mechanism
       function tryLoadNotes(attempt = 1) {
         if (window.supabase) {
-          console.log('Supabase ready – loading notes (attempt ' + attempt + ')');
+          console.log('Supabase is ready – loading notes (attempt ' + attempt + ')');
           loadRevisionNotes();
           return;
         }
 
-        if (attempt >= 10) {
-          console.error('Supabase still not available after 10 retries');
-          container.innerHTML = '<p style="color:red; font-weight:bold;">Error: Database connection failed. Please refresh the page or check your browser console for details.</p>';
+        if (attempt >= 12) {
+          console.error('Supabase failed to initialize after 12 attempts');
+          container.innerHTML = '<p style="color:red; font-weight:bold;">Database connection failed. Please refresh or check your browser console.</p>';
           return;
         }
 
@@ -116,7 +119,7 @@
         setTimeout(() => tryLoadNotes(attempt + 1), 500);
       }
 
-      // Fetch and render notes with subject filter
+      // Load notes with subject filter
       async function loadRevisionNotes() {
         const urlParams = new URLSearchParams(window.location.search);
         const subject = urlParams.get('subject') || 'Physics';
@@ -160,14 +163,14 @@
           });
         } catch (err) {
           console.error('Error loading revision notes:', err.message || err);
-          container.innerHTML = '<p style="color:red;">Failed to load notes: ' + (err.message || 'Unknown error') + '<br>Please check console for details.</p>';
+          container.innerHTML = '<p style="color:red;">Failed to load notes: ' + (err.message || 'Unknown error') + '<br>Check console for details.</p>';
         }
       }
 
-      // Start trying to load
+      // Start loading process
       tryLoadNotes();
 
-      // Sidebar subject filter (no reload)
+      // Sidebar filter clicks
       const subjectLinks = document.querySelectorAll('#subject-list a');
       subjectLinks.forEach(link => {
         link.addEventListener('click', (e) => {

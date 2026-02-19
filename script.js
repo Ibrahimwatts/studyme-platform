@@ -1,25 +1,30 @@
-// script.js - Studyme Platform JavaScript (Updated & Fixed)
+// script.js - Studyme Platform JavaScript (Final Fixed Version)
 // Shared across all pages - Admin + Frontend
 
-// ==================== Safe Supabase Initialization ====================
+// ==================== Supabase Configuration ====================
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-/**
- * Enhanced initialization to prevent ReferenceErrors 
- * if the CDN hasn't fully loaded yet.
- */
+// ==================== Safe Global Supabase Init ====================
 function initSupabase() {
-  if (typeof supabase !== 'undefined') {
-    if (!window.supabase) {
-      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('SUCCESS: Supabase client initialized globally (shared script.js)');
-    } else {
-      console.log('Supabase already initialized - reusing');
-    }
-  } else {
-    console.warn('Supabase library (CDN) not yet detected. Make sure <script src="https://unpkg.com/@supabase/supabase-js@2"></script> is in <head>');
+  if (typeof supabase === 'undefined') {
+    console.warn('Supabase CDN not loaded yet. Waiting for <script src="https://unpkg.com/@supabase/supabase-js@2"> in <head>');
+    return false;
   }
+
+  if (!window.supabase) {
+    try {
+      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('SUCCESS: Supabase client initialized globally');
+      return true;
+    } catch (err) {
+      console.error('Failed to create Supabase client:', err);
+      return false;
+    }
+  }
+
+  console.log('Supabase already initialized - reusing');
+  return true;
 }
 
 // Run immediately
@@ -27,8 +32,11 @@ initSupabase();
 
 // ==================== Auth Functions ====================
 async function loginWithGoogle() {
+  if (!window.supabase) {
+    alert('Supabase not ready. Please refresh the page.');
+    return;
+  }
   try {
-    if (!window.supabase) throw new Error('Supabase client not initialized');
     const { error } = await window.supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -43,8 +51,11 @@ async function loginWithGoogle() {
 }
 
 async function logout() {
+  if (!window.supabase) {
+    alert('Supabase not ready. Please refresh.');
+    return;
+  }
   try {
-    if (!window.supabase) throw new Error('Supabase client not initialized');
     const { error } = await window.supabase.auth.signOut();
     if (error) throw error;
     alert('You have been logged out.');
@@ -83,8 +94,11 @@ async function updateAuthUI() {
 
 // ==================== Global Data Fetch Helpers ====================
 async function fetchRevisionNotes(filters = {}) {
+  if (!window.supabase) {
+    console.error('fetchRevisionNotes: Supabase not available');
+    return [];
+  }
   try {
-    if (!window.supabase) return [];
     let query = window.supabase
       .from('revision_notes')
       .select('*')
@@ -98,14 +112,17 @@ async function fetchRevisionNotes(filters = {}) {
     if (error) throw error;
     return data || [];
   } catch (err) {
-    console.error('Error fetching revision notes:', err);
+    console.error('Error fetching revision notes:', err.message);
     return [];
   }
 }
 
 async function fetchVideoLessons(filters = {}) {
+  if (!window.supabase) {
+    console.error('fetchVideoLessons: Supabase not available');
+    return [];
+  }
   try {
-    if (!window.supabase) return [];
     let query = window.supabase
       .from('video_lessons')
       .select('*')
@@ -119,7 +136,7 @@ async function fetchVideoLessons(filters = {}) {
     if (error) throw error;
     return data || [];
   } catch (err) {
-    console.error('Error fetching videos:', err);
+    console.error('Error fetching videos:', err.message);
     return [];
   }
 }
@@ -184,8 +201,15 @@ if (localStorage.getItem('darkMode') === 'enabled' ||
 
 // ==================== Initialize on page load ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  // Re-attempt init if CDN was delayed
-  initSupabase();
+  // Re-try init in case CDN loaded late
+  let initialized = initSupabase();
+
+  if (!initialized) {
+    // Give CDN extra time and retry
+    setTimeout(() => {
+      initSupabase();
+    }, 800);
+  }
 
   if (window.supabase) {
     initQuizzes();
@@ -195,10 +219,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       await updateAuthUI();
     });
   } else {
-    console.warn('Supabase not available after DOMContentLoaded - some features may not work');
+    console.warn('Supabase not available after init attempts - auth & data features disabled');
   }
 
-  // Click listener for buttons
+  // Global click listener
   document.addEventListener('click', e => {
     if (e.target.matches('#google-login-btn, .login-btn')) {
       e.preventDefault();
