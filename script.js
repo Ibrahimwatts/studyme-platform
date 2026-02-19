@@ -5,41 +5,39 @@
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-// ==================== Safe & Retrying Supabase Init ====================
+// ==================== Robust Supabase Initialization ====================
 function initSupabase(attempt = 1) {
-  if (typeof supabase !== 'undefined') {
-    if (!window.supabase) {
-      try {
-        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('SUCCESS: Supabase client created globally (attempt ' + attempt + ')');
-        return true;
-      } catch (err) {
-        console.error('Failed to create Supabase client:', err);
-      }
-    } else {
-      console.log('Supabase already initialized - reusing');
-      return true;
+  if (typeof supabase === 'undefined' || !supabase.createClient) {
+    console.warn(`Supabase global object not ready (attempt ${attempt})`);
+    if (attempt >= 10) {
+      console.error('Supabase CDN failed to load after 10 attempts. Check <head> for <script src="https://unpkg.com/@supabase/supabase-js@2"></script>');
+      return false;
     }
-  } else {
-    console.warn('Supabase CDN not loaded yet (attempt ' + attempt + ')');
-  }
-
-  if (attempt >= 8) {
-    console.error('Supabase failed to initialize after 8 attempts');
+    setTimeout(() => initSupabase(attempt + 1), 400);
     return false;
   }
 
-  // Retry after delay
-  setTimeout(() => initSupabase(attempt + 1), 400);
-  return false;
+  if (!window.supabase) {
+    try {
+      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('SUCCESS: Supabase client created globally (attempt ' + attempt + ')');
+      return true;
+    } catch (err) {
+      console.error('Failed to create Supabase client:', err.message || err);
+      return false;
+    }
+  }
+
+  console.log('Supabase already initialized - reusing');
+  return true;
 }
 
-// Start initialization
+// Start initialization immediately
 initSupabase();
 
 // ==================== Auth Functions ====================
 async function loginWithGoogle() {
-  if (!window.supabase) {
+  if (!window.supabase || !window.supabase.auth) {
     alert('Database connection not ready. Please refresh the page.');
     return;
   }
@@ -56,7 +54,7 @@ async function loginWithGoogle() {
 }
 
 async function logout() {
-  if (!window.supabase) return;
+  if (!window.supabase || !window.supabase.auth) return;
   try {
     const { error } = await window.supabase.auth.signOut();
     if (error) throw error;
@@ -69,7 +67,7 @@ async function logout() {
 }
 
 async function updateAuthUI() {
-  if (!window.supabase) return;
+  if (!window.supabase || !window.supabase.auth) return;
 
   try {
     const { data: { user } } = await window.supabase.auth.getUser();
@@ -93,14 +91,14 @@ async function updateAuthUI() {
       if (userGreeting) userGreeting.style.display = 'none';
     }
   } catch (err) {
-    console.error('updateAuthUI failed:', err);
+    console.error('updateAuthUI failed:', err.message);
   }
 }
 
 // ==================== Global Data Fetch Helpers ====================
 async function fetchRevisionNotes(filters = {}) {
-  if (!window.supabase) {
-    console.error('fetchRevisionNotes: Supabase not available');
+  if (!window.supabase || !window.supabase.from) {
+    console.error('fetchRevisionNotes: Supabase client invalid or not initialized');
     return [];
   }
   try {
@@ -123,8 +121,8 @@ async function fetchRevisionNotes(filters = {}) {
 }
 
 async function fetchVideoLessons(filters = {}) {
-  if (!window.supabase) {
-    console.error('fetchVideoLessons: Supabase not available');
+  if (!window.supabase || !window.supabase.from) {
+    console.error('fetchVideoLessons: Supabase client invalid or not initialized');
     return [];
   }
   try {
@@ -206,17 +204,17 @@ if (localStorage.getItem('darkMode') === 'enabled' ||
 
 // ==================== Initialize on page load ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  // Retry init a few times in case CDN is slow
+  // Retry Supabase init with delay
   let initialized = initSupabase();
 
   if (!initialized) {
-    console.warn('Initial Supabase init failed - retrying in 1 second');
+    console.warn('Initial Supabase init failed - retrying in 1.5 seconds');
     setTimeout(() => {
       initSupabase();
-    }, 1000);
+    }, 1500);
   }
 
-  if (window.supabase) {
+  if (window.supabase && window.supabase.auth) {
     initQuizzes();
     await updateAuthUI();
 
@@ -224,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       await updateAuthUI();
     });
   } else {
-    console.warn('Supabase not available - auth & data features disabled');
+    console.warn('Supabase client or auth not available - features limited');
   }
 
   // Global click listener
