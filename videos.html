@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video Lessons - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Stable Supabase CDN - same as notes.html and admin.html -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -50,7 +53,7 @@
     </section>
 
     <div class="videos-layout">
-      <!-- Sidebar (added for subject filtering) -->
+      <!-- Sidebar -->
       <aside class="videos-sidebar">
         <h3>Subjects</h3>
         <ul class="subject-list" id="subject-list">
@@ -114,25 +117,27 @@
     </div>
   </footer>
 
-  <!-- Shared script (must define window.supabase safely) -->
+  <!-- Shared script -->
   <script src="script.js"></script>
 
   <!-- Page-specific logic -->
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (!window.supabase) {
-        console.error('Supabase not loaded from script.js');
-        document.getElementById('videos-container').innerHTML = '<p>Error: Supabase client not available.</p>';
-        return;
-      }
-
+    window.addEventListener('load', async function () {
       const container = document.getElementById('videos-container');
       const loadingText = document.getElementById('videos-loading');
       const subjectLinks = document.querySelectorAll('#subject-list a');
 
+      if (!window.supabaseClient) {
+        console.error('Supabase client not available');
+        container.innerHTML = '<p style="color:red;">Database connection failed. Please refresh.</p>';
+        return;
+      }
+
+      console.log('Supabase client ready - starting video fetch');
+
       // Get subject from URL or default to all
       const urlParams = new URLSearchParams(window.location.search);
-      let currentSubject = urlParams.get('subject') || null; // null = show all
+      let currentSubject = urlParams.get('subject') || null;
 
       // Highlight active subject
       subjectLinks.forEach(link => {
@@ -140,12 +145,11 @@
         link.classList.toggle('active', isActive);
       });
 
-      // Load videos
       async function loadVideos(subject = null) {
         container.innerHTML = '<p class="loading">Loading video lessons...</p>';
 
         try {
-          let query = window.supabase
+          let query = window.supabaseClient
             .from('video_lessons')
             .select('*')
             .order('created_at', { ascending: false });
@@ -189,25 +193,23 @@
           });
         } catch (err) {
           console.error('Error loading videos:', err);
-          container.innerHTML = '<p>Failed to load video lessons. Please try again later.</p>';
+          container.innerHTML = '<p style="color:red;">Failed to load videos: ' + (err.message || 'Unknown error') + '</p>';
         }
       }
 
       // Initial load
       loadVideos(currentSubject);
 
-      // Sidebar click handler (filter without reload)
+      // Sidebar click handler
       subjectLinks.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
           const subject = link.dataset.subject;
           currentSubject = subject;
 
-          // Update active class
           subjectLinks.forEach(l => l.classList.remove('active'));
           link.classList.add('active');
 
-          // Update URL without reload
           const newUrl = new URL(window.location);
           if (subject) {
             newUrl.searchParams.set('subject', subject.toLowerCase());
