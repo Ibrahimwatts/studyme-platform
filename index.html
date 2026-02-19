@@ -7,7 +7,99 @@
   <link rel="stylesheet" href="styles.css">
 
   <!-- Supabase JS client (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* Existing styles from your code - unchanged */
+
+    /* ────────────────────────────────────────────────
+       Improved responsive hamburger menu
+       ──────────────────────────────────────────────── */
+    nav {
+      position: relative;
+    }
+
+    .nav-toggle {
+      display: none;
+    }
+
+    .hamburger {
+      display: none;
+      font-size: 2rem;
+      cursor: pointer;
+      color: white;
+      background: none;
+      border: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-menu li {
+      margin-left: 1.5rem;
+    }
+
+    .nav-menu a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* Mobile menu */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+      }
+
+      .nav-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: right 0.4s ease-in-out;
+        z-index: 1000;
+      }
+
+      .nav-menu li {
+        margin: 2rem 0;
+        font-size: 1.5rem;
+      }
+
+      .nav-toggle:checked ~ .nav-menu {
+        right: 0;
+      }
+
+      /* Overlay when menu open */
+      .nav-toggle:checked ~ .hamburger::before {
+        content: "✕";
+        font-size: 2.5rem;
+      }
+    }
+
+    /* Close menu when clicking a link (mobile only) */
+    @media (max-width: 768px) {
+      .nav-menu a {
+        display: block;
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* Prevent body scroll when menu open */
+    body.menu-open {
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
 
@@ -37,7 +129,7 @@
           <li><a href="community.html">Community</a></li>
           <li><a href="classes.html">Live Classes</a></li>
           <li><a href="subscriptions.html">Subscribe</a></li>
-          <li><a href="admin.html">Admin Panel</a></li> <!-- ← NEW: Admin link added here -->
+          <li><a href="admin.html">Admin Panel</a></li>
           <li><a href="#" class="login-btn">Log In</a></li>
         </ul>
       </nav>
@@ -161,55 +253,76 @@
 
   <!-- Supabase dynamic loading script for index.html -->
   <script>
-    // Your Supabase keys
-    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+    window.addEventListener('load', async function () {
+      if (!window.supabaseClient) {
+        console.error('Supabase client not available');
+        document.getElementById('featured-videos-container').innerHTML = '<p style="color:red;">Database connection failed.</p>';
+        return;
+      }
 
-    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-
-    // Load featured video lessons on homepage
-    async function loadFeaturedVideos() {
       const container = document.getElementById('featured-videos-container');
       const loadingText = document.getElementById('videos-loading');
 
-      if (!container) return;
+      async function loadFeaturedVideos() {
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('video_lessons')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(4);
 
-      try {
-        const { data, error } = await supabase
-          .from('video_lessons')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(4); // Show only 4 featured videos
+          if (error) throw error;
 
-        if (error) throw error;
+          loadingText.remove();
 
-        loadingText.remove();
+          if (data.length === 0) {
+            container.innerHTML = '<p>No featured videos yet.</p>';
+            return;
+          }
 
-        if (data.length === 0) {
-          container.innerHTML = '<p>No featured videos yet.</p>';
-          return;
+          data.forEach(lesson => {
+            const card = document.createElement('div');
+            card.className = 'card featured-video-card';
+            card.innerHTML = `
+              <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
+              <h3>${lesson.title}</h3>
+              <p>${lesson.subject} • ${lesson.form}</p>
+              <p>${lesson.duration} min</p>
+            `;
+            container.appendChild(card);
+          });
+        } catch (err) {
+          console.error('Error loading featured videos:', err);
+          loadingText.textContent = 'Failed to load videos.';
         }
-
-        data.forEach(lesson => {
-          const card = document.createElement('div');
-          card.className = 'card featured-video-card';
-          card.innerHTML = `
-            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
-            <h3>${lesson.title}</h3>
-            <p>${lesson.subject} • ${lesson.form}</p>
-            <p>${lesson.duration} min</p>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error('Error loading featured videos:', err);
-        loadingText.textContent = 'Failed to load videos.';
       }
-    }
 
-    // Run when page loads
-    document.addEventListener('DOMContentLoaded', () => {
       loadFeaturedVideos();
+    });
+  </script>
+
+  <!-- Close mobile menu when clicking a link -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const navLinks = document.querySelectorAll('.nav-menu a');
+      const navToggle = document.getElementById('nav-toggle');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            navToggle.checked = false;
+            document.body.classList.remove('menu-open');
+          }
+        });
+      });
+
+      // Close menu when clicking outside (optional enhancement)
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && !e.target.closest('nav') && navToggle.checked) {
+          navToggle.checked = false;
+          document.body.classList.remove('menu-open');
+        }
+      });
     });
   </script>
 </body>
