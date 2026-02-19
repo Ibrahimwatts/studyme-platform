@@ -1,17 +1,19 @@
-// script.js - Studyme Platform JavaScript (Updated & Enhanced)
+// script.js - Studyme Platform JavaScript (Updated & Fixed)
 // Shared across all pages - Admin + Frontend
 
 // ==================== Safe Supabase Initialization ====================
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-// Safe init - only create if not already defined
+// Safe global init - only create if not already defined
 if (!window.supabase) {
   window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('Supabase client initialized (shared script.js)');
+  console.log('Supabase client initialized globally (shared script.js)');
+} else {
+  console.log('Supabase client already exists — reusing');
 }
 
-// ==================== Auth Functions (unchanged) ====================
+// ==================== Auth Functions ====================
 async function loginWithGoogle() {
   try {
     const { error } = await window.supabase.auth.signInWithOAuth({
@@ -39,7 +41,7 @@ async function logout() {
   }
 }
 
-// Update UI based on auth state (unchanged)
+// Update UI based on auth state
 async function updateAuthUI() {
   const { data: { user } } = await window.supabase.auth.getUser();
 
@@ -63,64 +65,7 @@ async function updateAuthUI() {
   }
 }
 
-// ==================== Global Data Fetch Helpers ====================
-// These can be used in notes.html, videos.html, tests.html, etc.
-
-async function fetchRevisionNotes(filters = {}) {
-  try {
-    let query = window.supabase
-      .from('revision_notes')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    // Apply filters (e.g. subject)
-    if (filters.subject) {
-      query = query.ilike('subject', `%${filters.subject}%`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
-  } catch (err) {
-    console.error('Error fetching revision notes:', err);
-    return [];
-  }
-}
-
-async function fetchVideoLessons(filters = {}) {
-  try {
-    let query = window.supabase
-      .from('video_lessons')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (filters.subject) {
-      query = query.ilike('subject', `%${filters.subject}%`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
-  } catch (err) {
-    console.error('Error fetching videos:', err);
-    return [];
-  }
-}
-
-// Optional: Real-time subscription for new notes (live updates)
-function subscribeToNewNotes(callback) {
-  const channel = window.supabase
-    .channel('public:revision_notes')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'revision_notes' }, payload => {
-      console.log('New note added:', payload.new);
-      callback(payload.new);
-    })
-    .subscribe();
-
-  return () => window.supabase.removeChannel(channel); // cleanup
-}
-
-// ==================== Quiz Functionality (unchanged) ====================
+// ==================== Quiz Functionality ====================
 function initQuizzes() {
   document.querySelectorAll('.quiz').forEach(quiz => {
     const submitBtn = quiz.querySelector('.quiz-submit');
@@ -166,7 +111,7 @@ function initQuizzes() {
   });
 }
 
-// ==================== Dark Mode Toggle (unchanged) ====================
+// ==================== Dark Mode Toggle ====================
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
   const isDark = document.body.classList.contains('dark-mode');
