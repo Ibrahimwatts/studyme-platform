@@ -6,7 +6,7 @@
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
   
-  <!-- Supabase CDN - MUST be here before script.js -->
+  <!-- REQUIRED Supabase CDN - must be here -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -97,12 +97,11 @@
       const container = document.getElementById('notes-container');
 
       if (!window.supabase) {
-        console.error('Supabase client not available after load');
-        container.innerHTML = '<p style="color:red;">Database connection failed. Please refresh the page.</p>';
+        container.innerHTML = '<p style="color:red;">Database connection not ready. Please refresh.</p>';
         return;
       }
 
-      console.log('Supabase ready - loading notes');
+      console.log('Supabase is ready - loading notes');
 
       async function loadRevisionNotes() {
         container.innerHTML = '<p>Loading Revision Notes...</p>';
@@ -117,7 +116,7 @@
 
           container.innerHTML = '';
 
-          if (!data || data.length === 0) {
+          if (data.length === 0) {
             container.innerHTML = '<p>No revision notes available yet.</p>';
             return;
           }
@@ -134,8 +133,8 @@
             container.appendChild(card);
           });
         } catch (err) {
-          console.error('Load error:', err);
-          container.innerHTML = '<p style="color:red;">Failed to load notes. Please check console.</p>';
+          console.error('Load error:', err.message);
+          container.innerHTML = '<p style="color:red;">Failed to load notes: ' + err.message + '</p>';
         }
       }
 
