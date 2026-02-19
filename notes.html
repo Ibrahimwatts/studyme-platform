@@ -5,21 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Ensure library is in the HEAD -->
+  <!-- 1. CRITICAL: Load library in HEAD so it's ready before ANY other script -->
   <script src="https://unpkg.com"></script>
 </head>
 <body>
 
   <header>
     <div class="header-container">
-      <div class="logo">
-        <h1>Studyme</h1>
-        <span>Digital Learning Platform</span>
-      </div>
-      <div class="search-bar">
-        <input type="search" placeholder="Search notes, videos, tests...">
-        <button type="submit">Search</button>
-      </div>
+      <div class="logo"><h1>Studyme</h1><span>Digital Learning Platform</span></div>
       <nav>
         <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
@@ -31,39 +24,39 @@
     </div>
   </header>
 
-  <main>
-    <div class="notes-layout">
-      <aside class="notes-sidebar">
-        <h3>Subjects</h3>
-        <ul class="subject-list" id="subject-list">
-          <li><a href="#" data-subject="Physics" class="active">Physics</a></li>
-          <li><a href="#" data-subject="Chemistry">Chemistry</a></li>
-          <li><a href="#" data-subject="Biology">Biology</a></li>
-          <li><a href="#" data-subject="Mathematics">Mathematics</a></li>
-        </ul>
-      </aside>
-
-      <section class="notes-content" id="notes-container">
-        <h2>Loading Revision Notes...</h2>
-      </section>
-    </div>
+  <main class="notes-layout">
+    <aside class="notes-sidebar">
+      <h3>Subjects</h3>
+      <ul class="subject-list" id="subject-list">
+        <li><a href="#" data-subject="Physics" class="active">Physics</a></li>
+        <li><a href="#" data-subject="Chemistry">Chemistry</a></li>
+        <li><a href="#" data-subject="Biology">Biology</a></li>
+        <li><a href="#" data-subject="Mathematics">Mathematics</a></li>
+      </ul>
+    </aside>
+    <section class="notes-content" id="notes-container">
+      <h2>Loading Revision Notes...</h2>
+    </section>
   </main>
 
+  <!-- 2. Load Shared Script -->
   <script src="script.js"></script>
 
+  <!-- 3. Page Logic with Retry Loop -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const container = document.getElementById('notes-container');
       
-      // FIX: Wait for window.supabase to be fully initialized by script.js
+      // WAIT LOOP: Prevents "supabase is not a function" error
       let attempts = 0;
-      while ((!window.supabase || !window.supabase.from) && attempts < 10) {
+      while ((!window.supabase || !window.supabase.from) && attempts < 20) {
+        console.log("Waiting for Supabase client...");
         await new Promise(r => setTimeout(r, 200));
         attempts++;
       }
 
       if (!window.supabase || !window.supabase.from) {
-        container.innerHTML = '<p style="color:red">Failed to connect to backend. Please refresh.</p>';
+        container.innerHTML = '<p style="color:red; font-weight:bold;">Failed to connect to backend. Please refresh the page.</p>';
         return;
       }
 
@@ -72,7 +65,7 @@
       let currentSubject = urlParams.get('subject') || 'Physics';
 
       async function loadNotes(subject) {
-        container.innerHTML = '<p>Loading...</p>';
+        container.innerHTML = '<p>Fetching data...</p>';
         try {
           const { data, error } = await window.supabase
             .from('revision_notes')
@@ -95,7 +88,8 @@
             container.appendChild(card);
           });
         } catch (err) {
-          container.innerHTML = '<p>Error loading notes. Check RLS policies.</p>';
+          console.error("Fetch error:", err);
+          container.innerHTML = '<p>Error loading content. Please check your database connection.</p>';
         }
       }
 
