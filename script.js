@@ -1,47 +1,52 @@
-// script.js - Studyme Platform JavaScript (Final Fixed Version)
+// script.js - Studyme Platform JavaScript (FINAL FIXED VERSION)
 // Shared across all pages - Admin + Frontend
 
 // ==================== Supabase Configuration ====================
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-// ==================== Safe Global Supabase Init ====================
-function initSupabase() {
-  if (typeof supabase === 'undefined') {
-    console.warn('Supabase CDN not loaded yet. Waiting for <script src="https://unpkg.com/@supabase/supabase-js@2"> in <head>');
+// ==================== Safe & Retrying Supabase Init ====================
+function initSupabase(attempt = 1) {
+  if (typeof supabase !== 'undefined') {
+    if (!window.supabase) {
+      try {
+        window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('SUCCESS: Supabase client created globally (attempt ' + attempt + ')');
+        return true;
+      } catch (err) {
+        console.error('Failed to create Supabase client:', err);
+      }
+    } else {
+      console.log('Supabase already initialized - reusing');
+      return true;
+    }
+  } else {
+    console.warn('Supabase CDN not loaded yet (attempt ' + attempt + ')');
+  }
+
+  if (attempt >= 8) {
+    console.error('Supabase failed to initialize after 8 attempts');
     return false;
   }
 
-  if (!window.supabase) {
-    try {
-      window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('SUCCESS: Supabase client initialized globally');
-      return true;
-    } catch (err) {
-      console.error('Failed to create Supabase client:', err);
-      return false;
-    }
-  }
-
-  console.log('Supabase already initialized - reusing');
-  return true;
+  // Retry after delay
+  setTimeout(() => initSupabase(attempt + 1), 400);
+  return false;
 }
 
-// Run immediately
+// Start initialization
 initSupabase();
 
 // ==================== Auth Functions ====================
 async function loginWithGoogle() {
   if (!window.supabase) {
-    alert('Supabase not ready. Please refresh the page.');
+    alert('Database connection not ready. Please refresh the page.');
     return;
   }
   try {
     const { error } = await window.supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/admin.html'
-      }
+      options: { redirectTo: window.location.origin + '/admin.html' }
     });
     if (error) throw error;
   } catch (err) {
@@ -51,10 +56,7 @@ async function loginWithGoogle() {
 }
 
 async function logout() {
-  if (!window.supabase) {
-    alert('Supabase not ready. Please refresh.');
-    return;
-  }
+  if (!window.supabase) return;
   try {
     const { error } = await window.supabase.auth.signOut();
     if (error) throw error;
@@ -66,29 +68,32 @@ async function logout() {
   }
 }
 
-// Update UI based on auth state
 async function updateAuthUI() {
   if (!window.supabase) return;
 
-  const { data: { user } } = await window.supabase.auth.getUser();
+  try {
+    const { data: { user } } = await window.supabase.auth.getUser();
 
-  const loginBtns = document.querySelectorAll('.login-btn');
-  const logoutBtns = document.querySelectorAll('.logout-btn');
-  const userGreeting = document.querySelector('.user-greeting');
+    const loginBtns = document.querySelectorAll('.login-btn');
+    const logoutBtns = document.querySelectorAll('.logout-btn');
+    const userGreeting = document.querySelector('.user-greeting');
 
-  if (user) {
-    loginBtns.forEach(btn => btn.style.display = 'none');
-    logoutBtns.forEach(btn => btn.style.display = 'inline-block');
+    if (user) {
+      loginBtns.forEach(btn => btn.style.display = 'none');
+      logoutBtns.forEach(btn => btn.style.display = 'inline-block');
 
-    const name = user.user_metadata?.full_name || user.email.split('@')[0];
-    if (userGreeting) {
-      userGreeting.textContent = `Welcome, ${name}`;
-      userGreeting.style.display = 'inline';
+      const name = user.user_metadata?.full_name || user.email.split('@')[0];
+      if (userGreeting) {
+        userGreeting.textContent = `Welcome, ${name}`;
+        userGreeting.style.display = 'inline';
+      }
+    } else {
+      loginBtns.forEach(btn => btn.style.display = 'inline-block');
+      logoutBtns.forEach(btn => btn.style.display = 'none');
+      if (userGreeting) userGreeting.style.display = 'none';
     }
-  } else {
-    loginBtns.forEach(btn => btn.style.display = 'inline-block');
-    logoutBtns.forEach(btn => btn.style.display = 'none');
-    if (userGreeting) userGreeting.style.display = 'none';
+  } catch (err) {
+    console.error('updateAuthUI failed:', err);
   }
 }
 
@@ -201,14 +206,14 @@ if (localStorage.getItem('darkMode') === 'enabled' ||
 
 // ==================== Initialize on page load ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  // Re-try init in case CDN loaded late
+  // Retry init a few times in case CDN is slow
   let initialized = initSupabase();
 
   if (!initialized) {
-    // Give CDN extra time and retry
+    console.warn('Initial Supabase init failed - retrying in 1 second');
     setTimeout(() => {
       initSupabase();
-    }, 800);
+    }, 1000);
   }
 
   if (window.supabase) {
@@ -219,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       await updateAuthUI();
     });
   } else {
-    console.warn('Supabase not available after init attempts - auth & data features disabled');
+    console.warn('Supabase not available - auth & data features disabled');
   }
 
   // Global click listener
