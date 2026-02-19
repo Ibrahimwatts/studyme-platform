@@ -7,157 +7,7 @@
   <link rel="stylesheet" href="styles.css">
 
   <!-- Supabase JS client (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-
-  <style>
-    /* ────────────────────────────────────────────────
-       Professional responsive hamburger menu
-       ──────────────────────────────────────────────── */
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    header {
-      background: linear-gradient(135deg, #ff416c, #ff4b2b);
-      color: white;
-      padding: 1rem 2rem;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .logo h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-
-    .logo span {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-
-    .search-bar {
-      flex: 1;
-      max-width: 500px;
-      margin: 0 2rem;
-    }
-
-    .search-bar input {
-      width: 100%;
-      padding: 0.7rem 1rem;
-      border: none;
-      border-radius: 50px 0 0 50px;
-      font-size: 1rem;
-    }
-
-    .search-bar button {
-      padding: 0.7rem 1.2rem;
-      border: none;
-      background: #4CAF50;
-      color: white;
-      border-radius: 0 50px 50px 0;
-      cursor: pointer;
-    }
-
-    nav {
-      position: relative;
-    }
-
-    .nav-toggle {
-      display: none;
-    }
-
-    .hamburger {
-      display: none;
-      font-size: 2rem;
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-    }
-
-    .nav-menu {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .nav-menu li {
-      margin-left: 1.8rem;
-    }
-
-    .nav-menu a {
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav-menu a:hover {
-      color: #ffeb3b;
-    }
-
-    /* Mobile menu */
-    @media (max-width: 900px) {
-      .hamburger {
-        display: block;
-      }
-
-      .nav-menu {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 80%;
-        max-width: 320px;
-        height: 100vh;
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: right 0.35s ease-in-out;
-        z-index: 9999;
-        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-      }
-
-      .nav-menu li {
-        margin: 1.8rem 0;
-        font-size: 1.4rem;
-      }
-
-      .nav-toggle:checked ~ .nav-menu {
-        right: 0;
-      }
-
-      .hamburger::before {
-        content: "☰";
-      }
-
-      .nav-toggle:checked ~ .hamburger::before {
-        content: "✕";
-        font-size: 2.4rem;
-      }
-    }
-
-    /* Prevent body scroll when menu is open */
-    body.menu-open {
-      overflow: hidden;
-    }
-
-    main {
-      padding: 2rem;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -175,7 +25,7 @@
 
       <nav>
         <input type="checkbox" id="nav-toggle" class="nav-toggle">
-        <label for="nav-toggle" class="hamburger"></label>
+        <label for="nav-toggle" class="hamburger">☰</label>
 
         <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
@@ -187,7 +37,7 @@
           <li><a href="community.html">Community</a></li>
           <li><a href="classes.html">Live Classes</a></li>
           <li><a href="subscriptions.html">Subscribe</a></li>
-          <li><a href="admin.html">Admin Panel</a></li>
+          <li><a href="admin.html">Admin Panel</a></li> <!-- ← NEW: Admin link added here -->
           <li><a href="#" class="login-btn">Log In</a></li>
         </ul>
       </nav>
@@ -244,7 +94,6 @@
       </div>
     </section>
 
-    <!-- Rest of your content remains unchanged -->
     <section class="about">
       <h2 class="section-title">About Studyme</h2>
       <p>Studyme is dedicated to making high-quality, curriculum-aligned education accessible to every high school student in Kenya. We partner with experienced educators to deliver engaging notes, videos, tests, live sessions, and community tools — empowering learners to excel in KCSE and beyond.</p>
@@ -312,84 +161,55 @@
 
   <!-- Supabase dynamic loading script for index.html -->
   <script>
-    window.addEventListener('load', async function () {
-      if (!window.supabaseClient) {
-        console.error('Supabase client not available');
-        document.getElementById('featured-videos-container').innerHTML = '<p style="color:red;">Database connection failed.</p>';
-        return;
-      }
+    // Your Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Load featured video lessons on homepage
+    async function loadFeaturedVideos() {
       const container = document.getElementById('featured-videos-container');
       const loadingText = document.getElementById('videos-loading');
 
-      async function loadFeaturedVideos() {
-        try {
-          const { data, error } = await window.supabaseClient
-            .from('video_lessons')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(4);
+      if (!container) return;
 
-          if (error) throw error;
+      try {
+        const { data, error } = await supabase
+          .from('video_lessons')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(4); // Show only 4 featured videos
 
-          loadingText.remove();
+        if (error) throw error;
 
-          if (data.length === 0) {
-            container.innerHTML = '<p>No featured videos yet.</p>';
-            return;
-          }
+        loadingText.remove();
 
-          data.forEach(lesson => {
-            const card = document.createElement('div');
-            card.className = 'card featured-video-card';
-            card.innerHTML = `
-              <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
-              <h3>${lesson.title}</h3>
-              <p>${lesson.subject} • ${lesson.form}</p>
-              <p>${lesson.duration} min</p>
-            `;
-            container.appendChild(card);
-          });
-        } catch (err) {
-          console.error('Error loading featured videos:', err);
-          loadingText.textContent = 'Failed to load videos.';
+        if (data.length === 0) {
+          container.innerHTML = '<p>No featured videos yet.</p>';
+          return;
         }
-      }
 
-      loadFeaturedVideos();
-    });
-  </script>
-
-  <!-- Hamburger menu close on link click + body scroll lock -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const navToggle = document.getElementById('nav-toggle');
-      const navLinks = document.querySelectorAll('.nav-menu a');
-
-      // Close menu when clicking any link
-      navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          navToggle.checked = false;
-          document.body.classList.remove('menu-open');
+        data.forEach(lesson => {
+          const card = document.createElement('div');
+          card.className = 'card featured-video-card';
+          card.innerHTML = `
+            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
+            <h3>${lesson.title}</h3>
+            <p>${lesson.subject} • ${lesson.form}</p>
+            <p>${lesson.duration} min</p>
+          `;
+          container.appendChild(card);
         });
-      });
+      } catch (err) {
+        console.error('Error loading featured videos:', err);
+        loadingText.textContent = 'Failed to load videos.';
+      }
+    }
 
-      // Close menu when clicking outside
-      document.addEventListener('click', (e) => {
-        if (navToggle.checked && !e.target.closest('nav')) {
-          navToggle.checked = false;
-          document.body.classList.remove('menu-open');
-        }
-      });
-
-      // Lock body scroll when menu open
-      navToggle.addEventListener('change', () => {
-        if (navToggle.checked) {
-          document.body.classList.add('menu-open');
-        } else {
-          document.body.classList.remove('menu-open');
-        }
-      });
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadFeaturedVideos();
     });
   </script>
 </body>
