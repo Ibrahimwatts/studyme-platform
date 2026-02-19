@@ -6,8 +6,8 @@
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
   
-  <!-- REQUIRED Supabase CDN - must be here -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- Reliable Supabase CDN from jsDelivr - pinned version -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -53,6 +53,7 @@
     </section>
 
     <div class="notes-layout">
+      <!-- Sidebar -->
       <aside class="notes-sidebar">
         <h3>Subjects</h3>
         <ul class="subject-list" id="subject-list">
@@ -77,6 +78,7 @@
         </div>
       </aside>
 
+      <!-- Dynamic notes -->
       <section class="notes-content" id="notes-container">
         <h2>Loading Revision Notes...</h2>
       </section>
@@ -93,21 +95,23 @@
   <script src="script.js"></script>
 
   <script>
+    // Wait for full page load
     window.addEventListener('load', async function () {
       const container = document.getElementById('notes-container');
 
-      if (!window.supabase) {
+      if (!window.supabaseClient) {
         container.innerHTML = '<p style="color:red;">Database connection not ready. Please refresh.</p>';
+        console.error('window.supabaseClient is missing');
         return;
       }
 
-      console.log('Supabase is ready - loading notes');
+      console.log('Supabase client ready - starting fetch');
 
       async function loadRevisionNotes() {
         container.innerHTML = '<p>Loading Revision Notes...</p>';
 
         try {
-          const { data, error } = await window.supabase
+          const { data, error } = await window.supabaseClient
             .from('revision_notes')
             .select('*')
             .order('created_at', { ascending: false });
@@ -125,16 +129,19 @@
             const card = document.createElement('div');
             card.className = 'content-card';
             card.innerHTML = `
-              <h3>${note.title || 'Untitled'}</h3>
-              <p>${note.subject} • ${note.form}</p>
-              <p>${note.body ? note.body.substring(0, 300) + '...' : ''}</p>
-              ${note.pdf_url ? `<a href="${note.pdf_url}" target="_blank">Download PDF</a>` : ''}
+              <h3>${note.title || 'Untitled Note'}</h3>
+              <p class="note-meta">${note.subject || '?'} • ${note.form || '?'}</p>
+              <div class="note-body">
+                ${note.body ? note.body.substring(0, 400) + (note.body.length > 400 ? '...' : '') : 'No preview available'}
+              </div>
+              ${note.pdf_url ? `<a href="${note.pdf_url}" target="_blank" class="btn small">Download PDF</a>` : ''}
+              <a href="#" class="btn small premium-btn">Read Full Note (Premium)</a>
             `;
             container.appendChild(card);
           });
         } catch (err) {
-          console.error('Load error:', err.message);
-          container.innerHTML = '<p style="color:red;">Failed to load notes: ' + err.message + '</p>';
+          console.error('Load error:', err.message || err);
+          container.innerHTML = '<p style="color:red;">Failed to load notes: ' + (err.message || 'Unknown error') + '</p>';
         }
       }
 
