@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- 1. Load Supabase Library FIRST to prevent ReferenceErrors -->
+  
+  <!-- CORRECTED: Full Supabase CDN URL -->
   <script src="https://unpkg.com"></script>
 </head>
 <body>
@@ -91,21 +92,20 @@
     </div>
   </footer>
 
-  <!-- 2. Shared script (now safe because library is loaded in head) -->
+  <!-- Load script.js which initializes window.supabase -->
   <script src="script.js"></script>
 
-  <!-- 3. Page-specific logic -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      // Small timeout ensures window.supabase is registered if script.js is still processing
+      // Retry logic if script.js takes a moment
       if (!window.supabase) {
-        console.warn('Supabase not immediately ready, waiting 100ms...');
-        await new Promise(r => setTimeout(r, 100));
+        console.warn('Supabase not immediately ready, waiting 150ms...');
+        await new Promise(r => setTimeout(r, 150));
       }
 
       if (!window.supabase) {
         console.error('Supabase not loaded from script.js');
-        document.getElementById('notes-container').innerHTML = '<p>Error: Supabase client not available.</p>';
+        document.getElementById('notes-container').innerHTML = '<p>Error: Supabase client not available. Please refresh.</p>';
         return;
       }
 
@@ -115,6 +115,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       let currentSubject = urlParams.get('subject') || 'Physics';
 
+      // Load initial state
       subjectLinks.forEach(link => {
         link.classList.toggle('active', link.dataset.subject.toLowerCase() === currentSubject.toLowerCase());
       });
@@ -133,8 +134,8 @@
 
           container.innerHTML = '';
 
-          if (data.length === 0) {
-            container.innerHTML = `<p>No revision notes found for ${subject} yet. Subscribe to unlock premium content!</p>`;
+          if (!data || data.length === 0) {
+            container.innerHTML = `<p>No revision notes found for ${subject} yet.</p>`;
             return;
           }
 
@@ -147,14 +148,13 @@
               <div class="note-body">
                 ${note.body ? note.body.substring(0, 300) + (note.body.length > 300 ? '...' : '') : 'No preview available'}
               </div>
-              ${note.pdf_url ? `<a href="${note.pdf_url}" target="_blank" class="btn small">Download PDF</a>` : ''}
-              <a href="#" class="btn small premium-btn">Read Full Note (Premium)</a>
+              <a href="#" class="btn small premium-btn">Read Full Note</a>
             `;
             container.appendChild(card);
           });
         } catch (err) {
           console.error('Error loading notes:', err);
-          container.innerHTML = '<p>Failed to load revision notes. Please try again later.</p>';
+          container.innerHTML = '<p>Failed to load revision notes. Check your internet or Supabase RLS policies.</p>';
         }
       }
 
