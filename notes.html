@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- 1. Load Supabase Library FIRST to prevent ReferenceErrors -->
+  <script src="https://unpkg.com"></script>
 </head>
 <body>
 
@@ -89,13 +91,18 @@
     </div>
   </footer>
 
-  <!-- Shared script (must define window.supabase safely) -->
+  <!-- 2. Shared script (now safe because library is loaded in head) -->
   <script src="script.js"></script>
 
-  <!-- Page-specific logic -->
+  <!-- 3. Page-specific logic -->
   <script>
-    // Wait for Supabase to be ready from script.js
     document.addEventListener('DOMContentLoaded', async () => {
+      // Small timeout ensures window.supabase is registered if script.js is still processing
+      if (!window.supabase) {
+        console.warn('Supabase not immediately ready, waiting 100ms...');
+        await new Promise(r => setTimeout(r, 100));
+      }
+
       if (!window.supabase) {
         console.error('Supabase not loaded from script.js');
         document.getElementById('notes-container').innerHTML = '<p>Error: Supabase client not available.</p>';
@@ -105,16 +112,13 @@
       const container = document.getElementById('notes-container');
       const subjectLinks = document.querySelectorAll('#subject-list a');
 
-      // Get subject from URL or default to Physics
       const urlParams = new URLSearchParams(window.location.search);
       let currentSubject = urlParams.get('subject') || 'Physics';
 
-      // Highlight active subject
       subjectLinks.forEach(link => {
         link.classList.toggle('active', link.dataset.subject.toLowerCase() === currentSubject.toLowerCase());
       });
 
-      // Load notes for selected subject
       async function loadNotes(subject) {
         container.innerHTML = '<p class="loading">Loading Revision Notes...</p>';
 
@@ -122,7 +126,7 @@
           const { data, error } = await window.supabase
             .from('revision_notes')
             .select('*')
-            .ilike('subject', `%${subject}%`) // case-insensitive partial match
+            .ilike('subject', `%${subject}%`) 
             .order('created_at', { ascending: false });
 
           if (error) throw error;
@@ -154,21 +158,17 @@
         }
       }
 
-      // Initial load
       loadNotes(currentSubject);
 
-      // Sidebar click handler (filter without reload)
       subjectLinks.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
           const subject = link.dataset.subject;
           currentSubject = subject;
 
-          // Update active class
           subjectLinks.forEach(l => l.classList.remove('active'));
           link.classList.add('active');
 
-          // Update URL without reload
           const newUrl = new URL(window.location);
           newUrl.searchParams.set('subject', subject.toLowerCase());
           window.history.pushState({}, '', newUrl);
