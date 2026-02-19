@@ -34,7 +34,7 @@
     .pdf-link { color: #0070f3; text-decoration: underline; font-size: 0.95rem; }
   </style>
 
-  <!-- Stable CDN - same as your working notes.html -->
+  <!-- Stable CDN - same as working notes.html -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -188,64 +188,48 @@
       const loginSection = document.getElementById('login-section');
       const dashboardSection = document.getElementById('dashboard-section');
 
-      // Clean hash/params on load
-      if (window.location.hash || window.location.search.includes('cb=')) {
+      // Clean URL hash and query params on load
+      if (window.location.hash || window.location.search) {
         window.history.replaceState(null, null, window.location.pathname);
       }
 
-      // Force session recovery (fixes dashboard not showing after login redirect)
+      // Force session recovery after OAuth redirect
       try {
-        // Delay to let OAuth hash settle
-        await new Promise(r => setTimeout(r, 1000));
+        console.log('Attempting to recover session after redirect...');
 
-        // Try to get current session
-        const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+        // First try getSession()
+        let { data: { session } } = await window.supabaseClient.auth.getSession();
 
-        if (sessionError) console.error('getSession error:', sessionError);
+        if (!session) {
+          // If no session, try refresh (common after OAuth redirect)
+          console.log('No session found - trying refreshSession...');
+          const refreshResult = await window.supabaseClient.auth.refreshSession();
+          session = refreshResult.data.session;
+        }
 
         if (session && session.user) {
-          console.log('Session found on initial load:', session.user.email);
+          console.log('Session recovered successfully:', session.user.email);
           loginSection.classList.add('hidden');
           dashboardSection.classList.remove('hidden');
           document.getElementById('user-name').textContent = 
             session.user.user_metadata?.full_name || session.user.email;
           loadDashboardData();
         } else {
-          // Force refresh session to recover after OAuth redirect
-          console.log('No session on load - forcing refreshSession...');
-          const { data: refreshed, error: refreshError } = await window.supabaseClient.auth.refreshSession();
-
-          if (refreshError) {
-            console.error('refreshSession failed:', refreshError.message);
-          } else if (refreshed.session) {
-            console.log('Session recovered via refresh:', refreshed.session.user.email);
-            loginSection.classList.add('hidden');
-            dashboardSection.classList.remove('hidden');
-            document.getElementById('user-name').textContent = 
-              refreshed.session.user.user_metadata?.full_name || refreshed.session.user.email;
-            loadDashboardData();
-          } else {
-            console.warn('No session after refresh - user likely not logged in');
-          }
+          console.warn('No session could be recovered after redirect');
         }
       } catch (err) {
-        console.error('Session recovery error:', err);
+        console.error('Session recovery failed:', err.message);
       }
 
-      // Auth listener
+      // Auth state change listener
       window.supabaseClient.auth.onAuthStateChange((event, session) => {
-        console.log("Auth Event:", event, session);
+        console.log("Auth Event:", event, session ? session.user?.email : 'no session');
 
         if (session && session.user) {
           loginSection.classList.add('hidden');
           dashboardSection.classList.remove('hidden');
           document.getElementById('user-name').textContent = 
             session.user.user_metadata?.full_name || session.user.email;
-
-          if (window.location.hash || window.location.search.includes('cb=')) {
-            window.history.replaceState(null, null, window.location.pathname);
-          }
-
           loadDashboardData();
         } else {
           loginSection.classList.remove('hidden');
@@ -255,8 +239,8 @@
 
       // Login button
       document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-        const redirectTo = window.location.origin + '/admin.html?cb=' + Date.now();
-        console.log('Redirecting to:', redirectTo);
+        const redirectTo = window.location.origin + '/admin.html';
+        console.log('Login redirectTo:', redirectTo);
 
         try {
           await new Promise(r => setTimeout(r, 800)); // prevent lock timeout
