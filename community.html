@@ -119,9 +119,20 @@
       line-height: 1.6;
     }
 
-    .post-replies-count {
-      color: var(--gray);
-      font-weight: 500;
+    .post-actions {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .reply-btn, .view-replies-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
     }
 
     .reply-form {
@@ -137,6 +148,7 @@
       border-radius: 8px;
       margin-bottom: 0.8rem;
       resize: vertical;
+      min-height: 80px;
     }
 
     .post-login-prompt {
@@ -144,6 +156,19 @@
       padding: 1.5rem;
       background: var(--light-bg);
       border-radius: 12px;
+    }
+
+    .replies-container {
+      margin-top: 1rem;
+      padding-left: 2rem;
+      border-left: 3px solid var(--accent);
+    }
+
+    .reply-item {
+      background: var(--light-bg);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
     }
   </style>
 </head>
@@ -269,7 +294,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Community logic – FIXED version -->
+  <!-- Community logic – FULLY FIXED with replies -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const discussionsContainer = document.getElementById('discussions-container');
@@ -293,47 +318,48 @@
         loginPrompt.classList.remove('hidden');
       }
 
-      // Load discussions – fixed query + better error handling
+      // Load discussions + replies
       async function loadDiscussions() {
         discussionsContainer.innerHTML = '<p>Loading discussions...</p>';
         refreshBtn.classList.add('hidden');
 
         try {
-          // Fetch discussions (no invalid join)
-          const { data, error } = await window.supabaseClient
+          // Fetch discussions
+          const { data: posts, error: postsError } = await window.supabaseClient
             .from('discussions')
             .select('id, title, content, created_at, user_id')
             .order('created_at', { ascending: false })
             .limit(10);
 
-          if (error) throw error;
+          if (postsError) throw postsError;
 
-          discussionsContainer.innerHTML = '';
-
-          if (data.length === 0) {
+          if (posts.length === 0) {
             discussionsContainer.innerHTML = '<p>No discussions yet. Be the first to start one!</p>';
             return;
           }
 
-          // Get all unique user IDs
-          const userIds = [...new Set(data.map(post => post.user_id))];
+          // Get unique user IDs for authors
+          const userIds = [...new Set(posts.map(p => p.user_id))];
 
-          // Fetch user names in one go
+          // Fetch user names
           const { data: users } = await window.supabaseClient
             .from('users')
             .select('id, raw_user_meta_data')
             .in('id', userIds);
 
-          // Map user_id to name
           const userMap = {};
           users?.forEach(u => {
             userMap[u.id] = u.raw_user_meta_data?.full_name || 'Anonymous';
           });
 
-          // Render posts
-          data.forEach(post => {
+          discussionsContainer.innerHTML = '';
+
+          // Render each post + its replies
+          for (const post of posts) {
             const postEl = document.createElement('div');
             postEl.className = 'discussion-post';
+            postEl.dataset.postId = post.id;
+
             postEl.innerHTML = `
               <div class="post-header">
                 <span class="post-author">${userMap[post.user_id] || 'Anonymous'}</span>
@@ -341,14 +367,148 @@
               </div>
               <h3>${post.title}</h3>
               <div class="post-content">${post.content.replace(/\n/g, '<br>')}</div>
-              <p class="post-replies-count">Replies: <strong>0</strong> (coming soon)</p>
+              <div class="post-actions">
+                <button class="reply-btn" data-post-id="${post.id}">Reply</button>
+                <button class="view-replies-btn" data-post-id="${post.id}">View Replies (<span class="reply-count">0</span>)</button>
+              </div>
+              <div class="replies-container hidden" id="replies-${post.id}"></div>
+              <div class="reply-form hidden" id="reply-form-${post.id}">
+                <textarea class="reply-input" placeholder="Write your reply..." rows="3"></textarea>
+                <button class="btn primary small submit-reply" data-post-id="${post.id}">Post Reply</button>
+              </div>
             `;
+
             discussionsContainer.appendChild(postEl);
+
+            // Load reply count & replies on demand
+            loadReplyCount(post.id);
+          }
+
+          // Event listeners for reply & view
+          document.querySelectorAll('.reply-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const postId = e.target.dataset.postId;
+              const form = document.getElementById(`reply-form-${postId}`);
+              form.classList.toggle('hidden');
+            });
+          });
+
+          document.querySelectorAll('.view-replies-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              const postId = e.target.dataset.postId;
+              const container = document.getElementById(`replies-${postId}`);
+              container.classList.toggle('hidden');
+
+              if (!container.classList.contains('hidden') && container.innerHTML === '') {
+                await loadReplies(postId, container);
+              }
+            });
+          });
+
+          document.querySelectorAll('.submit-reply').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              const postId = e.target.dataset.postId;
+              const textarea = document.querySelector(`#reply-form-${postId} textarea`);
+              const content = textarea.value.trim();
+
+              if (!content) {
+                alert('Reply cannot be empty.');
+                return;
+              }
+
+              try {
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                if (!user) throw new Error('You must be logged in.');
+
+                const { error } = await window.supabaseClient
+                  .from('replies')
+                  .insert({
+                    discussion_id: postId,
+                    user_id: user.id,
+                    content
+                  });
+
+                if (error) throw error;
+
+                textarea.value = '';
+                alert('Reply posted!');
+                await loadReplies(postId, document.getElementById(`replies-${postId}`));
+                await loadReplyCount(postId);
+              } catch (err) {
+                alert('Failed to post reply: ' + err.message);
+              }
+            });
           });
         } catch (err) {
           console.error('Error loading discussions:', err);
-          discussionsContainer.innerHTML = '<p style="color:red;">Failed to load discussions. Check your connection or try again.</p>';
-          refreshBtn.classList.remove('hidden');
+          discussionsContainer.innerHTML = '<p style="color:red;">Failed to load discussions. <button id="retry-load">Try Again</button></p>';
+          document.getElementById('retry-load')?.addEventListener('click', loadDiscussions);
+        }
+      }
+
+      // Load reply count for a post
+      async function loadReplyCount(postId) {
+        try {
+          const { count, error } = await window.supabaseClient
+            .from('replies')
+            .select('*', { count: 'exact', head: true })
+            .eq('discussion_id', postId);
+
+          if (error) throw error;
+
+          const btn = document.querySelector(`.view-replies-btn[data-post-id="${postId}"] .reply-count`);
+          if (btn) btn.textContent = count || 0;
+        } catch (err) {
+          console.error('Error loading reply count:', err);
+        }
+      }
+
+      // Load all replies for a post
+      async function loadReplies(postId, container) {
+        container.innerHTML = '<p>Loading replies...</p>';
+
+        try {
+          const { data: replies, error } = await window.supabaseClient
+            .from('replies')
+            .select('id, content, created_at, user_id')
+            .eq('discussion_id', postId)
+            .order('created_at', { ascending: true });
+
+          if (error) throw error;
+
+          container.innerHTML = '';
+
+          if (replies.length === 0) {
+            container.innerHTML = '<p>No replies yet.</p>';
+            return;
+          }
+
+          const userIds = [...new Set(replies.map(r => r.user_id))];
+          const { data: users } = await window.supabaseClient
+            .from('users')
+            .select('id, raw_user_meta_data')
+            .in('id', userIds);
+
+          const userMap = {};
+          users?.forEach(u => {
+            userMap[u.id] = u.raw_user_meta_data?.full_name || 'Anonymous';
+          });
+
+          replies.forEach(reply => {
+            const replyEl = document.createElement('div');
+            replyEl.className = 'reply-item';
+            replyEl.innerHTML = `
+              <div class="post-header">
+                <span class="post-author">${userMap[reply.user_id] || 'Anonymous'}</span>
+                <span class="post-time">${new Date(reply.created_at).toLocaleString()}</span>
+              </div>
+              <div class="post-content">${reply.content.replace(/\n/g, '<br>')}</div>
+            `;
+            container.appendChild(replyEl);
+          });
+        } catch (err) {
+          console.error('Error loading replies:', err);
+          container.innerHTML = '<p style="color:red;">Failed to load replies.</p>';
         }
       }
 
@@ -365,7 +525,7 @@
 
           try {
             const { data: { user } } = await window.supabaseClient.auth.getUser();
-            if (!user) throw new Error('You must be logged in to post.');
+            if (!user) throw new Error('You must be logged in.');
 
             const { error } = await window.supabaseClient
               .from('discussions')
@@ -380,7 +540,7 @@
             alert('Your question has been posted!');
             document.getElementById('post-title').value = '';
             document.getElementById('post-content').value = '';
-            loadDiscussions(); // Refresh list immediately
+            loadDiscussions();
           } catch (err) {
             console.error('Post error:', err);
             alert('Failed to post: ' + (err.message || 'Unknown error'));
