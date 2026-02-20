@@ -76,8 +76,6 @@
       <div class="logo">
         <h1>Studyme</h1>
         <span>Digital Learning Platform</span>
-        <!-- Welcome message (only shown when logged in) -->
-        <span id="welcome-msg" class="welcome-msg hidden"></span>
       </div>
 
       <div class="search-bar">
@@ -100,8 +98,7 @@
           <li><a href="classes.html">Live Classes</a></li>
           <li><a href="subscriptions.html">Subscribe</a></li>
           <li id="admin-link"><a href="admin.html">Admin Panel</a></li>
-          <li id="logout-li" class="hidden"><a href="#" id="logout-btn">Sign Out</a></li>
-          <li><a href="login.html" class="login-btn">Log In</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
         </ul>
       </nav>
     </div>
@@ -270,64 +267,30 @@
     });
   </script>
 
-  <!-- Hamburger toggle + Auth UI updates -->
+  <!-- Hamburger toggle script – exactly as you requested -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
       const navMenu = document.querySelector('.nav-menu');
-      const logoutBtn = document.getElementById('logout-btn');
-      const logoutLi = document.getElementById('logout-li');
-      const loginBtn = document.querySelector('.login-btn');
-      const welcomeMsg = document.getElementById('welcome-msg');
-      const adminLink = document.getElementById('admin-link');
 
-      // Hamburger toggle
       hamburger.addEventListener('click', () => {
+        // This adds/removes the 'active' class to show/hide the vertical list
         navMenu.classList.toggle('active');
-        const expanded = hamburger.getAttribute('aria-expanded') === 'true';
+        
+        // Optional: Update ARIA for accessibility
+        const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
         hamburger.setAttribute('aria-expanded', !expanded);
       });
 
-      // Logout button
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-          e.preventDefault();
-          try {
-            await window.supabaseClient.auth.signOut();
-            window.location.href = '/'; // Go back to landing (index.html)
-          } catch (err) {
-            console.error('Logout failed:', err);
-          }
-        });
-      }
-
-      // Load user state and update UI
+      // Role-based admin link visibility (students hide admin, teachers see it)
       if (window.supabaseClient) {
         window.supabaseClient.auth.getUser().then(({ data: { user } }) => {
-          if (user) {
-            // Logged in
-            loginBtn.style.display = 'none';
-            logoutLi.classList.remove('hidden');
-
-            // Show admin only for teachers
-            adminLink.style.display = (user.user_metadata?.role === 'teacher') ? 'list-item' : 'none';
-
-            // Welcome message with name
-            const name = user.user_metadata?.full_name || user.email.split('@')[0];
-            welcomeMsg.textContent = `Welcome, ${name}`;
-            welcomeMsg.classList.remove('hidden');
+          const adminLink = document.getElementById('admin-link');
+          if (user && user.user_metadata?.role === 'teacher') {
+            adminLink.style.display = 'list-item';
           } else {
-            // Not logged in
-            loginBtn.style.display = 'inline-block';
-            logoutLi.classList.add('hidden');
             adminLink.style.display = 'none';
-            welcomeMsg.classList.add('hidden');
           }
-        });
-
-        // Listen for auth changes (login/logout) - refresh UI
-        window.supabaseClient.auth.onAuthStateChange(() => {
-          window.location.reload(); // Refresh to update UI
         });
       }
     });
