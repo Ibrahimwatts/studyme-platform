@@ -6,10 +6,10 @@
   <title>Revision Notes - Studyme</title>
   <link rel="stylesheet" href="styles.css">
   
-  <!-- Reliable Supabase CDN from jsDelivr - pinned version -->
+  <!-- Reliable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Inline mobile menu fix – same working version as other pages -->
+  <!-- Inline mobile menu fix – same as other pages -->
   <style>
     @media (max-width: 768px) {
       .nav-menu {
@@ -88,6 +88,14 @@
         font-size: 1rem;
       }
     }
+
+    /* Small visual improvement for active links in sidebar */
+    .subject-list a.active,
+    .form-list a.active {
+      background: var(--accent);
+      color: white;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
@@ -138,22 +146,24 @@
       <aside class="notes-sidebar">
         <h3>Subjects</h3>
         <ul class="subject-list" id="subject-list">
-          <li><a href="#" data-subject="Physics" class="active">Physics</a></li>
+          <li><a href="#" data-subject="all" class="active">All Subjects</a></li>
+          <li><a href="#" data-subject="Physics">Physics</a></li>
           <li><a href="#" data-subject="Chemistry">Chemistry</a></li>
           <li><a href="#" data-subject="Biology">Biology</a></li>
           <li><a href="#" data-subject="Mathematics">Mathematics</a></li>
         </ul>
 
         <h3>Forms / Grades</h3>
-        <ul class="form-list">
-          <li><a href="#" class="active">Form 1</a></li>
-          <li><a href="#">Form 2</a></li>
-          <li><a href="#">Form 3</a></li>
-          <li><a href="#">Form 4</a></li>
+        <ul class="form-list" id="form-list">
+          <li><a href="#" data-form="all" class="active">All Forms</a></li>
+          <li><a href="#" data-form="Form 1">Form 1</a></li>
+          <li><a href="#" data-form="Form 2">Form 2</a></li>
+          <li><a href="#" data-form="Form 3">Form 3</a></li>
+          <li><a href="#" data-form="Form 4">Form 4</a></li>
         </ul>
       </aside>
 
-      <!-- Dynamic notes – now showing full content -->
+      <!-- Dynamic notes -->
       <section class="notes-content" id="notes-container">
         <h2>Loading Revision Notes...</h2>
       </section>
@@ -173,6 +183,8 @@
     // Wait for full page load
     window.addEventListener('load', async function () {
       const container = document.getElementById('notes-container');
+      const subjectLinks = document.querySelectorAll('#subject-list a');
+      const formLinks = document.querySelectorAll('#form-list a');
 
       if (!window.supabaseClient) {
         container.innerHTML = '<p style="color:red;">Database connection not ready. Please refresh.</p>';
@@ -182,21 +194,43 @@
 
       console.log('Supabase client ready - starting fetch');
 
+      let currentSubject = 'all';
+      let currentForm = 'all';
+
+      // Helper: update active class
+      function updateActive(links, selectedValue) {
+        links.forEach(link => {
+          link.classList.toggle('active', link.dataset[link.closest('ul').id.includes('subject') ? 'subject' : 'form'] === selectedValue);
+        });
+      }
+
       async function loadRevisionNotes() {
         container.innerHTML = '<p>Loading Revision Notes...</p>';
 
         try {
-          const { data, error } = await window.supabaseClient
+          let query = window.supabaseClient
             .from('revision_notes')
             .select('*')
             .order('created_at', { ascending: false });
+
+          // Apply subject filter
+          if (currentSubject !== 'all') {
+            query = query.ilike('subject', `%${currentSubject}%`);
+          }
+
+          // Apply form filter
+          if (currentForm !== 'all') {
+            query = query.eq('form', currentForm);
+          }
+
+          const { data, error } = await query;
 
           if (error) throw error;
 
           container.innerHTML = '';
 
           if (data.length === 0) {
-            container.innerHTML = '<p>No revision notes available yet.</p>';
+            container.innerHTML = `<p>No revision notes found for the selected filters.</p>`;
             return;
           }
 
@@ -219,6 +253,27 @@
         }
       }
 
+      // Subject filter clicks
+      subjectLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentSubject = link.dataset.subject;
+          updateActive(subjectLinks, currentSubject);
+          loadRevisionNotes();
+        });
+      });
+
+      // Form filter clicks
+      formLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentForm = link.dataset.form;
+          updateActive(formLinks, currentForm);
+          loadRevisionNotes();
+        });
+      });
+
+      // Initial load (shows all)
       loadRevisionNotes();
     });
   </script>
