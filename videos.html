@@ -173,12 +173,8 @@
             card.className = 'card video-card';
             card.innerHTML = `
               <div class="video-container">
-                <div class="play-overlay">
-                  <button class="play-btn">▶ Play Video</button>
-                </div>
                 <iframe 
-                  class="youtube-iframe"
-                  data-src="https://www.youtube.com/embed/${lesson.youtube_id}?autoplay=1&rel=0" 
+                  src="https://www.youtube.com/embed/${lesson.youtube_id}?enablejsapi=1&rel=0&modestbranding=1" 
                   title="${lesson.title}" 
                   frameborder="0" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -192,16 +188,6 @@
                 ${lesson.description ? `<p class="desc">${lesson.description}</p>` : ''}
               </div>
             `;
-
-            // Click to play: replace overlay with playing iframe
-            const playOverlay = card.querySelector('.play-overlay');
-            const iframe = card.querySelector('.youtube-iframe');
-
-            playOverlay.addEventListener('click', () => {
-              playOverlay.style.display = 'none';
-              iframe.src = iframe.dataset.src; // trigger autoplay
-            });
-
             container.appendChild(card);
           });
         } catch (err) {
@@ -236,56 +222,5 @@
       });
     });
   </script>
-
-  <!-- Optional: Basic play button style -->
-  <style>
-    .video-container {
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px;
-      aspect-ratio: 16 / 9;
-    }
-
-    .youtube-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .play-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: opacity 0.3s;
-    }
-
-    .play-overlay:hover {
-      background: rgba(0,0,0,0.6);
-    }
-
-    .play-btn {
-      background: rgba(255,255,255,0.9);
-      border: none;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      font-size: 2.5rem;
-      color: #c00;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      transition: transform 0.2s;
-    }
-
-    .play-btn:hover {
-      transform: scale(1.1);
-    }
-  </style>
 </body>
 </html>
