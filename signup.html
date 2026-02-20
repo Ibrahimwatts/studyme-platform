@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up - Studyme</title>
   <link rel="stylesheet" href="styles.css" />
+  <!-- FIXED: This line was missing – Supabase library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body class="landing">
 
@@ -22,21 +24,10 @@
         Create your free account and start mastering KCSE subjects today.
       </p>
 
-      <!-- Signup Form -->
       <div class="auth-form">
         <button id="google-signup-btn" class="btn-landing btn-login full-width">
           Sign Up with Google
         </button>
-
-        <!-- Optional email/password signup (commented out) -->
-        <!--
-        <form id="email-signup-form" class="email-login-form">
-          <input type="text" id="full-name" placeholder="Full Name" required class="auth-input" />
-          <input type="email" id="email" placeholder="Email" required class="auth-input" />
-          <input type="password" id="password" placeholder="Password" required class="auth-input" />
-          <button type="submit" class="btn-landing btn-login full-width">Sign Up with Email</button>
-        </form>
-        -->
 
         <div class="auth-links">
           <a href="login.html" class="auth-link">Already have an account? Log In</a>
@@ -60,6 +51,12 @@
       const errorMsg = document.getElementById('error-message');
       const successMsg = document.getElementById('success-message');
 
+      if (!window.supabase) {
+        errorMsg.textContent = 'Supabase library failed to load. Please refresh or check your internet.';
+        console.error('Supabase not available');
+        return;
+      }
+
       googleBtn.addEventListener('click', async () => {
         errorMsg.textContent = '';
         successMsg.classList.add('hidden');
@@ -78,13 +75,12 @@
         }
       });
 
-      // After Google signup success → prompt for role
+      // After Google signup → prompt for role
       window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN') {
           const { data: { user } } = await window.supabaseClient.auth.getUser();
 
           if (user && !user.user_metadata?.role) {
-            // New user — ask for role
             const role = prompt("Are you a Student or a Teacher? Type 'student' or 'teacher'");
 
             if (role && (role.toLowerCase() === 'student' || role.toLowerCase() === 'teacher')) {
@@ -105,7 +101,6 @@
               errorMsg.textContent = 'Please choose a valid role (student or teacher).';
             }
           } else {
-            // Role already set → go to home
             window.location.href = '/home.html';
           }
         }
