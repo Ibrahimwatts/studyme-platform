@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Log In - Studyme</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- FIXED: This line was missing – Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body class="landing">
@@ -49,18 +48,29 @@
       const googleBtn = document.getElementById('google-login-btn');
       const errorMsg = document.getElementById('error-message');
 
-      if (!window.supabase) {
-        errorMsg.textContent = 'Supabase library failed to load. Please refresh or check your internet.';
-        console.error('Supabase not available');
-        return;
-      }
-
       googleBtn.addEventListener('click', async () => {
-        errorMsg.textContent = '';
+        errorMsg.textContent = 'Connecting to Google...';
+        errorMsg.style.color = '#ccc';
+
         try {
-          await loginWithGoogle(); // From script.js
+          const { error } = await window.supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin + '/home.html'
+            }
+          });
+
+          if (error) throw error;
         } catch (err) {
-          errorMsg.textContent = 'Google login failed: ' + (err.message || 'Unknown error');
+          let msg = err.message || 'Login failed. Please try again.';
+
+          // Friendly message for non-existent users
+          if (msg.includes('not found') || msg.includes('invalid') || msg.includes('credentials')) {
+            msg = 'Account not found. Please <a href="signup.html" style="color:#4ade80; text-decoration:underline;">sign up first</a>.';
+          }
+
+          errorMsg.innerHTML = msg;
+          errorMsg.style.color = '#ff6b6b';
         }
       });
     });
