@@ -207,7 +207,7 @@
     });
   </script>
 
-  <!-- Hamburger menu toggle script – FIXED -->
+  <!-- Hamburger menu toggle script – FIXED for vertical dropdown -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const hamburger = document.querySelector('.hamburger');
@@ -219,7 +219,7 @@
       }
 
       hamburger.addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevent outside-click handler from closing immediately
+        e.stopPropagation(); // Prevent immediate close
         navMenu.classList.toggle('active');
         const isOpen = navMenu.classList.contains('active');
         hamburger.setAttribute('aria-expanded', isOpen);
