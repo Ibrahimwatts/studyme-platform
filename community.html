@@ -294,7 +294,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Community logic – FULLY FIXED with replies -->
+  <!-- Community logic – with real names from signup metadata -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const discussionsContainer = document.getElementById('discussions-container');
@@ -318,6 +318,33 @@
         loginPrompt.classList.remove('hidden');
       }
 
+      // Helper: Get display name from user metadata or email fallback
+      async function getDisplayName(userId) {
+        if (!userId) return 'Anonymous';
+
+        try {
+          const { data } = await window.supabaseClient
+            .from('users')
+            .select('raw_user_meta_data')
+            .eq('id', userId)
+            .single();
+
+          if (data?.raw_user_meta_data?.full_name) {
+            return data.raw_user_meta_data.full_name;
+          }
+
+          // Fallback: get email prefix
+          const { data: authUser } = await window.supabaseClient.auth.admin.getUserById(userId);
+          if (authUser?.user?.email) {
+            return authUser.user.email.split('@')[0];
+          }
+        } catch (err) {
+          console.warn('Could not fetch name for user:', userId, err);
+        }
+
+        return 'Anonymous';
+      }
+
       // Load discussions + replies
       async function loadDiscussions() {
         discussionsContainer.innerHTML = '<p>Loading discussions...</p>';
@@ -338,31 +365,18 @@
             return;
           }
 
-          // Get unique user IDs for authors
-          const userIds = [...new Set(posts.map(p => p.user_id))];
-
-          // Fetch user names
-          const { data: users } = await window.supabaseClient
-            .from('users')
-            .select('id, raw_user_meta_data')
-            .in('id', userIds);
-
-          const userMap = {};
-          users?.forEach(u => {
-            userMap[u.id] = u.raw_user_meta_data?.full_name || 'Anonymous';
-          });
-
           discussionsContainer.innerHTML = '';
 
-          // Render each post + its replies
           for (const post of posts) {
+            const authorName = await getDisplayName(post.user_id);
+
             const postEl = document.createElement('div');
             postEl.className = 'discussion-post';
             postEl.dataset.postId = post.id;
 
             postEl.innerHTML = `
               <div class="post-header">
-                <span class="post-author">${userMap[post.user_id] || 'Anonymous'}</span>
+                <span class="post-author">${authorName}</span>
                 <span class="post-time">${new Date(post.created_at).toLocaleString()}</span>
               </div>
               <h3>${post.title}</h3>
@@ -380,16 +394,15 @@
 
             discussionsContainer.appendChild(postEl);
 
-            // Load reply count & replies on demand
+            // Load reply count
             loadReplyCount(post.id);
           }
 
-          // Event listeners for reply & view
+          // Event listeners
           document.querySelectorAll('.reply-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
               const postId = e.target.dataset.postId;
-              const form = document.getElementById(`reply-form-${postId}`);
-              form.classList.toggle('hidden');
+              document.getElementById(`reply-form-${postId}`).classList.toggle('hidden');
             });
           });
 
@@ -446,7 +459,7 @@
         }
       }
 
-      // Load reply count for a post
+      // Load reply count
       async function loadReplyCount(postId) {
         try {
           const { count, error } = await window.supabaseClient
@@ -456,14 +469,14 @@
 
           if (error) throw error;
 
-          const btn = document.querySelector(`.view-replies-btn[data-post-id="${postId}"] .reply-count`);
-          if (btn) btn.textContent = count || 0;
+          const countEl = document.querySelector(`.view-replies-btn[data-post-id="${postId}"] .reply-count`);
+          if (countEl) countEl.textContent = count || 0;
         } catch (err) {
           console.error('Error loading reply count:', err);
         }
       }
 
-      // Load all replies for a post
+      // Load replies for a post
       async function loadReplies(postId, container) {
         container.innerHTML = '<p>Loading replies...</p>';
 
@@ -479,10 +492,11 @@
           container.innerHTML = '';
 
           if (replies.length === 0) {
-            container.innerHTML = '<p>No replies yet.</p>';
+            container.innerHTML = '<p>No replies yet. Be the first to reply!</p>';
             return;
           }
 
+          // Get author names for replies
           const userIds = [...new Set(replies.map(r => r.user_id))];
           const { data: users } = await window.supabaseClient
             .from('users')
@@ -491,7 +505,7 @@
 
           const userMap = {};
           users?.forEach(u => {
-            userMap[u.id] = u.raw_user_meta_data?.full_name || 'Anonymous';
+            userMap[u.id] = u.raw_user_meta_data?.full_name || u.raw_user_meta_data?.email?.split('@')[0] || 'Anonymous';
           });
 
           replies.forEach(reply => {
