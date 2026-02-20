@@ -14,24 +14,25 @@
     /* Mobile Styles (adjust 768px as needed) */
     @media (max-width: 768px) {
       .nav-menu {
-        display: none;
-        flex-direction: column;
+        display: none; /* Hide menu by default on mobile */
+        flex-direction: column; /* Stack items vertically */
         width: 100%;
-        background-color: rgba(0,0,0,0.95);
+        background-color: rgba(0,0,0,0.95); /* Dark overlay like your header */
         position: absolute;
-        top: 100%;
+        top: 100%; /* Position below header */
         left: 0;
         padding: 20px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         z-index: 9999;
       }
 
+      /* When the menu is toggled 'active' via JS */
       .nav-menu.active {
         display: flex;
       }
 
       .nav-menu li {
-        margin: 10px 0;
+        margin: 10px 0; /* Add spacing between vertical items */
       }
 
       .nav-menu li a {
@@ -47,7 +48,7 @@
       }
 
       .hamburger {
-        display: block;
+        display: block; /* Ensure hamburger is visible */
         cursor: pointer;
         font-size: 2.2rem;
         background: none;
@@ -56,6 +57,7 @@
       }
     }
 
+    /* Ensure menu is horizontal on desktop */
     @media (min-width: 769px) {
       .nav-menu {
         display: flex;
@@ -74,8 +76,8 @@
       <div class="logo">
         <h1>Studyme</h1>
         <span>Digital Learning Platform</span>
-        <!-- Welcome message with name (only visible when logged in) -->
-        <span id="welcome-message" class="welcome-msg hidden"></span>
+        <!-- Welcome message (only shown when logged in) -->
+        <span id="welcome-msg" class="welcome-msg hidden"></span>
       </div>
 
       <div class="search-bar">
@@ -84,6 +86,7 @@
       </div>
 
       <nav>
+        <!-- Hamburger only visible on mobile -->
         <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
         <ul class="nav-menu">
@@ -97,8 +100,8 @@
           <li><a href="classes.html">Live Classes</a></li>
           <li><a href="subscriptions.html">Subscribe</a></li>
           <li id="admin-link"><a href="admin.html">Admin Panel</a></li>
-          <li><a href="#" id="logout-btn" class="logout-btn hidden">Sign Out</a></li>
-          <li><a href="#" class="login-btn">Log In</a></li>
+          <li id="logout-li" class="hidden"><a href="#" id="logout-btn">Sign Out</a></li>
+          <li><a href="login.html" class="login-btn">Log In</a></li>
         </ul>
       </nav>
     </div>
@@ -273,8 +276,9 @@
       const hamburger = document.querySelector('.hamburger');
       const navMenu = document.querySelector('.nav-menu');
       const logoutBtn = document.getElementById('logout-btn');
+      const logoutLi = document.getElementById('logout-li');
       const loginBtn = document.querySelector('.login-btn');
-      const welcomeMsg = document.getElementById('welcome-message');
+      const welcomeMsg = document.getElementById('welcome-msg');
       const adminLink = document.getElementById('admin-link');
 
       // Hamburger toggle
@@ -284,39 +288,46 @@
         hamburger.setAttribute('aria-expanded', !expanded);
       });
 
-      // Logout button click
+      // Logout button
       if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
           e.preventDefault();
-          await logout(); // from script.js
+          try {
+            await window.supabaseClient.auth.signOut();
+            window.location.href = '/'; // Go back to landing (index.html)
+          } catch (err) {
+            console.error('Logout failed:', err);
+          }
         });
       }
 
-      // Auth state listener – show/hide elements
+      // Load user state and update UI
       if (window.supabaseClient) {
         window.supabaseClient.auth.getUser().then(({ data: { user } }) => {
           if (user) {
             // Logged in
             loginBtn.style.display = 'none';
-            logoutBtn.classList.remove('hidden');
+            logoutLi.classList.remove('hidden');
+
+            // Show admin only for teachers
             adminLink.style.display = (user.user_metadata?.role === 'teacher') ? 'list-item' : 'none';
 
-            // Welcome message
+            // Welcome message with name
             const name = user.user_metadata?.full_name || user.email.split('@')[0];
             welcomeMsg.textContent = `Welcome, ${name}`;
             welcomeMsg.classList.remove('hidden');
           } else {
             // Not logged in
             loginBtn.style.display = 'inline-block';
-            logoutBtn.classList.add('hidden');
+            logoutLi.classList.add('hidden');
             adminLink.style.display = 'none';
             welcomeMsg.classList.add('hidden');
           }
         });
 
-        // Listen for auth changes (login/logout)
-        window.supabaseClient.auth.onAuthStateChange((event, session) => {
-          window.location.reload(); // Simple refresh to update UI
+        // Listen for auth changes (login/logout) - refresh UI
+        window.supabaseClient.auth.onAuthStateChange(() => {
+          window.location.reload(); // Refresh to update UI
         });
       }
     });
