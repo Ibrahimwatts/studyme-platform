@@ -6,46 +6,54 @@
   <title>Studyme - Digital Learning Platform for High School</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Stable Supabase CDN - same as videos.html, notes.html, admin.html -->
+  <!-- Stable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Inline style fix – only for the mobile menu to be vertical list -->
+  <!-- Inline fix for vertical mobile menu – only this small block added -->
   <style>
     @media (max-width: 992px) {
-      .nav-menu.active ul {
+      .nav-menu {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        max-width: 320px;
+        height: 100vh;
+        background: rgba(0,0,0,0.95);
+        transition: left 0.4s ease;
+        z-index: 9999;
+        padding: 5rem 1.5rem 2rem;
+        overflow-y: auto;
+      }
+
+      .nav-menu.active {
+        left: 0;
+      }
+
+      .nav-menu ul {
         display: flex;
         flex-direction: column;
-        gap: 1.2rem;
-        padding: 1.5rem 0;
+        gap: 1.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
       }
 
-      .nav-menu.active li {
-        width: 100%;
-      }
-
-      .nav-menu.active a {
-        display: block;
-        padding: 1rem 1.5rem;
-        font-size: 1.25rem;
+      .nav-menu li a {
+        font-size: 1.3rem;
         color: white;
         text-decoration: none;
-        border-bottom: 1px solid rgba(255,255,255,0.12);
+        padding: 0.8rem 1rem;
+        display: block;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
       }
 
-      .nav-menu.active a:hover {
-        background: rgba(255,255,255,0.08);
+      .nav-menu li a:hover {
+        background: rgba(255,255,255,0.1);
       }
 
-      .nav-menu.active .login-btn {
-        margin-top: 1rem;
-        text-align: center;
-        background: white;
-        color: #16a34a;
-        border-radius: 50px;
-        padding: 0.9rem 2rem;
-        width: fit-content;
-        margin-left: auto;
-        margin-right: auto;
+      .hamburger {
+        display: block;
       }
     }
   </style>
@@ -200,7 +208,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Featured videos loading - fixed to use window.supabaseClient -->
+  <!-- Featured videos loading -->
   <script>
     window.addEventListener('load', async function () {
       const container = document.getElementById('featured-videos-container');
