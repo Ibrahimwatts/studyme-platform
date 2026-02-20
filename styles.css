@@ -561,3 +561,18 @@ footer {
   font-weight: bold;
 }
 
+/* Update the .hamburger part in your styles.css */
+.hamburger {
+  display: none; /* Hidden on Desktop */
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+  
+  /* Add these lines to fix the Safari error */
+  -webkit-user-select: none; /* Safari & Safari on iOS support */
+  -moz-user-select: none;    /* Firefox support */
+  -ms-user-select: none;     /* Internet Explorer support */
+  user-select: none;         /* Modern browsers (Chrome/Edge) */
+  
+  z-index: 1001; /* Ensure it stays above the side menu */
+}
