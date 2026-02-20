@@ -89,7 +89,7 @@
       }
     }
 
-    /* Discussion post styling */
+    /* Discussion post styling – unchanged */
     .discussion-post {
       background: var(--white);
       border-radius: 12px;
@@ -163,7 +163,6 @@
       </div>
 
       <nav>
-        <!-- Hamburger button -->
         <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
         <ul class="nav-menu">
@@ -244,19 +243,20 @@
 
       <div id="login-to-post" class="post-login-prompt hidden">
         <p><strong>Log in to post questions and reply</strong></p>
-        <a href="#" class="btn primary login-btn">Log In</a>
+        <a href="login.html" class="btn primary login-btn">Log In</a>
       </div>
 
       <!-- Discussions list -->
       <div id="discussions-container">
         <p>Loading discussions...</p>
       </div>
+      <button id="refresh-discussions" class="btn small hidden" >Refresh Discussions</button>
     </section>
 
     <section class="cta-final">
       <h2>Ready to Join the Conversation?</h2>
       <p>Log in to post questions, reply to others, and get teacher support.</p>
-      <a href="#" class="btn primary large login-btn">Log In to Participate</a>
+      <a href="login.html" class="btn primary large login-btn">Log In to Participate</a>
     </section>
   </main>
 
@@ -269,20 +269,21 @@
 
   <script src="script.js"></script>
 
-  <!-- Community logic -->
+  <!-- Community logic – FIXED version -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const discussionsContainer = document.getElementById('discussions-container');
       const newPostForm = document.getElementById('new-post-form');
       const loginPrompt = document.getElementById('login-to-post');
       const submitPostBtn = document.getElementById('submit-post');
+      const refreshBtn = document.getElementById('refresh-discussions');
 
       if (!window.supabaseClient) {
-        discussionsContainer.innerHTML = '<p style="color:red;">Database connection failed. Please refresh.</p>';
+        discussionsContainer.innerHTML = '<p style="color:red;">Database connection failed. Please refresh the page.</p>';
         return;
       }
 
-      // Check if user is logged in
+      // Check login status
       const { data: { user } } = await window.supabaseClient.auth.getUser();
       if (user) {
         newPostForm.classList.remove('hidden');
@@ -292,21 +293,16 @@
         loginPrompt.classList.remove('hidden');
       }
 
-      // Load discussions
+      // Load discussions – fixed query + better error handling
       async function loadDiscussions() {
         discussionsContainer.innerHTML = '<p>Loading discussions...</p>';
+        refreshBtn.classList.add('hidden');
 
         try {
+          // Fetch discussions (no invalid join)
           const { data, error } = await window.supabaseClient
             .from('discussions')
-            .select(`
-              id,
-              title,
-              content,
-              created_at,
-              user_id,
-              auth.users!user_id (user_metadata->full_name)
-            `)
+            .select('id, title, content, created_at, user_id')
             .order('created_at', { ascending: false })
             .limit(10);
 
@@ -319,12 +315,28 @@
             return;
           }
 
+          // Get all unique user IDs
+          const userIds = [...new Set(data.map(post => post.user_id))];
+
+          // Fetch user names in one go
+          const { data: users } = await window.supabaseClient
+            .from('users')
+            .select('id, raw_user_meta_data')
+            .in('id', userIds);
+
+          // Map user_id to name
+          const userMap = {};
+          users?.forEach(u => {
+            userMap[u.id] = u.raw_user_meta_data?.full_name || 'Anonymous';
+          });
+
+          // Render posts
           data.forEach(post => {
             const postEl = document.createElement('div');
             postEl.className = 'discussion-post';
             postEl.innerHTML = `
               <div class="post-header">
-                <span class="post-author">${post.auth.users?.user_metadata?.full_name || 'Anonymous'}</span>
+                <span class="post-author">${userMap[post.user_id] || 'Anonymous'}</span>
                 <span class="post-time">${new Date(post.created_at).toLocaleString()}</span>
               </div>
               <h3>${post.title}</h3>
@@ -335,7 +347,8 @@
           });
         } catch (err) {
           console.error('Error loading discussions:', err);
-          discussionsContainer.innerHTML = '<p style="color:red;">Failed to load discussions.</p>';
+          discussionsContainer.innerHTML = '<p style="color:red;">Failed to load discussions. Check your connection or try again.</p>';
+          refreshBtn.classList.remove('hidden');
         }
       }
 
@@ -351,12 +364,15 @@
           }
 
           try {
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (!user) throw new Error('You must be logged in to post.');
+
             const { error } = await window.supabaseClient
               .from('discussions')
               .insert({
                 title,
                 content,
-                user_id: (await window.supabaseClient.auth.getUser()).data.user?.id
+                user_id: user.id
               });
 
             if (error) throw error;
@@ -364,18 +380,21 @@
             alert('Your question has been posted!');
             document.getElementById('post-title').value = '';
             document.getElementById('post-content').value = '';
-            loadDiscussions();
+            loadDiscussions(); // Refresh list immediately
           } catch (err) {
             console.error('Post error:', err);
-            alert('Failed to post: ' + err.message);
+            alert('Failed to post: ' + (err.message || 'Unknown error'));
           }
         });
       }
 
+      // Refresh button
+      refreshBtn.addEventListener('click', loadDiscussions);
+
       // Initial load
       loadDiscussions();
 
-      // Load stats (fixed version)
+      // Load stats (unchanged)
       async function loadCommunityStats() {
         const container = document.getElementById('stats-container');
         const loadingText = document.getElementById('stats-loading');
