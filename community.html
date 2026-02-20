@@ -294,7 +294,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Community logic – FIXED to show real names -->
+  <!-- Community logic – FIXED to show real names reliably -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const discussionsContainer = document.getElementById('discussions-container');
@@ -323,7 +323,6 @@
         if (!userId) return 'User';
 
         try {
-          // Direct fetch from auth.users metadata
           const { data: authUser, error } = await window.supabaseClient.auth.admin.getUserById(userId);
 
           if (error || !authUser?.user) return 'User';
@@ -337,13 +336,13 @@
             return authUser.user.email.split('@')[0];
           }
         } catch (err) {
-          console.warn('Could not fetch user name:', userId, err);
+          console.warn('Failed to fetch name for user ID:', userId, err.message);
         }
 
         return 'User';
       }
 
-      // Load discussions + replies
+      // Load discussions
       async function loadDiscussions() {
         discussionsContainer.innerHTML = '<p>Loading discussions...</p>';
         refreshBtn.classList.add('hidden');
@@ -391,11 +390,10 @@
 
             discussionsContainer.appendChild(postEl);
 
-            // Load reply count
             loadReplyCount(post.id);
           }
 
-          // Event listeners for reply/view/submit (same as before)
+          // Event listeners for reply, view, submit
           document.querySelectorAll('.reply-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
               const postId = e.target.dataset.postId;
@@ -491,12 +489,11 @@
             return;
           }
 
-          // Fetch names for replies
-          const userIds = [...new Set(replies.map(r => r.user_id))];
           const userMap = {};
-
-          for (const uid of userIds) {
-            userMap[uid] = await getDisplayName(uid);
+          for (const reply of replies) {
+            if (!userMap[reply.user_id]) {
+              userMap[reply.user_id] = await getDisplayName(reply.user_id);
+            }
           }
 
           replies.forEach(reply => {
