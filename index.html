@@ -9,51 +9,62 @@
   <!-- Stable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Inline fix for vertical mobile menu -->
+  <!-- Inline CSS – exactly as you requested (mobile vertical menu) -->
   <style>
-    @media (max-width: 992px) {
-      .hamburger {
-        display: block;
-      }
-
+    /* Mobile Styles (adjust 768px as needed) */
+    @media (max-width: 768px) {
       .nav-menu {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        width: 80%;
-        max-width: 320px;
-        height: 100vh;
-        background: rgba(0,0,0,0.95);
-        transition: left 0.4s ease;
-        z-index: 9999;
-        padding: 5rem 1.5rem 2rem;
-        overflow-y: auto;
-      }
-
-      .nav-menu.active {
+        display: none; /* Hide menu by default on mobile */
+        flex-direction: column; /* Stack items vertically */
+        width: 100%;
+        background-color: rgba(0,0,0,0.95); /* Dark overlay like your header */
+        position: absolute;
+        top: 100%; /* Position below header */
         left: 0;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 9999;
       }
 
-      .nav-menu ul {
+      /* When the menu is toggled 'active' via JS */
+      .nav-menu.active {
         display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
+      }
+
+      .nav-menu li {
+        margin: 10px 0; /* Add spacing between vertical items */
       }
 
       .nav-menu li a {
-        font-size: 1.3rem;
         color: white;
-        text-decoration: none;
+        font-size: 1.3rem;
         padding: 0.8rem 1rem;
         display: block;
-        border-bottom: 1px solid rgba(255,255,255,0.15);
+        text-decoration: none;
       }
 
       .nav-menu li a:hover {
         background: rgba(255,255,255,0.1);
+      }
+
+      .hamburger {
+        display: block; /* Ensure hamburger is visible */
+        cursor: pointer;
+        font-size: 2.2rem;
+        background: none;
+        border: none;
+        color: white;
+      }
+    }
+
+    /* Ensure menu is horizontal on desktop */
+    @media (min-width: 769px) {
+      .nav-menu {
+        display: flex;
+        flex-direction: row;
+      }
+      .hamburger {
+        display: none;
       }
     }
   </style>
@@ -256,41 +267,19 @@
     });
   </script>
 
-  <!-- FIXED Hamburger menu toggle – this is the only changed part -->
+  <!-- Hamburger toggle script – exactly as you requested -->
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const hamburger = document.querySelector('button.hamburger');
-      const navMenu = document.querySelector('ul.nav-menu');
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburger = document.querySelector('.hamburger');
+      const navMenu = document.querySelector('.nav-menu');
 
-      if (!hamburger || !navMenu) {
-        console.warn('Hamburger or nav-menu not found in DOM');
-        return;
-      }
-
-      hamburger.addEventListener('click', function (e) {
-        e.stopPropagation(); // prevent document click from closing immediately
+      hamburger.addEventListener('click', () => {
+        // This adds/removes the 'active' class to show/hide the vertical list
         navMenu.classList.toggle('active');
-        const isOpen = navMenu.classList.contains('active');
-        hamburger.setAttribute('aria-expanded', isOpen);
-        hamburger.textContent = isOpen ? '✕' : '☰';
-      });
-
-      // Close when clicking outside the nav
-      document.addEventListener('click', function (e) {
-        if (!e.target.closest('nav') && navMenu.classList.contains('active')) {
-          navMenu.classList.remove('active');
-          hamburger.setAttribute('aria-expanded', 'false');
-          hamburger.textContent = '☰';
-        }
-      });
-
-      // Close when clicking any link
-      navMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', function () {
-          navMenu.classList.remove('active');
-          hamburger.setAttribute('aria-expanded', 'false');
-          hamburger.textContent = '☰';
-        });
+        
+        // Optional: Update ARIA for accessibility
+        const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
+        hamburger.setAttribute('aria-expanded', !expanded);
       });
     });
   </script>
