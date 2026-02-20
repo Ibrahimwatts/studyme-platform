@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="styles.css">
 
   <!-- Supabase JS client (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Inline mobile menu fix – same working version as other pages -->
+  <!-- Inline mobile menu fix – same as other pages -->
   <style>
     @media (max-width: 768px) {
       .nav-menu {
@@ -88,11 +88,68 @@
         font-size: 1rem;
       }
     }
+
+    /* Discussion post styling */
+    .discussion-post {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+
+    .post-author {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .post-time {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .post-content {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .post-replies-count {
+      color: var(--gray);
+      font-weight: 500;
+    }
+
+    .reply-form {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .reply-input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.8rem;
+      resize: vertical;
+    }
+
+    .post-login-prompt {
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--light-bg);
+      border-radius: 12px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Header – updated with working hamburger menu -->
+  <!-- Header – same as other pages -->
   <header>
     <div class="header-container">
       <div class="logo">
@@ -129,12 +186,12 @@
     <section class="page-hero">
       <div class="page-hero-content">
         <h1>Learner Community</h1>
-        <p>Connect with fellow students, ask questions, share study tips, discuss difficult topics, and get help from peers and moderators — all in a supportive environment built for Kenyan high school learners.</p>
-        <p class="hero-meta">Active discussions • Real-time chat (premium) • Moderated for respectful learning</p>
+        <p>Connect with fellow students, ask questions, share study tips, discuss difficult topics, and get help from peers and teachers — all in a supportive environment built for Kenyan high school learners.</p>
+        <p class="hero-meta">Active discussions • Teacher support • Real-time replies</p>
       </div>
     </section>
 
-    <!-- New: Dynamic Community Stats from Supabase -->
+    <!-- Community Stats -->
     <section class="community-stats">
       <h2 class="section-title">Community at a Glance</h2>
       <div id="stats-container" class="card-grid">
@@ -165,44 +222,41 @@
 
         <div class="card feature-card">
           <div class="feature-icon">🎙️</div>
-          <h3>Real-time Chat</h3>
-          <p>Instant messaging and live discussions (available to subscribers).</p>
+          <h3>Teacher Support</h3>
+          <p>Get direct responses and guidance from qualified teachers in the community.</p>
         </div>
       </div>
     </section>
 
+    <!-- Discussion Forum -->
     <section class="discussion-section">
       <h2 class="section-title">Latest Discussions</h2>
       <p class="discussion-intro">
-        Join the conversation below — powered by Disqus (sign in with your Studyme account for full features)
+        Ask questions, share tips, or help others — everyone is welcome!
       </p>
 
-      <!-- Disqus comment section -->
-      <div id="disqus_thread"></div>
-      <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+      <!-- Post a new question (only visible if logged in) -->
+      <div id="new-post-form" class="hidden">
+        <textarea id="post-title" class="reply-input" placeholder="Enter a title for your question..." rows="2"></textarea>
+        <textarea id="post-content" class="reply-input" placeholder="Describe your question or topic in detail..." rows="5"></textarea>
+        <button id="submit-post" class="btn primary">Post Question</button>
+      </div>
 
-      <!-- Disqus configuration script -->
-      <script>
-        var disqus_config = function () {
-          this.page.url = window.location.href;
-          this.page.identifier = 'studyme-community';
-          this.page.title = 'Studyme Community Discussions';
-        };
+      <div id="login-to-post" class="post-login-prompt hidden">
+        <p><strong>Log in to post questions and reply</strong></p>
+        <a href="#" class="btn primary login-btn">Log In</a>
+      </div>
 
-        (function() {
-          var d = document, s = d.createElement('script');
-          s.src = 'https://YOUR-DISQUS-SHORTNAME.disqus.com/embed.js';  // ← Replace YOUR-DISQUS-SHORTNAME
-          s.setAttribute('data-timestamp', +new Date());
-          (d.head || d.body).appendChild(s);
-        })();
-      </script>
+      <!-- Discussions list -->
+      <div id="discussions-container">
+        <p>Loading discussions...</p>
+      </div>
     </section>
 
     <section class="cta-final">
-      <h2>Ready to Join the Community?</h2>
-      <p>Unlock full access to discussions, real-time chat, and exclusive study groups with a subscription.</p>
-      <a href="subscriptions.html" class="btn primary large">Subscribe Now via M-Pesa</a>
-      <p class="cta-note">Free users can read and browse – subscribe to post and chat</p>
+      <h2>Ready to Join the Conversation?</h2>
+      <p>Log in to post questions, reply to others, and get teacher support.</p>
+      <a href="#" class="btn primary large login-btn">Log In to Participate</a>
     </section>
   </main>
 
@@ -215,67 +269,163 @@
 
   <script src="script.js"></script>
 
-  <!-- Supabase dynamic community stats script -->
+  <!-- Community logic -->
   <script>
-    // Your real Supabase keys
-    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
+    document.addEventListener('DOMContentLoaded', async () => {
+      const discussionsContainer = document.getElementById('discussions-container');
+      const newPostForm = document.getElementById('new-post-form');
+      const loginPrompt = document.getElementById('login-to-post');
+      const submitPostBtn = document.getElementById('submit-post');
 
-    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-
-    // Load community stats (counts from tables)
-    async function loadCommunityStats() {
-      const container = document.getElementById('stats-container');
-      const loadingText = document.getElementById('stats-loading');
-
-      if (!container) return;
-
-      try {
-        const { count: videoCount } = await supabase
-          .from('video_lessons')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: notesCount } = await supabase
-          .from('revision_notes')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: classesCount } = await supabase
-          .from('live_classes')
-          .select('*', { count: 'exact', head: true });
-
-        loadingText.remove();
-
-        container.innerHTML = `
-          <div class="card stat-card">
-            <div class="stat-value">${videoCount || 0}</div>
-            <div class="stat-label">Video Lessons</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${notesCount || 0}</div>
-            <div class="stat-label">Revision Notes</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${classesCount || 0}</div>
-            <div class="stat-label">Live Classes</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">Soon</div>
-            <div class="stat-label">Active Discussions</div>
-          </div>
-        `;
-      } catch (err) {
-        console.error('Error loading community stats:', err);
-        loadingText.textContent = 'Failed to load stats.';
+      if (!window.supabaseClient) {
+        discussionsContainer.innerHTML = '<p style="color:red;">Database connection failed. Please refresh.</p>';
+        return;
       }
-    }
 
-    // Run when page loads
-    document.addEventListener('DOMContentLoaded', () => {
+      // Check if user is logged in
+      const { data: { user } } = await window.supabaseClient.auth.getUser();
+      if (user) {
+        newPostForm.classList.remove('hidden');
+        loginPrompt.classList.add('hidden');
+      } else {
+        newPostForm.classList.add('hidden');
+        loginPrompt.classList.remove('hidden');
+      }
+
+      // Load discussions
+      async function loadDiscussions() {
+        discussionsContainer.innerHTML = '<p>Loading discussions...</p>';
+
+        try {
+          const { data, error } = await window.supabaseClient
+            .from('discussions')
+            .select(`
+              id,
+              title,
+              content,
+              created_at,
+              user_id,
+              auth.users!user_id (user_metadata->full_name)
+            `)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+          if (error) throw error;
+
+          discussionsContainer.innerHTML = '';
+
+          if (data.length === 0) {
+            discussionsContainer.innerHTML = '<p>No discussions yet. Be the first to start one!</p>';
+            return;
+          }
+
+          data.forEach(post => {
+            const postEl = document.createElement('div');
+            postEl.className = 'discussion-post';
+            postEl.innerHTML = `
+              <div class="post-header">
+                <span class="post-author">${post.auth.users?.user_metadata?.full_name || 'Anonymous'}</span>
+                <span class="post-time">${new Date(post.created_at).toLocaleString()}</span>
+              </div>
+              <h3>${post.title}</h3>
+              <div class="post-content">${post.content.replace(/\n/g, '<br>')}</div>
+              <p class="post-replies-count">Replies: <strong>0</strong> (coming soon)</p>
+            `;
+            discussionsContainer.appendChild(postEl);
+          });
+        } catch (err) {
+          console.error('Error loading discussions:', err);
+          discussionsContainer.innerHTML = '<p style="color:red;">Failed to load discussions.</p>';
+        }
+      }
+
+      // Post new discussion
+      if (submitPostBtn) {
+        submitPostBtn.addEventListener('click', async () => {
+          const title = document.getElementById('post-title').value.trim();
+          const content = document.getElementById('post-content').value.trim();
+
+          if (!title || !content) {
+            alert('Please fill in both title and content.');
+            return;
+          }
+
+          try {
+            const { error } = await window.supabaseClient
+              .from('discussions')
+              .insert({
+                title,
+                content,
+                user_id: (await window.supabaseClient.auth.getUser()).data.user?.id
+              });
+
+            if (error) throw error;
+
+            alert('Your question has been posted!');
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-content').value = '';
+            loadDiscussions();
+          } catch (err) {
+            console.error('Post error:', err);
+            alert('Failed to post: ' + err.message);
+          }
+        });
+      }
+
+      // Initial load
+      loadDiscussions();
+
+      // Load stats (fixed version)
+      async function loadCommunityStats() {
+        const container = document.getElementById('stats-container');
+        const loadingText = document.getElementById('stats-loading');
+
+        if (!container) return;
+
+        try {
+          const { count: videoCount } = await window.supabaseClient
+            .from('video_lessons')
+            .select('*', { count: 'exact', head: true });
+
+          const { count: notesCount } = await window.supabaseClient
+            .from('revision_notes')
+            .select('*', { count: 'exact', head: true });
+
+          const { count: classesCount } = await window.supabaseClient
+            .from('live_classes')
+            .select('*', { count: 'exact', head: true });
+
+          loadingText.remove();
+
+          container.innerHTML = `
+            <div class="card stat-card">
+              <div class="stat-value">${videoCount || 0}</div>
+              <div class="stat-label">Video Lessons</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value">${notesCount || 0}</div>
+              <div class="stat-label">Revision Notes</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value">${classesCount || 0}</div>
+              <div class="stat-label">Live Classes</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value">Active</div>
+              <div class="stat-label">Community</div>
+            </div>
+          `;
+        } catch (err) {
+          console.error('Error loading stats:', err);
+          loadingText.textContent = 'Failed to load stats.';
+        }
+      }
+
       loadCommunityStats();
     });
   </script>
 
-  <!-- Hamburger toggle script – same working version -->
+  <!-- Hamburger toggle script -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
@@ -283,8 +433,6 @@
 
       hamburger.addEventListener('click', () => {
         navMenu.classList.toggle('active');
-        
-        // Update ARIA for accessibility
         const expanded = hamburger.getAttribute('aria-expanded') === 'true';
         hamburger.setAttribute('aria-expanded', !expanded);
       });
