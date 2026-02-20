@@ -294,7 +294,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Community logic – with real names from signup metadata -->
+  <!-- Community logic – FIXED to show real names -->
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
       const discussionsContainer = document.getElementById('discussions-container');
@@ -318,31 +318,29 @@
         loginPrompt.classList.remove('hidden');
       }
 
-      // Helper: Get display name from user metadata or email fallback
+      // Helper: Get display name (prefer full_name → email prefix → fallback)
       async function getDisplayName(userId) {
-        if (!userId) return 'Anonymous';
+        if (!userId) return 'User';
 
         try {
-          const { data } = await window.supabaseClient
-            .from('users')
-            .select('raw_user_meta_data')
-            .eq('id', userId)
-            .single();
+          // Direct fetch from auth.users metadata
+          const { data: authUser, error } = await window.supabaseClient.auth.admin.getUserById(userId);
 
-          if (data?.raw_user_meta_data?.full_name) {
-            return data.raw_user_meta_data.full_name;
+          if (error || !authUser?.user) return 'User';
+
+          const meta = authUser.user.user_metadata || {};
+          if (meta.full_name && meta.full_name.trim()) {
+            return meta.full_name.trim();
           }
 
-          // Fallback: get email prefix
-          const { data: authUser } = await window.supabaseClient.auth.admin.getUserById(userId);
-          if (authUser?.user?.email) {
+          if (authUser.user.email) {
             return authUser.user.email.split('@')[0];
           }
         } catch (err) {
-          console.warn('Could not fetch name for user:', userId, err);
+          console.warn('Could not fetch user name:', userId, err);
         }
 
-        return 'Anonymous';
+        return 'User';
       }
 
       // Load discussions + replies
@@ -351,14 +349,13 @@
         refreshBtn.classList.add('hidden');
 
         try {
-          // Fetch discussions
-          const { data: posts, error: postsError } = await window.supabaseClient
+          const { data: posts, error } = await window.supabaseClient
             .from('discussions')
             .select('id, title, content, created_at, user_id')
             .order('created_at', { ascending: false })
             .limit(10);
 
-          if (postsError) throw postsError;
+          if (error) throw error;
 
           if (posts.length === 0) {
             discussionsContainer.innerHTML = '<p>No discussions yet. Be the first to start one!</p>';
@@ -398,7 +395,7 @@
             loadReplyCount(post.id);
           }
 
-          // Event listeners
+          // Event listeners for reply/view/submit (same as before)
           document.querySelectorAll('.reply-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
               const postId = e.target.dataset.postId;
@@ -459,7 +456,6 @@
         }
       }
 
-      // Load reply count
       async function loadReplyCount(postId) {
         try {
           const { count, error } = await window.supabaseClient
@@ -476,7 +472,6 @@
         }
       }
 
-      // Load replies for a post
       async function loadReplies(postId, container) {
         container.innerHTML = '<p>Loading replies...</p>';
 
@@ -496,24 +491,20 @@
             return;
           }
 
-          // Get author names for replies
+          // Fetch names for replies
           const userIds = [...new Set(replies.map(r => r.user_id))];
-          const { data: users } = await window.supabaseClient
-            .from('users')
-            .select('id, raw_user_meta_data')
-            .in('id', userIds);
-
           const userMap = {};
-          users?.forEach(u => {
-            userMap[u.id] = u.raw_user_meta_data?.full_name || u.raw_user_meta_data?.email?.split('@')[0] || 'Anonymous';
-          });
+
+          for (const uid of userIds) {
+            userMap[uid] = await getDisplayName(uid);
+          }
 
           replies.forEach(reply => {
             const replyEl = document.createElement('div');
             replyEl.className = 'reply-item';
             replyEl.innerHTML = `
               <div class="post-header">
-                <span class="post-author">${userMap[reply.user_id] || 'Anonymous'}</span>
+                <span class="post-author">${userMap[reply.user_id] || 'User'}</span>
                 <span class="post-time">${new Date(reply.created_at).toLocaleString()}</span>
               </div>
               <div class="post-content">${reply.content.replace(/\n/g, '<br>')}</div>
@@ -526,7 +517,6 @@
         }
       }
 
-      // Post new discussion
       if (submitPostBtn) {
         submitPostBtn.addEventListener('click', async () => {
           const title = document.getElementById('post-title').value.trim();
@@ -562,7 +552,6 @@
         });
       }
 
-      // Refresh button
       refreshBtn.addEventListener('click', loadDiscussions);
 
       // Initial load
