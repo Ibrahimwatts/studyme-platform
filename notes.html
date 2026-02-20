@@ -9,7 +9,7 @@
   <!-- Reliable Supabase CDN from jsDelivr - pinned version -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Inline mobile menu fix – same working version as index.html, classes.html, subjects.html -->
+  <!-- Inline mobile menu fix – same working version as other pages -->
   <style>
     @media (max-width: 768px) {
       .nav-menu {
@@ -129,7 +129,7 @@
       <div class="page-hero-content">
         <h1>Revision Notes</h1>
         <p>Comprehensive, curriculum-aligned revision notes for Physics, Chemistry, Biology, and Mathematics (Form 1–4 / Grade 7–12). Clear explanations, diagrams, key formulas, and KCSE-focused summaries — perfect for quick review and deep understanding.</p>
-        <p class="hero-meta">Downloadable PDFs • Interactive highlights • Premium access unlocks full library</p>
+        <p class="hero-meta">Downloadable PDFs • Interactive highlights • All notes freely accessible</p>
       </div>
     </section>
 
@@ -151,15 +151,9 @@
           <li><a href="#">Form 3</a></li>
           <li><a href="#">Form 4</a></li>
         </ul>
-
-        <div class="premium-promo">
-          <h4>Unlock Full Notes</h4>
-          <p>Download PDFs, access all forms, and get printable versions with subscription.</p>
-          <a href="subscriptions.html" class="btn small">Subscribe Now</a>
-        </div>
       </aside>
 
-      <!-- Dynamic notes -->
+      <!-- Dynamic notes – now showing full content -->
       <section class="notes-content" id="notes-container">
         <h2>Loading Revision Notes...</h2>
       </section>
@@ -213,10 +207,9 @@
               <h3>${note.title || 'Untitled Note'}</h3>
               <p class="note-meta">${note.subject || '?'} • ${note.form || '?'}</p>
               <div class="note-body">
-                ${note.body ? note.body.substring(0, 400) + (note.body.length > 400 ? '...' : '') : 'No preview available'}
+                ${note.body || 'No content available'}
               </div>
               ${note.pdf_url ? `<a href="${note.pdf_url}" target="_blank" class="btn small">Download PDF</a>` : ''}
-              <a href="#" class="btn small premium-btn">Read Full Note (Premium)</a>
             `;
             container.appendChild(card);
           });
