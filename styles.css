@@ -24,10 +24,20 @@
   }
 }
 
-/* ============================================= */
-/* Landing & Login Page Styles (previously inline) */
-/* ============================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* Landing page specific styles (moved from inline in index.html) */
 body.landing {
   background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   color: white;
@@ -39,17 +49,6 @@ body.landing {
 .landing-header {
   padding: 2rem 5%;
   text-align: center;
-}
-
-.landing-header .logo h1 {
-  font-size: 3.2rem;
-  margin: 0;
-}
-
-.landing-header .logo p {
-  font-size: 1.3rem;
-  opacity: 0.9;
-  margin-top: 0.3rem;
 }
 
 .landing-hero {
@@ -72,10 +71,6 @@ body.landing {
   font-weight: 800;
 }
 
-.hero-title span {
-  color: var(--accent);
-}
-
 .hero-subtitle {
   font-size: 1.5rem;
   margin-bottom: 2.5rem;
@@ -96,7 +91,6 @@ body.landing {
   border-radius: 50px;
   text-decoration: none;
   transition: all 0.3s ease;
-  cursor: pointer;
 }
 
 .btn-login {
@@ -128,50 +122,7 @@ body.landing {
   font-size: 1.1rem;
 }
 
-.landing-footer {
-  padding: 2rem;
-  text-align: center;
-  opacity: 0.8;
-  font-size: 0.95rem;
-}
-
-/* Responsive landing page adjustments */
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.8rem;
-  }
-  .hero-subtitle {
-    font-size: 1.3rem;
-  }
-  .hero-buttons {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .landing-header .logo h1 {
-    font-size: 2.8rem;
-  }
-  .landing-header .logo p {
-    font-size: 1.1rem;
-  }
-}
-
-/* ============================================= */
 /* Header & Navigation – FIXED for desktop switch */
-/* ============================================= */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-}
-
 header {
   background: linear-gradient(to right, #000000, #dc2626, #16a34a);
   color: white;
@@ -836,4 +787,3 @@ footer {
   text-decoration: underline;
   font-size: 0.95rem;
 }
-
