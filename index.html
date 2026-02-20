@@ -8,6 +8,47 @@
 
   <!-- Stable Supabase CDN - same as videos.html, notes.html, admin.html -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+  <!-- Inline style fix – only for the mobile menu to be vertical list -->
+  <style>
+    @media (max-width: 992px) {
+      .nav-menu.active ul {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        padding: 1.5rem 0;
+      }
+
+      .nav-menu.active li {
+        width: 100%;
+      }
+
+      .nav-menu.active a {
+        display: block;
+        padding: 1rem 1.5rem;
+        font-size: 1.25rem;
+        color: white;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255,255,255,0.12);
+      }
+
+      .nav-menu.active a:hover {
+        background: rgba(255,255,255,0.08);
+      }
+
+      .nav-menu.active .login-btn {
+        margin-top: 1rem;
+        text-align: center;
+        background: white;
+        color: #16a34a;
+        border-radius: 50px;
+        padding: 0.9rem 2rem;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -178,7 +219,7 @@
           .from('video_lessons')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(4);  // Show only 4 featured videos
+          .limit(4);
 
         if (error) throw error;
 
@@ -204,45 +245,6 @@
         console.error('Error loading featured videos:', err);
         loadingText.textContent = 'Failed to load videos. Please try again later.';
       }
-    });
-  </script>
-
-  <!-- Hamburger menu toggle script – FIXED for vertical dropdown -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const hamburger = document.querySelector('.hamburger');
-      const navMenu = document.querySelector('.nav-menu');
-
-      if (!hamburger || !navMenu) {
-        console.warn('Hamburger or nav-menu not found');
-        return;
-      }
-
-      hamburger.addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevent immediate close
-        navMenu.classList.toggle('active');
-        const isOpen = navMenu.classList.contains('active');
-        hamburger.setAttribute('aria-expanded', isOpen);
-        hamburger.textContent = isOpen ? '✕' : '☰';
-      });
-
-      // Close when clicking outside
-      document.addEventListener('click', function (e) {
-        if (!e.target.closest('nav') && navMenu.classList.contains('active')) {
-          navMenu.classList.remove('active');
-          hamburger.setAttribute('aria-expanded', 'false');
-          hamburger.textContent = '☰';
-        }
-      });
-
-      // Close when clicking any link
-      navMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', function () {
-          navMenu.classList.remove('active');
-          hamburger.setAttribute('aria-expanded', 'false');
-          hamburger.textContent = '☰';
-        });
-      });
     });
   </script>
 </body>
