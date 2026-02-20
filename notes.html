@@ -8,6 +8,87 @@
   
   <!-- Reliable Supabase CDN from jsDelivr - pinned version -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+  <!-- Inline mobile menu fix – same working version as index.html, classes.html, subjects.html -->
+  <style>
+    @media (max-width: 768px) {
+      .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background-color: rgba(0,0,0,0.95);
+        position: absolute;
+        top: 100%;
+        left: 0;
+        padding: 20px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 9999;
+      }
+
+      .nav-menu.active {
+        display: flex;
+      }
+
+      .nav-menu li {
+        margin: 10px 0;
+      }
+
+      .nav-menu li a {
+        display: block;
+        padding: 0.8rem 1.5rem;
+        font-size: 1.25rem;
+        color: white;
+        text-decoration: none;
+      }
+
+      .nav-menu li a:hover {
+        background: rgba(255,255,255,0.1);
+      }
+
+      .hamburger {
+        display: block;
+        cursor: pointer;
+        font-size: 2.2rem;
+        background: none;
+        border: none;
+        color: white;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .hamburger {
+        display: none !important;
+      }
+
+      .nav-menu {
+        display: flex !important;
+        flex-direction: row !important;
+        position: static !important;
+        width: auto !important;
+        background: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+
+      .nav-menu ul {
+        display: flex;
+        flex-direction: row;
+        gap: 1.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .nav-menu li {
+        margin: 0;
+      }
+
+      .nav-menu li a {
+        padding: 0.6rem 1.1rem;
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -24,8 +105,8 @@
       </div>
 
       <nav>
-        <input type="checkbox" id="nav-toggle" class="nav-toggle">
-        <label for="nav-toggle" class="hamburger">☰</label>
+        <!-- Hamburger button -->
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
         <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
@@ -146,6 +227,22 @@
       }
 
       loadRevisionNotes();
+    });
+  </script>
+
+  <!-- Hamburger toggle script – same working version -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburger = document.querySelector('.hamburger');
+      const navMenu = document.querySelector('.nav-menu');
+
+      hamburger.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        
+        // Update ARIA for accessibility
+        const expanded = hamburger.getAttribute('aria-expanded') === 'true';
+        hamburger.setAttribute('aria-expanded', !expanded);
+      });
     });
   </script>
 </body>
