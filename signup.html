@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up - Studyme</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- FIXED: This line was missing – Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body class="landing">
@@ -43,68 +42,86 @@
     © 2026 Studyme. All rights reserved.
   </footer>
 
+  <!-- Role Selection Modal -->
+  <div id="role-modal" class="role-modal hidden">
+    <div class="role-modal-content">
+      <h2 class="role-modal-title">Who Are You?</h2>
+      <p class="role-modal-subtitle">Select your role to get the right experience</p>
+
+      <div class="role-options">
+        <button id="role-student-btn" class="role-btn student">
+          <span class="role-icon">🎓</span>
+          <span>Student</span>
+          <small>Access notes, videos, tests & community</small>
+        </button>
+
+        <button id="role-teacher-btn" class="role-btn teacher">
+          <span class="role-icon">👨‍🏫</span>
+          <span>Teacher / Admin</span>
+          <small>Manage content, classes & student progress</small>
+        </button>
+      </div>
+
+      <p id="role-error" class="role-error hidden"></p>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const googleBtn = document.getElementById('google-signup-btn');
       const errorMsg = document.getElementById('error-message');
-      const successMsg = document.getElementById('success-message');
-
-      if (!window.supabase) {
-        errorMsg.textContent = 'Supabase library failed to load. Please refresh or check your internet.';
-        console.error('Supabase not available');
-        return;
-      }
+      const roleModal = document.getElementById('role-modal');
+      const roleStudentBtn = document.getElementById('role-student-btn');
+      const roleTeacherBtn = document.getElementById('role-teacher-btn');
+      const roleError = document.getElementById('role-error');
 
       googleBtn.addEventListener('click', async () => {
         errorMsg.textContent = '';
-        successMsg.classList.add('hidden');
-
         try {
           const { error } = await window.supabaseClient.auth.signInWithOAuth({
             provider: 'google',
-            options: {
-              redirectTo: window.location.origin + '/home.html'
-            }
+            options: { redirectTo: window.location.origin + '/signup.html' } // Stay on signup for role prompt
           });
-
           if (error) throw error;
         } catch (err) {
-          errorMsg.textContent = err.message || 'Signup failed. Please try again.';
+          errorMsg.textContent = 'Google signup failed: ' + (err.message || 'Try again');
         }
       });
 
-      // After Google signup → prompt for role
+      // Listen for auth state → show role modal if new user
       window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           const { data: { user } } = await window.supabaseClient.auth.getUser();
 
           if (user && !user.user_metadata?.role) {
-            const role = prompt("Are you a Student or a Teacher? Type 'student' or 'teacher'");
-
-            if (role && (role.toLowerCase() === 'student' || role.toLowerCase() === 'teacher')) {
-              const { error } = await window.supabaseClient.auth.updateUser({
-                data: { role: role.toLowerCase() }
-              });
-
-              if (error) {
-                errorMsg.textContent = 'Failed to save role: ' + error.message;
-              } else {
-                successMsg.textContent = 'Account created! Redirecting...';
-                successMsg.classList.remove('hidden');
-                setTimeout(() => {
-                  window.location.href = '/home.html';
-                }, 1500);
-              }
-            } else {
-              errorMsg.textContent = 'Please choose a valid role (student or teacher).';
-            }
+            roleModal.classList.remove('hidden');
           } else {
             window.location.href = '/home.html';
           }
         }
       });
+
+      // Save role when clicked
+      async function saveRole(role) {
+        try {
+          const { error } = await window.supabaseClient.auth.updateUser({
+            data: { role }
+          });
+
+          if (error) throw error;
+
+          roleModal.classList.add('hidden');
+          window.location.href = '/home.html';
+        } catch (err) {
+          roleError.textContent = 'Failed to save role: ' + err.message;
+          roleError.classList.remove('hidden');
+        }
+      }
+
+      roleStudentBtn.addEventListener('click', () => saveRole('student'));
+      roleTeacherBtn.addEventListener('click', () => saveRole('teacher'));
     });
   </script>
 </body>
