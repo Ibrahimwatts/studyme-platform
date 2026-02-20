@@ -267,7 +267,7 @@
     });
   </script>
 
-  <!-- Hamburger toggle script – exactly as you requested -->
+  <!-- Hamburger toggle script + Sign Out handler – exactly as you requested + minimal addition -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
@@ -285,7 +285,7 @@
       if (signoutBtn) {
         signoutBtn.addEventListener('click', async (e) => {
           e.preventDefault();
-          await logout();  // from script.js - redirects to index.html after full logout
+          await logout();  // Calls the full logout from script.js → redirects to index.html
         });
       }
 
