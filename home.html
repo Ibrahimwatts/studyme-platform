@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studyme - Digital Learning Platform for High School</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Stable Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+  <!-- Inline CSS – exactly as you requested (mobile vertical menu) -->
+  <style>
+    /* Mobile Styles (adjust 768px as needed) */
+    @media (max-width: 768px) {
+      .nav-menu {
+        display: none; /* Hide menu by default on mobile */
+        flex-direction: column; /* Stack items vertically */
+        width: 100%;
+        background-color: rgba(0,0,0,0.95); /* Dark overlay like your header */
+        position: absolute;
+        top: 100%; /* Position below header */
+        left: 0;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 9999;
+      }
+
+      /* When the menu is toggled 'active' via JS */
+      .nav-menu.active {
+        display: flex;
+      }
+
+      .nav-menu li {
+        margin: 10px 0; /* Add spacing between vertical items */
+      }
+
+      .nav-menu li a {
+        color: white;
+        font-size: 1.3rem;
+        padding: 0.8rem 1rem;
+        display: block;
+        text-decoration: none;
+      }
+
+      .nav-menu li a:hover {
+        background: rgba(255,255,255,0.1);
+      }
+
+      .hamburger {
+        display: block; /* Ensure hamburger is visible */
+        cursor: pointer;
+        font-size: 2.2rem;
+        background: none;
+        border: none;
+        color: white;
+      }
+    }
+
+    /* Ensure menu is horizontal on desktop */
+    @media (min-width: 769px) {
+      .nav-menu {
+        display: flex;
+        flex-direction: row;
+      }
+      .hamburger {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" placeholder="Search subjects, notes, videos, or tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
+      </div>
+
+      <nav>
+        <!-- Hamburger only visible on mobile -->
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+        <ul class="nav-menu">
+          <li><a href="home.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
+          <li id="admin-link"><a href="admin.html">Admin Panel</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <h2>Transform Your High School Learning</h2>
+        <p>Master Physics, Chemistry, Biology, and Mathematics with expert-led resources aligned to the Kenyan curriculum (Form 1–4 / Grade 7–12). Access revision notes, video lessons, interactive tests, live weekend classes, and community support — all in one place.</p>
+        <div class="hero-ctas">
+          <a href="subjects.html" class="btn primary large">Explore Subjects</a>
+          <a href="subscriptions.html" class="btn secondary large">Start Free Trial</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Video Lessons from Supabase -->
+    <section class="featured-content">
+      <h2 class="section-title">Featured Video Lessons</h2>
+      <div id="featured-videos-container" class="card-grid">
+        <p id="videos-loading">Loading featured videos...</p>
+      </div>
+    </section>
+
+    <section class="featured-subjects">
+      <h2 class="section-title">Core Subjects</h2>
+      <div class="card-grid">
+        <div class="card subject-card">
+          <div class="subject-icon">⚛️</div>
+          <h3>Physics</h3>
+          <p>Mechanics, electricity, waves & modern physics – KCSE-ready.</p>
+          <a href="notes.html?subject=physics" class="btn small">Revision Notes</a>
+        </div>
+        <div class="card subject-card">
+          <div class="subject-icon">🧪</div>
+          <h3>Chemistry</h3>
+          <p>Organic & inorganic chemistry, practicals, and lab simulations.</p>
+          <a href="notes.html?subject=chemistry" class="btn small">Revision Notes</a>
+        </div>
+        <div class="card subject-card">
+          <div class="subject-icon">🌿</div>
+          <h3>Biology</h3>
+          <p>Cell biology, genetics, ecology – with interactive diagrams.</p>
+          <a href="notes.html?subject=biology" class="btn small">Revision Notes</a>
+        </div>
+        <div class="card subject-card">
+          <div class="subject-icon">📐</div>
+          <h3>Mathematics</h3>
+          <p>Algebra, geometry, calculus – practice problems & solutions.</p>
+          <a href="notes.html?subject=mathematics" class="btn small">Revision Notes</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 class="section-title">About Studyme</h2>
+      <p>Studyme is dedicated to making high-quality, curriculum-aligned education accessible to every high school student in Kenya. We partner with experienced educators to deliver engaging notes, videos, tests, live sessions, and community tools — empowering learners to excel in KCSE and beyond.</p>
+    </section>
+
+    <section class="why">
+      <h2 class="section-title">Why Choose Studyme?</h2>
+      <div class="why-grid">
+        <div class="why-item">
+          <h3>Free Trial Resources</h3>
+          <p>Access sample notes and tests without commitment.</p>
+        </div>
+        <div class="why-item">
+          <h3>Live Weekend Classes</h3>
+          <p>Interactive sessions with qualified teachers.</p>
+        </div>
+        <div class="why-item">
+          <h3>Progress Tracking</h3>
+          <p>Personalized dashboard for students & teachers.</p>
+        </div>
+        <div class="why-item">
+          <h3>Community & Support</h3>
+          <p>Discuss, ask questions, and collaborate in real time.</p>
+        </div>
+        <div class="why-item">
+          <h3>Affordable Access</h3>
+          <p>Subscriptions from KSh 500/month via M-Pesa.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="testimonials">
+      <h2 class="section-title">What Learners Say</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial">
+          <p>“The video lessons and tests helped me improve my Physics grade dramatically!”</p>
+          <cite>— Form 3 Student, Nyamira</cite>
+        </div>
+        <div class="testimonial">
+          <p>“Affordable, clear explanations, and great community support. Highly recommend.”</p>
+          <cite>— Form 4 Student</cite>
+        </div>
+        <div class="testimonial">
+          <p>“Live classes feel like real tuition – I finally understand Math concepts.”</p>
+          <cite>— Form 2 Learner</cite>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <h2>Ready to Excel?</h2>
+      <p>Join thousands of students preparing for KCSE success. Start today — free trial available.</p>
+      <a href="subscriptions.html" class="btn primary large">Get Started Now</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Studyme. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a> • <a href="community.html">Contact Us</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+
+  <!-- Featured videos loading -->
+  <script>
+    window.addEventListener('load', async function () {
+      const container = document.getElementById('featured-videos-container');
+      const loadingText = document.getElementById('videos-loading');
+
+      if (!window.supabaseClient) {
+        console.error('Supabase client not available');
+        container.innerHTML = '<p style="color:red;">Database connection failed. Please refresh.</p>';
+        return;
+      }
+
+      console.log('Supabase client ready - loading featured videos');
+
+      try {
+        const { data, error } = await window.supabaseClient
+          .from('video_lessons')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(4);
+
+        if (error) throw error;
+
+        loadingText.remove();
+
+        if (data.length === 0) {
+          container.innerHTML = '<p>No featured videos yet.</p>';
+          return;
+        }
+
+        data.forEach(lesson => {
+          const card = document.createElement('div');
+          card.className = 'card featured-video-card';
+          card.innerHTML = `
+            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${lesson.youtube_id}" frameborder="0" allowfullscreen></iframe>
+            <h3>${lesson.title}</h3>
+            <p>${lesson.subject} • ${lesson.form}</p>
+            <p>${lesson.duration} min</p>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error loading featured videos:', err);
+        loadingText.textContent = 'Failed to load videos. Please try again later.';
+      }
+    });
+  </script>
+
+  <!-- Hamburger toggle script – exactly as you requested -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburger = document.querySelector('.hamburger');
+      const navMenu = document.querySelector('.nav-menu');
+
+      hamburger.addEventListener('click', () => {
+        // This adds/removes the 'active' class to show/hide the vertical list
+        navMenu.classList.toggle('active');
+        
+        // Optional: Update ARIA for accessibility
+        const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
+        hamburger.setAttribute('aria-expanded', !expanded);
+      });
+
+      // Role-based admin link visibility (students hide admin, teachers see it)
+      if (window.supabaseClient) {
+        window.supabaseClient.auth.getUser().then(({ data: { user } }) => {
+          const adminLink = document.getElementById('admin-link');
+          if (user && user.user_metadata?.role === 'teacher') {
+            adminLink.style.display = 'list-item';
+          } else {
+            adminLink.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - Studyme</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="landing">
+
+  <header class="landing-header">
+    <div class="logo">
+      <h1>Studyme</h1>
+      <p>Digital Learning Platform for KCSE Success</p>
+    </div>
+  </header>
+
+  <main class="landing-hero">
+    <div class="hero-content auth-form-container">
+      <h1 class="hero-title">Join Studyme</h1>
+      <p class="hero-subtitle">
+        Create your free account and start mastering KCSE subjects today.
+      </p>
+
+      <!-- Signup Form -->
+      <div class="auth-form">
+        <button id="google-signup-btn" class="btn-landing btn-login full-width">
+          Sign Up with Google
+        </button>
+
+        <!-- Optional email/password signup (commented out) -->
+        <!--
+        <form id="email-signup-form" class="email-login-form">
+          <input type="text" id="full-name" placeholder="Full Name" required class="auth-input" />
+          <input type="email" id="email" placeholder="Email" required class="auth-input" />
+          <input type="password" id="password" placeholder="Password" required class="auth-input" />
+          <button type="submit" class="btn-landing btn-login full-width">Sign Up with Email</button>
+        </form>
+        -->
+
+        <div class="auth-links">
+          <a href="login.html" class="auth-link">Already have an account? Log In</a>
+        </div>
+
+        <p id="error-message" class="error-message"></p>
+        <p id="success-message" class="success-message hidden"></p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="landing-footer">
+    © 2026 Studyme. All rights reserved.
+  </footer>
+
+  <script src="script.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const googleBtn = document.getElementById('google-signup-btn');
+      const errorMsg = document.getElementById('error-message');
+      const successMsg = document.getElementById('success-message');
+
+      googleBtn.addEventListener('click', async () => {
+        errorMsg.textContent = '';
+        successMsg.classList.add('hidden');
+
+        try {
+          const { error } = await window.supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin + '/home.html'
+            }
+          });
+
+          if (error) throw error;
+        } catch (err) {
+          errorMsg.textContent = err.message || 'Signup failed. Please try again.';
+        }
+      });
+
+      // After Google signup success → prompt for role
+      window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN') {
+          const { data: { user } } = await window.supabaseClient.auth.getUser();
+
+          if (user && !user.user_metadata?.role) {
+            // New user — ask for role
+            const role = prompt("Are you a Student or a Teacher? Type 'student' or 'teacher'");
+
+            if (role && (role.toLowerCase() === 'student' || role.toLowerCase() === 'teacher')) {
+              const { error } = await window.supabaseClient.auth.updateUser({
+                data: { role: role.toLowerCase() }
+              });
+
+              if (error) {
+                errorMsg.textContent = 'Failed to save role: ' + error.message;
+              } else {
+                successMsg.textContent = 'Account created! Redirecting...';
+                successMsg.classList.remove('hidden');
+                setTimeout(() => {
+                  window.location.href = '/home.html';
+                }, 1500);
+              }
+            } else {
+              errorMsg.textContent = 'Please choose a valid role (student or teacher).';
+            }
+          } else {
+            // Role already set → go to home
+            window.location.href = '/home.html';
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

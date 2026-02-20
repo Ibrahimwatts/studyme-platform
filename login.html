@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Log In - Studyme</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="landing">
+
+  <header class="landing-header">
+    <div class="logo">
+      <h1>Studyme</h1>
+      <p>Digital Learning Platform for KCSE Success</p>
+    </div>
+  </header>
+
+  <main class="landing-hero">
+    <div class="hero-content auth-form-container">
+      <h1 class="hero-title">Welcome Back</h1>
+      <p class="hero-subtitle">
+        Log in to access your personalized dashboard, revision notes, videos, tests, and more.
+      </p>
+
+      <!-- Login Form -->
+      <div class="auth-form">
+        <button id="google-login-btn" class="btn-landing btn-login full-width">
+          Log In with Google
+        </button>
+
+        <!-- Optional email/password (commented out) -->
+        <!--
+        <form id="email-login-form" class="email-login-form">
+          <input type="email" id="email" placeholder="Email" required class="auth-input" />
+          <input type="password" id="password" placeholder="Password" required class="auth-input" />
+          <button type="submit" class="btn-landing btn-login full-width">Log In with Email</button>
+        </form>
+        -->
+
+        <div class="auth-links">
+          <a href="signup.html" class="auth-link">Don't have an account? Sign Up</a>
+          <a href="#" class="auth-link forgot-password">Forgot Password?</a>
+        </div>
+
+        <p id="error-message" class="error-message"></p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="landing-footer">
+    © 2026 Studyme. All rights reserved.
+  </footer>
+
+  <!-- Role selection modal (shown after Google login) -->
+  <div id="role-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 class="modal-title">Who are you?</h2>
+      <p class="modal-subtitle">This helps us personalize your experience.</p>
+
+      <div class="role-buttons">
+        <button id="role-student" class="btn-landing role-btn student">Student</button>
+        <button id="role-teacher" class="btn-landing role-btn teacher">Teacher</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const googleBtn = document.getElementById('google-login-btn');
+      const errorMsg = document.getElementById('error-message');
+      const roleModal = document.getElementById('role-modal');
+      const roleStudentBtn = document.getElementById('role-student');
+      const roleTeacherBtn = document.getElementById('role-teacher');
+
+      // Show role selection after Google login success
+      window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN') {
+          const { data: { user } } = await window.supabaseClient.auth.getUser();
+          if (user && !user.user_metadata?.role) {
+            // New user – show role selection
+            roleModal.classList.remove('hidden');
+          } else {
+            // Role already set → redirect to home
+            window.location.href = '/home.html';
+          }
+        }
+      });
+
+      // Google Login button
+      googleBtn.addEventListener('click', async () => {
+        errorMsg.textContent = '';
+        try {
+          await loginWithGoogle(); // From script.js – redirects to home.html after auth
+        } catch (err) {
+          errorMsg.textContent = 'Google login failed. Please try again.';
+        }
+      });
+
+      // Save role when user selects
+      async function saveRole(role) {
+        const { error } = await window.supabaseClient.auth.updateUser({
+          data: { role: role }
+        });
+
+        if (error) {
+          errorMsg.textContent = 'Failed to save role: ' + error.message;
+          return;
+        }
+
+        roleModal.classList.add('hidden');
+        window.location.href = '/home.html';
+      }
+
+      roleStudentBtn.addEventListener('click', () => saveRole('student'));
+      roleTeacherBtn.addEventListener('click', () => saveRole('teacher'));
+    });
+  </script>
+</body>
+</html>
