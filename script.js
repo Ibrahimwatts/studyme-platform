@@ -8,12 +8,11 @@ let supabaseClient = null;
 
 function initializeSupabase() {
   if (window.supabaseClient) {
-    console.log('Supabase already initialized - reusing');
     return window.supabaseClient;
   }
 
   if (typeof supabase === 'undefined') {
-    console.error('Supabase library not loaded from CDN. Ensure <script src="https://unpkg.com/@supabase/supabase-js@2"></script> is in <head>');
+    console.error('Supabase library not loaded from CDN.');
     return null;
   }
 
@@ -91,18 +90,13 @@ async function updateAuthUI() {
 // ==================== Data Fetch Helpers ====================
 async function fetchRevisionNotes(subject = null) {
   const client = initializeSupabase();
-  if (!client) {
-    console.error('fetchRevisionNotes: Supabase client not available');
-    return [];
-  }
+  if (!client) return [];
 
   try {
     let query = client.from('revision_notes').select('*').order('created_at', { ascending: false });
-
     if (subject) {
       query = query.ilike('subject', `%${subject}%`);
     }
-
     const { data, error } = await query;
     if (error) throw error;
     return data || [];
@@ -112,17 +106,32 @@ async function fetchRevisionNotes(subject = null) {
   }
 }
 
-// ... keep your other functions (initQuizzes, toggleDarkMode, etc.) unchanged ...
+// Added helper for Video Lessons to ensure consistency
+async function fetchVideoLessons(subject = null) {
+  const client = initializeSupabase();
+  if (!client) return [];
 
-// Initialize on page load
+  try {
+    let query = client.from('video_lessons').select('*').order('created_at', { ascending: false });
+    if (subject) {
+      query = query.ilike('subject', `%${subject}%`);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('fetchVideoLessons error:', err.message);
+    return [];
+  }
+}
+
+// ==================== UI Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  initializeSupabase(); // ensure it's ready
+  initializeSupabase();
 
   if (window.supabaseClient) {
     await updateAuthUI();
     window.supabaseClient.auth.onAuthStateChange(() => updateAuthUI());
-  } else {
-    console.warn('Supabase not initialized - some features disabled');
   }
 
   console.log('Studyme shared script loaded');
