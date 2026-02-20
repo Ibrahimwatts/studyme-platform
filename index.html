@@ -215,7 +215,8 @@
       const navMenu = document.querySelector('.nav-menu');
 
       if (hamburger && navMenu) {
-        hamburger.addEventListener('click', function () {
+        hamburger.addEventListener('click', function (e) {
+          e.stopPropagation(); // Prevent closing immediately
           navMenu.classList.toggle('active');
           const isOpen = navMenu.classList.contains('active');
           hamburger.setAttribute('aria-expanded', isOpen);
