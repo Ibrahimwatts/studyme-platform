@@ -560,3 +560,258 @@ footer {
   margin-top: 1rem;
   font-weight: bold;
 }
+
+/* styles.css - Studyme Platform (FINAL STABLE VERSION) */
+
+/* 1. Global Reset & Variables */
+:root {
+  --primary-green: #2ecc71;
+  --dark-bg: #121212;
+  --card-bg: #1e1e1e;
+  --text-main: #ffffff;
+  --text-dim: #b3b3b3;
+  --header-gradient: linear-gradient(135deg, #800000, #2ecc71);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: var(--text-main);
+  line-height: 1.6;
+  overflow-x: hidden; /* Prevents horizontal scrolling on mobile */
+}
+
+/* 2. Header & Professional Navigation */
+header {
+  background: var(--header-gradient);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.logo h1 {
+  font-size: 1.8rem;
+  color: #fff;
+  margin: 0;
+}
+
+.logo span {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.7);
+  display: block;
+}
+
+/* Desktop Navigation */
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-menu li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+  font-size: 0.95rem;
+}
+
+.nav-menu li a:hover {
+  color: var(--primary-green);
+}
+
+.login-btn {
+  background: var(--primary-green);
+  padding: 8px 20px;
+  border-radius: 25px;
+  color: #fff !important;
+}
+
+/* 3. Mobile Hamburger Logic (FIXED FOR OVERLAP & SAFARI) */
+.nav-toggle {
+  display: none; /* Hide the actual checkbox */
+}
+
+.hamburger {
+  display: none; /* Hidden on Desktop */
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+  z-index: 1001;
+  
+  /* Safari & Cross-Browser Compatibility Fix */
+  -webkit-user-select: none; 
+  -moz-user-select: none;    
+  -ms-user-select: none;     
+  user-select: none;         
+}
+
+@media (max-width: 992px) {
+  .hamburger {
+    display: block; /* Show 3-line icon on mobile/tablet */
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Completely hidden off-screen */
+    width: 280px;
+    height: 100vh;
+    background: #1a1a1a;
+    flex-direction: column;
+    padding: 80px 20px 20px 20px;
+    transition: 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+
+  /* Show menu ONLY when hamburger is clicked */
+  .nav-toggle:checked ~ .nav-menu {
+    right: 0;
+  }
+
+  .nav-menu li {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .nav-menu li a {
+    display: block;
+    padding: 15px;
+    border-radius: 8px;
+    background: #252525;
+    text-align: center;
+    border-bottom: none;
+  }
+}
+
+/* 4. Main Layout & Cards */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 15px;
+  border: 1px solid #333;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary-green);
+}
+
+/* 5. Buttons */
+.btn {
+  display: inline-block;
+  padding: 12px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.3s;
+  text-align: center;
+}
+
+.primary { background: var(--primary-green); color: #fff; }
+.secondary { background: transparent; border: 2px solid var(--primary-green); color: #fff; }
+.btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+/* 6. Video Player Fixes */
+.video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.video-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* 7. Search Bar Styling */
+.search-bar {
+  display: flex;
+  background: rgba(255,255,255,0.1);
+  border-radius: 25px;
+  padding: 5px 15px;
+  margin: 0 20px;
+  flex-grow: 0.5;
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px;
+  width: 100%;
+  outline: none;
+}
+
+.search-bar button {
+  background: var(--primary-green);
+  border: none;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+/* Hide Search on very small mobile to prevent clutter */
+@media (max-width: 600px) {
+  .search-bar { display: none; }
+}
+
+/* 8. Footer */
+footer {
+  text-align: center;
+  padding: 40px 20px;
+  background: #0a0a0a;
+  border-top: 1px solid #333;
+  color: var(--text-dim);
+}
+
+.footer-links {
+  margin-top: 10px;
+}
+
+.footer-links a {
+  color: var(--primary-green);
+  text-decoration: none;
+}
