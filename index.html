@@ -9,9 +9,13 @@
   <!-- Stable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Inline fix for vertical mobile menu – only this small block added -->
+  <!-- Inline fix for vertical mobile menu -->
   <style>
     @media (max-width: 992px) {
+      .hamburger {
+        display: block;
+      }
+
       .nav-menu {
         position: fixed;
         top: 0;
@@ -50,10 +54,6 @@
 
       .nav-menu li a:hover {
         background: rgba(255,255,255,0.1);
-      }
-
-      .hamburger {
-        display: block;
       }
     }
   </style>
@@ -253,6 +253,45 @@
         console.error('Error loading featured videos:', err);
         loadingText.textContent = 'Failed to load videos. Please try again later.';
       }
+    });
+  </script>
+
+  <!-- FIXED Hamburger menu toggle – this is the only changed part -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const hamburger = document.querySelector('button.hamburger');
+      const navMenu = document.querySelector('ul.nav-menu');
+
+      if (!hamburger || !navMenu) {
+        console.warn('Hamburger or nav-menu not found in DOM');
+        return;
+      }
+
+      hamburger.addEventListener('click', function (e) {
+        e.stopPropagation(); // prevent document click from closing immediately
+        navMenu.classList.toggle('active');
+        const isOpen = navMenu.classList.contains('active');
+        hamburger.setAttribute('aria-expanded', isOpen);
+        hamburger.textContent = isOpen ? '✕' : '☰';
+      });
+
+      // Close when clicking outside the nav
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('nav') && navMenu.classList.contains('active')) {
+          navMenu.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          hamburger.textContent = '☰';
+        }
+      });
+
+      // Close when clicking any link
+      navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function () {
+          navMenu.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          hamburger.textContent = '☰';
+        });
+      });
     });
   </script>
 </body>
