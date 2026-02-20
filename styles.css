@@ -38,7 +38,7 @@ body {
 }
 
 /* ============================================= */
-/* Header & Navigation – OPTIMIZED & FIXED       */
+/* Header & Navigation – CLEAN & PRESENTABLE     */
 /* ============================================= */
 
 header {
@@ -108,7 +108,7 @@ header {
   background: var(--accent-dark);
 }
 
-/* Hamburger button – only visible on mobile */
+/* Hamburger button – visible only on mobile */
 .hamburger {
   display: none;
   font-size: 2.2rem;
@@ -158,7 +158,7 @@ header {
   background: #f0f9f5 !important;
 }
 
-/* Mobile menu – slides in from left (Coursera style) */
+/* Mobile menu – clean, presentable slide-in (no bullet points) */
 @media (max-width: 992px) {
   .hamburger {
     display: block;
@@ -166,31 +166,44 @@ header {
 
   .nav-menu {
     position: fixed;
-    inset: 0 0 0 auto;           /* right: 0, top/bottom/left auto */
+    top: 0;
+    left: -100%;
     width: 80%;
     max-width: 320px;
     height: 100vh;
     background: rgba(0,0,0,0.95);
-    transform: translateX(100%);
-    transition: transform 0.4s ease;
+    transition: left 0.4s ease;
     z-index: 9999;
-    padding: 5rem 1.5rem 2rem;
+    padding: 6rem 2rem 2rem;
     overflow-y: auto;
   }
 
   .nav-menu.active {
-    transform: translateX(0);
+    left: 0;
   }
 
   .nav-menu ul {
-    flex-direction: column;
-    gap: 1.8rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-menu li {
+    margin: 1.2rem 0;
   }
 
   .nav-menu a {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
     display: block;
     color: white;
+    padding: 0.8rem 0;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    transition: background 0.2s;
+  }
+
+  .nav-menu a:hover {
+    background: rgba(255,255,255,0.1);
   }
 
   .header-container {
