@@ -1,4 +1,4 @@
-// script.js - Studyme Platform JavaScript (UPDATED: aggressive logout + no auto-login after signout)
+// script.js - Studyme Platform JavaScript (UPDATED: reliable auto-redirect on signout)
 
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
@@ -54,7 +54,7 @@ async function loginWithGoogle() {
   }
 }
 
-// Aggressive logout - clears everything so no auto-sign-in happens later
+// Aggressive logout with guaranteed redirect
 async function logout() {
   const client = initializeSupabase();
   if (!client) return;
@@ -64,21 +64,22 @@ async function logout() {
     const { error } = await client.auth.signOut();
     if (error) throw error;
 
-    // Manually wipe Supabase tokens from storage
+    // Clear all Supabase tokens
     localStorage.removeItem('sb-' + new URL(SUPABASE_URL).hostname + '-auth-token');
     localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('supabase.auth.refresh_token');
     sessionStorage.removeItem('supabase.auth.token');
     sessionStorage.removeItem('supabase.auth.refresh_token');
 
-    // Optional: clear all storage (uncomment if you want nuclear option)
-    // localStorage.clear();
-    // sessionStorage.clear();
-
     console.log('Logout successful - session fully cleared');
 
-    // Force redirect to landing page
-    window.location.href = '/';  // or '/index.html'
+    // Force immediate redirect to landing page (index.html)
+    window.location.replace('/');  // replace() prevents back-button re-login
+
+    // Extra fallback: reload after short delay to break any cache
+    setTimeout(() => {
+      window.location.reload(true);
+    }, 300);
   } catch (err) {
     console.error('Logout failed:', err.message || err);
     alert('Logout failed: ' + (err.message || 'Unknown error'));
@@ -106,7 +107,6 @@ async function updateAuthUI() {
         greeting.style.display = 'inline' || greeting.classList.remove('hidden');
       });
 
-      // If on landing (index.html or /), redirect to home
       if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         window.location.href = '/home.html';
       }
@@ -115,7 +115,6 @@ async function updateAuthUI() {
       logoutBtns.forEach(btn => (btn.style.display = 'none' || btn.classList.add('hidden')));
       userGreetings.forEach(greeting => greeting.style.display = 'none' || greeting.classList.add('hidden'));
 
-      // If on protected page, redirect to landing
       if (window.location.pathname.includes('/home.html') || 
           window.location.pathname.includes('/dashboard.html') || 
           window.location.pathname.includes('/admin.html')) {
@@ -143,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem('sb-' + new URL(SUPABASE_URL).hostname + '-auth-token');
         localStorage.clear();
         sessionStorage.clear();
-        window.location.reload(); // refresh to show clean login page
+        window.location.reload();
       }
     } catch (err) {
       console.warn('Session check failed:', err);
@@ -159,8 +158,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (event === 'SIGNED_IN') {
         window.location.href = '/home.html';
       } else if (event === 'SIGNED_OUT') {
-        window.location.href = '/';
+        window.location.replace('/');  // Force replace on sign out event too
       }
+    });
+  }
+
+  // Global handler for any #signout-btn on the page
+  const signoutBtn = document.getElementById('signout-btn');
+  if (signoutBtn) {
+    signoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await logout();  // This now guarantees redirect to index.html
     });
   }
 
