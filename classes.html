@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Classes - Studyme</title>
+  <title>Subjects - Studyme</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Stable Supabase CDN - same as notes.html, videos.html, admin.html -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Inline mobile menu fix – same as index.html (vertical list on mobile) -->
+  <!-- Inline mobile menu fix – same working version as index.html & classes.html -->
   <style>
     @media (max-width: 768px) {
       .nav-menu {
@@ -92,7 +92,6 @@
 </head>
 <body>
 
-  <!-- Header – updated with working hamburger menu (same as index.html) -->
   <header>
     <div class="header-container">
       <div class="logo">
@@ -128,43 +127,61 @@
   <main>
     <section class="page-hero">
       <div class="page-hero-content">
-        <h1>Weekend Live Classes</h1>
-        <p>Interactive live sessions with expert teachers every weekend. Ask questions in real time, get instant feedback, and dive deeper into challenging topics — perfect for KCSE preparation.</p>
-        <p class="hero-meta">All sessions are held in East Africa Time (EAT) • Recorded sessions available in dashboard for subscribers</p>
+        <h1>Explore Our Core Subjects</h1>
+        <p>Comprehensive, curriculum-aligned resources for Physics, Chemistry, Biology, and Mathematics (Form 1–4 / Grade 7–12). Choose a subject to access revision notes, video lessons, interactive tests, and more — all designed to help you excel in KCSE.</p>
       </div>
     </section>
 
-    <section class="schedule-section">
-      <h2 class="section-title">Upcoming Live Class Schedule</h2>
-      <p class="intro-text">See all upcoming live classes below. Full Zoom/YouTube links and recordings appear in your dashboard after login/subscription.</p>
+    <section class="subjects-grid-section">
+      <h2 class="section-title">Our Subjects</h2>
+      <div class="card-grid" id="subjects-container">
+        <!-- Dynamic stats will load here -->
 
-      <!-- Dynamic live classes from Supabase -->
-      <div id="classes-container" class="card-grid">
-        <p id="classes-loading">Loading upcoming classes...</p>
+        <!-- Static fallback cards -->
+        <div class="card subject-card">
+          <div class="subject-icon">⚛️</div>
+          <h3>Physics</h3>
+          <p>Master mechanics, heat, waves, electricity, magnetism, and modern physics with clear explanations, diagrams, videos, and KCSE-style practice questions.</p>
+          <div class="card-actions">
+            <a href="notes.html?subject=physics" class="btn small">Revision Notes</a>
+            <a href="videos.html?subject=physics" class="btn small secondary">Watch Videos</a>
+          </div>
+        </div>
+
+        <div class="card subject-card">
+          <div class="subject-icon">🧪</div>
+          <h3>Chemistry</h3>
+          <p>Learn atomic structure, chemical bonding, organic & inorganic chemistry, acids/bases, and practical techniques through interactive content and simulations.</p>
+          <div class="card-actions">
+            <a href="notes.html?subject=chemistry" class="btn small">Revision Notes</a>
+            <a href="videos.html?subject=chemistry" class="btn small secondary">Watch Videos</a>
+          </div>
+        </div>
+
+        <div class="card subject-card">
+          <div class="subject-icon">🌿</div>
+          <h3>Biology</h3>
+          <p>Study cell biology, genetics, ecology, human physiology, and plant/animal kingdoms with detailed diagrams, animations, and self-assessment quizzes.</p>
+          <div class="card-actions">
+            <a href="notes.html?subject=biology" class="btn small">Revision Notes</a>
+            <a href="videos.html?subject=biology" class="btn small secondary">Watch Videos</a>
+          </div>
+        </div>
+
+        <div class="card subject-card">
+          <div class="subject-icon">📐</div>
+          <h3>Mathematics</h3>
+          <p>Build strong foundations in algebra, geometry, trigonometry, calculus, statistics, and vectors with step-by-step solutions and graded practice problems.</p>
+          <div class="card-actions">
+            <a href="notes.html?subject=mathematics" class="btn small">Revision Notes</a>
+            <a href="videos.html?subject=mathematics" class="btn small secondary">Watch Videos</a>
+          </div>
+        </div>
       </div>
 
       <div class="center-cta">
-        <p class="schedule-note">Full schedule and Zoom/YouTube links appear in your dashboard after login.</p>
-        <a href="subscriptions.html" class="btn primary">Subscribe to Join Live Sessions</a>
-        <p>Free trial includes access to recorded sessions</p>
-      </div>
-    </section>
-
-    <section class="requirements">
-      <h2 class="section-title">How to Join</h2>
-      <div class="card-grid">
-        <div class="card">
-          <h3>1. Subscribe</h3>
-          <p>Choose a plan via M-Pesa on the subscriptions page.</p>
-        </div>
-        <div class="card">
-          <h3>2. Log In</h3>
-          <p>Access your personalized dashboard.</p>
-        </div>
-        <div class="card">
-          <h3>3. Join Live</h3>
-          <p>Click the live link 5–10 minutes before start time.</p>
-        </div>
+        <a href="subscriptions.html" class="btn primary">Subscribe to Unlock Full Access</a>
+        <p>Free trial notes and sample tests available for all subjects</p>
       </div>
     </section>
   </main>
@@ -178,67 +195,58 @@
 
   <script src="script.js"></script>
 
-  <!-- Page-specific logic – uses window.supabaseClient -->
+  <!-- Supabase dynamic loading script -->
   <script>
-    window.addEventListener('load', async function () {
-      const container = document.getElementById('classes-container');
-      const loadingText = document.getElementById('classes-loading');
+    // Your real Supabase keys
+    const supabaseUrl = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-      if (!window.supabaseClient) {
-        console.error('Supabase client not available');
-        container.innerHTML = '<p style="color:red;">Database connection failed. Please refresh.</p>';
-        return;
-      }
+    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
 
-      console.log('Supabase client ready - starting live classes fetch');
+    // Load subject stats (count of lessons/notes/classes)
+    async function loadSubjectStats() {
+      try {
+        const { count: videoCount } = await supabase
+          .from('video_lessons')
+          .select('*', { count: 'exact', head: true });
 
-      async function loadLiveClasses() {
-        container.innerHTML = '<p>Loading upcoming classes...</p>';
+        const { count: notesCount } = await supabase
+          .from('revision_notes')
+          .select('*', { count: 'exact', head: true });
 
-        try {
-          const { data, error } = await window.supabaseClient
-            .from('live_classes')
-            .select('*')
-            .order('time', { ascending: true }); // or 'created_at' if you prefer
+        const { count: classesCount } = await supabase
+          .from('live_classes')
+          .select('*', { count: 'exact', head: true });
 
-          if (error) throw error;
+        // Display counts under each subject card
+        const cards = document.querySelectorAll('.subject-card');
+        cards.forEach(card => {
+          const subject = card.querySelector('h3').textContent;
+          let statsText = '';
 
-          container.innerHTML = '';
+          if (subject === 'Physics') {
+            statsText = `Videos: ${videoCount || 0} • Notes: ${notesCount || 0} • Classes: ${classesCount || 0}`;
+          } else if (subject === 'Chemistry') {
+            statsText = `Videos: ${videoCount || 0} • Notes: ${notesCount || 0} • Classes: ${classesCount || 0}`;
+          } // Add for Biology and Math if you want per-subject counts later
 
-          if (data.length === 0) {
-            container.innerHTML = '<p>No upcoming live classes scheduled yet. Check back soon!</p>';
-            return;
+          const actions = card.querySelector('.card-actions');
+          if (actions) {
+            actions.innerHTML += `<p class="stats">${statsText}</p>`;
           }
-
-          data.forEach(classItem => {
-            const card = document.createElement('div');
-            card.className = 'card schedule-card';
-            card.innerHTML = `
-              <div class="schedule-header">
-                <span class="subject-tag ${classItem.subject.toLowerCase()}">${classItem.subject}</span>
-                <span class="time">${classItem.time}</span>
-              </div>
-              <p><strong>${classItem.topic}</strong></p>
-              <p>${classItem.description || ''}</p>
-              <div class="card-actions">
-                <a href="${classItem.link}" class="btn small" target="_blank">Join Live</a>
-                <a href="dashboard.html" class="btn small secondary">View Recording (Premium)</a>
-              </div>
-            `;
-            container.appendChild(card);
-          });
-        } catch (err) {
-          console.error('Error loading live classes:', err);
-          container.innerHTML = '<p style="color:red;">Failed to load classes: ' + (err.message || 'Unknown error') + '</p>';
-        }
+        });
+      } catch (err) {
+        console.error('Error loading subject stats:', err);
       }
+    }
 
-      // Initial load
-      loadLiveClasses();
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSubjectStats();
     });
   </script>
 
-  <!-- Hamburger toggle script – same working version as index.html -->
+  <!-- Hamburger toggle script – same working version as index.html & classes.html -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
