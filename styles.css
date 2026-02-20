@@ -561,18 +561,132 @@ footer {
   font-weight: bold;
 }
 
-/* Update the .hamburger part in your styles.css */
-.hamburger {
-  display: none; /* Hidden on Desktop */
-  font-size: 2rem;
-  color: #fff;
+/* Header base */
+header {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0.8rem 1.5rem;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logo h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  color: #1a73e8;
+}
+
+.logo span {
+  font-size: 0.9rem;
+  color: #5f6368;
+}
+
+.search-bar {
+  flex: 1;
+  max-width: 480px;
+  display: flex;
+  min-width: 220px;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: 1px solid #dadce0;
+  border-radius: 24px 0 0 24px;
+  font-size: 1rem;
+}
+
+.search-bar button {
+  padding: 0.7rem 1.4rem;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 0 24px 24px 0;
   cursor: pointer;
-  
-  /* Add these lines to fix the Safari error */
-  -webkit-user-select: none; /* Safari & Safari on iOS support */
-  -moz-user-select: none;    /* Firefox support */
-  -ms-user-select: none;     /* Internet Explorer support */
-  user-select: none;         /* Modern browsers (Chrome/Edge) */
-  
-  z-index: 1001; /* Ensure it stays above the side menu */
+}
+
+/* Desktop menu */
+.nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.8rem;
+}
+
+.nav-menu a {
+  color: #202124;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-menu a:hover {
+  color: #1a73e8;
+}
+
+/* Hamburger (mobile only) */
+.hamburger {
+  display: none;
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #202124;
+}
+
+/* Mobile menu overlay */
+@media (max-width: 960px) {
+  .hamburger {
+    display: block;
+  }
+
+  .nav-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    max-width: 320px;
+    height: 100vh;
+    background: white;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.25);
+    flex-direction: column;
+    padding: 5rem 1.5rem 2rem;
+    transition: left 0.35s ease;
+    z-index: 9999;
+  }
+
+  .nav-menu.active {
+    left: 0;
+  }
+
+  .nav-menu li {
+    margin: 1.2rem 0;
+  }
+
+  .nav-menu a {
+    font-size: 1.25rem;
+    display: block;
+  }
+
+  .header-container {
+    justify-content: space-between;
+  }
+
+  .search-bar {
+    order: 3;
+    width: 100%;
+    margin-top: 0.8rem;
+  }
 }

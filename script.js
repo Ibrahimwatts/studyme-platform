@@ -1,18 +1,19 @@
-// script.js - Studyme Platform JavaScript (FINAL WORKING VERSION)
+// script.js - Studyme Platform JavaScript (FINAL WORKING VERSION - Optimized & Clean)
 
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
 
-// Force global Supabase initialization with full error logging
+// Global Supabase client
 let supabaseClient = null;
 
 function initializeSupabase() {
   if (window.supabaseClient) {
+    console.log('Supabase already initialized - reusing');
     return window.supabaseClient;
   }
 
   if (typeof supabase === 'undefined') {
-    console.error('Supabase library not loaded from CDN.');
+    console.error('Supabase library not loaded from CDN. Ensure <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script> is in <head>');
     return null;
   }
 
@@ -27,37 +28,40 @@ function initializeSupabase() {
   }
 }
 
-// Run init immediately
+// Initialize immediately
 initializeSupabase();
 
 // ==================== Auth Functions ====================
 async function loginWithGoogle() {
   const client = initializeSupabase();
   if (!client) {
-    alert('Database connection not ready. Please refresh.');
+    alert('Database connection not ready. Please refresh the page.');
     return;
   }
+
   try {
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin + '/admin.html' }
     });
+
     if (error) throw error;
   } catch (err) {
-    console.error('Login error:', err.message);
-    alert('Login failed: ' + err.message);
+    console.error('Login error:', err.message || err);
+    alert('Login failed: ' + (err.message || 'Unknown error'));
   }
 }
 
 async function logout() {
   const client = initializeSupabase();
   if (!client) return;
+
   try {
     await client.auth.signOut();
     alert('Logged out successfully');
     updateAuthUI();
   } catch (err) {
-    console.error('Logout error:', err.message);
+    console.error('Logout error:', err.message || err);
   }
 }
 
@@ -76,14 +80,17 @@ async function updateAuthUI() {
       loginBtns.forEach(btn => btn.style.display = 'none');
       logoutBtns.forEach(btn => btn.style.display = 'inline-block');
       const name = user.user_metadata?.full_name || user.email.split('@')[0];
-      if (userGreeting) userGreeting.textContent = `Welcome, ${name}`;
+      if (userGreeting) {
+        userGreeting.textContent = `Welcome, ${name}`;
+        userGreeting.style.display = 'inline';
+      }
     } else {
       loginBtns.forEach(btn => btn.style.display = 'inline-block');
       logoutBtns.forEach(btn => btn.style.display = 'none');
       if (userGreeting) userGreeting.style.display = 'none';
     }
   } catch (err) {
-    console.error('updateAuthUI failed:', err.message);
+    console.error('updateAuthUI failed:', err.message || err);
   }
 }
 
@@ -101,12 +108,11 @@ async function fetchRevisionNotes(subject = null) {
     if (error) throw error;
     return data || [];
   } catch (err) {
-    console.error('fetchRevisionNotes error:', err.message);
+    console.error('fetchRevisionNotes error:', err.message || err);
     return [];
   }
 }
 
-// Added helper for Video Lessons to ensure consistency
 async function fetchVideoLessons(subject = null) {
   const client = initializeSupabase();
   if (!client) return [];
@@ -120,15 +126,17 @@ async function fetchVideoLessons(subject = null) {
     if (error) throw error;
     return data || [];
   } catch (err) {
-    console.error('fetchVideoLessons error:', err.message);
+    console.error('fetchVideoLessons error:', err.message || err);
     return [];
   }
 }
 
 // ==================== UI Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
+  // Ensure client is ready
   initializeSupabase();
 
+  // Update UI on load
   if (window.supabaseClient) {
     await updateAuthUI();
     window.supabaseClient.auth.onAuthStateChange(() => updateAuthUI());
