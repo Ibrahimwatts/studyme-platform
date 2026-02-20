@@ -24,21 +24,8 @@
   }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-}
-
 /* ============================================= */
-/* Landing Page Styles (previously inline)        */
+/* Landing & Login Page Styles (previously inline) */
 /* ============================================= */
 
 body.landing {
@@ -171,6 +158,19 @@ body.landing {
 /* ============================================= */
 /* Header & Navigation – FIXED for desktop switch */
 /* ============================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
 
 header {
   background: linear-gradient(to right, #000000, #dc2626, #16a34a);
@@ -836,3 +836,4 @@ footer {
   text-decoration: underline;
   font-size: 0.95rem;
 }
+
