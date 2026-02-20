@@ -6,7 +6,7 @@
   <title>Studyme - Digital Learning Platform for High School</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Stable Supabase CDN -->
+  <!-- Stable Supabase CDN - same as videos.html, notes.html, admin.html -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -23,12 +23,11 @@
         <button type="submit" aria-label="Search">Search</button>
       </div>
 
-      <!-- Hamburger button -->
-      <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+      <nav>
+        <!-- Hamburger only visible on mobile -->
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
-      <!-- Navigation menu -->
-      <nav class="nav-menu">
-        <ul>
+        <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
           <li><a href="subjects.html">Subjects</a></li>
           <li><a href="notes.html">Revision Notes</a></li>
@@ -160,7 +159,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Featured videos loading -->
+  <!-- Featured videos loading - fixed to use window.supabaseClient -->
   <script>
     window.addEventListener('load', async function () {
       const container = document.getElementById('featured-videos-container');
@@ -179,7 +178,7 @@
           .from('video_lessons')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(4);
+          .limit(4);  // Show only 4 featured videos
 
         if (error) throw error;
 
@@ -208,29 +207,28 @@
     });
   </script>
 
-  <!-- Hamburger menu toggle script – FIXED & ROBUST -->
+  <!-- Hamburger menu toggle script – FIXED -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const hamburger = document.querySelector('.hamburger');
       const navMenu = document.querySelector('.nav-menu');
 
       if (!hamburger || !navMenu) {
-        console.warn('Hamburger or nav-menu element not found');
+        console.warn('Hamburger or nav-menu not found');
         return;
       }
 
-      // Toggle menu on click
       hamburger.addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevent immediate close
+        e.stopPropagation(); // Prevent outside-click handler from closing immediately
         navMenu.classList.toggle('active');
         const isOpen = navMenu.classList.contains('active');
         hamburger.setAttribute('aria-expanded', isOpen);
         hamburger.textContent = isOpen ? '✕' : '☰';
       });
 
-      // Close when clicking outside header
-      document.addEventListener('click', function (event) {
-        if (!event.target.closest('header') && navMenu.classList.contains('active')) {
+      // Close when clicking outside
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('nav') && navMenu.classList.contains('active')) {
           navMenu.classList.remove('active');
           hamburger.setAttribute('aria-expanded', 'false');
           hamburger.textContent = '☰';
