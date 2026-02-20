@@ -38,7 +38,7 @@ body {
 }
 
 /* ============================================= */
-/* Header & Navigation – CLEAN & PRESENTABLE     */
+/* Header & Navigation – FIXED for desktop switch */
 /* ============================================= */
 
 header {
@@ -108,7 +108,7 @@ header {
   background: var(--accent-dark);
 }
 
-/* Hamburger button – visible only on mobile */
+/* Hamburger button – only visible on mobile */
 .hamburger {
   display: none;
   font-size: 2.2rem;
@@ -123,11 +123,8 @@ header {
   z-index: 1002;
 }
 
-/* Desktop navigation menu */
+/* Base nav menu styles */
 .nav-menu {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -158,63 +155,72 @@ header {
   background: #f0f9f5 !important;
 }
 
-/* Mobile menu – clean, presentable slide-in (no bullet points) */
-@media (max-width: 992px) {
+/* Mobile menu – vertical dropdown */
+@media (max-width: 768px) {
   .hamburger {
     display: block;
   }
 
   .nav-menu {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 80%;
-    max-width: 320px;
-    height: 100vh;
-    background: rgba(0,0,0,0.95);
-    transition: left 0.4s ease;
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba(0,0,0,0.95);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    padding: 20px 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     z-index: 9999;
-    padding: 6rem 2rem 2rem;
-    overflow-y: auto;
   }
 
   .nav-menu.active {
-    left: 0;
-  }
-
-  .nav-menu ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    display: flex;
   }
 
   .nav-menu li {
-    margin: 1.2rem 0;
+    margin: 10px 0;
   }
 
-  .nav-menu a {
-    font-size: 1.4rem;
+  .nav-menu li a {
     display: block;
-    color: white;
-    padding: 0.8rem 0;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    transition: background 0.2s;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.25rem;
+  }
+}
+
+/* Desktop menu – horizontal layout (forces override when wide) */
+@media (min-width: 769px) {
+  .hamburger {
+    display: none !important;
   }
 
-  .nav-menu a:hover {
-    background: rgba(255,255,255,0.1);
+  .nav-menu {
+    display: flex !important;
+    flex-direction: row !important;
+    position: static !important;
+    width: auto !important;
+    background: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    top: auto !important;
+    left: auto !important;
   }
 
-  .header-container {
-    position: relative;
+  .nav-menu ul {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: center;
   }
 
-  .search-bar {
-    width: 100%;
-    max-width: none;
-    order: 3;
-    margin-top: 0.8rem;
+  .nav-menu li {
+    margin: 0;
+  }
+
+  .nav-menu li a {
+    padding: 0.6rem 1.1rem;
+    font-size: 1rem;
   }
 }
 
