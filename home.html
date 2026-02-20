@@ -98,7 +98,7 @@
           <li><a href="classes.html">Live Classes</a></li>
           <li><a href="subscriptions.html">Subscribe</a></li>
           <li id="admin-link"><a href="admin.html">Admin Panel</a></li>
-          <li><a href="#" class="login-btn">Log In</a></li>
+          <li><a href="#" id="signout-btn" class="logout-btn">Sign Out</a></li>
         </ul>
       </nav>
     </div>
@@ -272,15 +272,22 @@
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
       const navMenu = document.querySelector('.nav-menu');
+      const signoutBtn = document.getElementById('signout-btn');
 
       hamburger.addEventListener('click', () => {
-        // This adds/removes the 'active' class to show/hide the vertical list
         navMenu.classList.toggle('active');
         
-        // Optional: Update ARIA for accessibility
         const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
         hamburger.setAttribute('aria-expanded', !expanded);
       });
+
+      // Sign Out button click handler
+      if (signoutBtn) {
+        signoutBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          await logout();  // from script.js - redirects to index.html after full logout
+        });
+      }
 
       // Role-based admin link visibility (students hide admin, teachers see it)
       if (window.supabaseClient) {
