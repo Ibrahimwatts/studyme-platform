@@ -267,7 +267,7 @@
     });
   </script>
 
-  <!-- Hamburger toggle script + Sign Out handler – exactly as you requested + minimal addition -->
+  <!-- Hamburger toggle script + Sign Out handler -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
@@ -281,11 +281,23 @@
         hamburger.setAttribute('aria-expanded', !expanded);
       });
 
-      // Sign Out button click handler
+      // Sign Out handler - automatic redirect to index.html
       if (signoutBtn) {
         signoutBtn.addEventListener('click', async (e) => {
           e.preventDefault();
-          await logout();  // Calls the full logout from script.js → redirects to index.html
+          try {
+            await logout();  // from script.js - signs out and clears session
+
+            // Force immediate redirect to index.html (landing/welcoming page)
+            window.location.replace('/');  // replace() prevents back button issues
+            // Fallback: reload to break cache
+            setTimeout(() => {
+              window.location.reload(true);
+            }, 500);
+          } catch (err) {
+            console.error('Sign out failed:', err);
+            alert('Sign out failed. Please try again.');
+          }
         });
       }
 
