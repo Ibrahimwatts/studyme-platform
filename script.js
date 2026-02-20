@@ -1,4 +1,4 @@
-// script.js - Studyme Platform JavaScript (FINAL WORKING VERSION - Optimized & Clean)
+// script.js - Studyme Platform JavaScript (FINAL WORKING VERSION - Clean & Stable)
 
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
@@ -7,13 +7,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let supabaseClient = null;
 
 function initializeSupabase() {
+  // Reuse if already exists
   if (window.supabaseClient) {
-    console.log('Supabase already initialized - reusing');
+    console.log('Supabase already initialized - reusing existing client');
     return window.supabaseClient;
   }
 
+  // Check if Supabase library loaded
   if (typeof supabase === 'undefined') {
-    console.error('Supabase library not loaded from CDN. Ensure <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script> is in <head>');
+    console.error('Supabase library not loaded from CDN. Make sure <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script> is in <head>');
     return null;
   }
 
@@ -23,12 +25,12 @@ function initializeSupabase() {
     console.log('SUCCESS: Supabase client initialized globally');
     return supabaseClient;
   } catch (err) {
-    console.error('Failed to create Supabase client:', err.message || err);
+    console.error('Failed to initialize Supabase client:', err.message || err);
     return null;
   }
 }
 
-// Initialize immediately
+// Initialize immediately on script load
 initializeSupabase();
 
 // ==================== Auth Functions ====================
@@ -47,7 +49,7 @@ async function loginWithGoogle() {
 
     if (error) throw error;
   } catch (err) {
-    console.error('Login error:', err.message || err);
+    console.error('Google login error:', err.message || err);
     alert('Login failed: ' + (err.message || 'Unknown error'));
   }
 }
@@ -62,6 +64,7 @@ async function logout() {
     updateAuthUI();
   } catch (err) {
     console.error('Logout error:', err.message || err);
+    alert('Logout failed: ' + (err.message || 'Unknown error'));
   }
 }
 
@@ -77,16 +80,16 @@ async function updateAuthUI() {
     const userGreeting = document.querySelector('.user-greeting');
 
     if (user) {
-      loginBtns.forEach(btn => btn.style.display = 'none');
-      logoutBtns.forEach(btn => btn.style.display = 'inline-block');
+      loginBtns.forEach(btn => (btn.style.display = 'none'));
+      logoutBtns.forEach(btn => (btn.style.display = 'inline-block'));
       const name = user.user_metadata?.full_name || user.email.split('@')[0];
       if (userGreeting) {
         userGreeting.textContent = `Welcome, ${name}`;
         userGreeting.style.display = 'inline';
       }
     } else {
-      loginBtns.forEach(btn => btn.style.display = 'inline-block');
-      logoutBtns.forEach(btn => btn.style.display = 'none');
+      loginBtns.forEach(btn => (btn.style.display = 'inline-block'));
+      logoutBtns.forEach(btn => (btn.style.display = 'none'));
       if (userGreeting) userGreeting.style.display = 'none';
     }
   } catch (err) {
@@ -133,13 +136,17 @@ async function fetchVideoLessons(subject = null) {
 
 // ==================== UI Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  // Ensure client is ready
+  // Make sure client is ready
   initializeSupabase();
 
-  // Update UI on load
+  // Update auth UI on page load
   if (window.supabaseClient) {
     await updateAuthUI();
-    window.supabaseClient.auth.onAuthStateChange(() => updateAuthUI());
+
+    // Listen for auth state changes (login/logout)
+    window.supabaseClient.auth.onAuthStateChange(() => {
+      updateAuthUI();
+    });
   }
 
   console.log('Studyme shared script loaded');

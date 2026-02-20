@@ -38,7 +38,7 @@ body {
 }
 
 /* ============================================= */
-/* Header & Navigation                           */
+/* Header & Navigation – FIXED & OPTIMIZED       */
 /* ============================================= */
 
 header {
@@ -108,22 +108,22 @@ header {
   background: var(--accent-dark);
 }
 
-/* Hamburger - only visible on mobile */
+/* Hamburger button – only on mobile */
 .hamburger {
   display: none;
   font-size: 2.2rem;
-  color: white;
-  cursor: pointer;
   background: none;
   border: none;
+  color: white;
+  cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  z-index: 1001;
+  z-index: 1002;
 }
 
-/* Desktop nav menu */
+/* Desktop navigation menu */
 .nav-menu {
   display: flex;
   align-items: center;
@@ -158,14 +158,13 @@ header {
   background: #f0f9f5 !important;
 }
 
-/* Mobile menu (slides in from left like Coursera) */
+/* Mobile menu – slides from left (Coursera style) */
 @media (max-width: 992px) {
   .hamburger {
     display: block;
   }
 
   .nav-menu {
-    display: none;
     position: fixed;
     top: 0;
     left: -100%;
@@ -173,11 +172,9 @@ header {
     max-width: 320px;
     height: 100vh;
     background: rgba(0,0,0,0.95);
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 5rem 1.5rem 2rem;
     transition: left 0.4s ease;
-    z-index: 999;
+    z-index: 9999;
+    padding: 5rem 1.5rem 2rem;
     overflow-y: auto;
   }
 
@@ -185,12 +182,13 @@ header {
     left: 0;
   }
 
-  .nav-menu li {
-    margin: 1.2rem 0;
+  .nav-menu ul {
+    flex-direction: column;
+    gap: 1.8rem;
   }
 
-  .nav-menu a {
-    font-size: 1.3rem;
+  .nav-menu li a {
+    font-size: 1.35rem;
     display: block;
     color: white;
   }
