@@ -6,43 +6,44 @@
   <title>Studyme - Digital Learning Platform for High School</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Stable Supabase CDN - same as videos.html, notes.html, admin.html -->
+  <!-- Stable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
   <header>
-  <div class="header-container">
-    <div class="logo">
-      <h1>Studyme</h1>
-      <span>Digital Learning Platform</span>
-    </div>
+    <div class="header-container">
+      <div class="logo">
+        <h1>Studyme</h1>
+        <span>Digital Learning Platform</span>
+      </div>
 
-    <div class="search-bar">
-      <input type="search" placeholder="Search subjects, notes, videos, or tests..." aria-label="Search">
-      <button type="submit" aria-label="Search">Search</button>
-    </div>
+      <div class="search-bar">
+        <input type="search" placeholder="Search subjects, notes, videos, or tests..." aria-label="Search">
+        <button type="submit" aria-label="Search">Search</button>
+      </div>
 
-    <nav>
-      <!-- Hamburger only visible on mobile -->
+      <!-- Hamburger button -->
       <button class="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
 
-      <ul class="nav-menu">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="subjects.html">Subjects</a></li>
-        <li><a href="notes.html">Revision Notes</a></li>
-        <li><a href="videos.html">Video Lessons</a></li>
-        <li><a href="tests.html">Tests & Quizzes</a></li>
-        <li><a href="dashboard.html">My Dashboard</a></li>
-        <li><a href="community.html">Community</a></li>
-        <li><a href="classes.html">Live Classes</a></li>
-        <li><a href="subscriptions.html">Subscribe</a></li>
-        <li><a href="admin.html">Admin Panel</a></li>
-        <li><a href="#" class="login-btn">Log In</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
+      <!-- Navigation menu -->
+      <nav class="nav-menu">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="subjects.html">Subjects</a></li>
+          <li><a href="notes.html">Revision Notes</a></li>
+          <li><a href="videos.html">Video Lessons</a></li>
+          <li><a href="tests.html">Tests & Quizzes</a></li>
+          <li><a href="dashboard.html">My Dashboard</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="classes.html">Live Classes</a></li>
+          <li><a href="subscriptions.html">Subscribe</a></li>
+          <li><a href="admin.html">Admin Panel</a></li>
+          <li><a href="#" class="login-btn">Log In</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
   <main>
     <section class="hero">
@@ -159,7 +160,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Featured videos loading - fixed to use window.supabaseClient -->
+  <!-- Featured videos loading -->
   <script>
     window.addEventListener('load', async function () {
       const container = document.getElementById('featured-videos-container');
@@ -178,7 +179,7 @@
           .from('video_lessons')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(4);  // Show only 4 featured videos
+          .limit(4);
 
         if (error) throw error;
 
@@ -204,6 +205,46 @@
         console.error('Error loading featured videos:', err);
         loadingText.textContent = 'Failed to load videos. Please try again later.';
       }
+    });
+  </script>
+
+  <!-- Hamburger menu toggle script – FIXED & ROBUST -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const hamburger = document.querySelector('.hamburger');
+      const navMenu = document.querySelector('.nav-menu');
+
+      if (!hamburger || !navMenu) {
+        console.warn('Hamburger or nav-menu element not found');
+        return;
+      }
+
+      // Toggle menu on click
+      hamburger.addEventListener('click', function (e) {
+        e.stopPropagation(); // Prevent immediate close
+        navMenu.classList.toggle('active');
+        const isOpen = navMenu.classList.contains('active');
+        hamburger.setAttribute('aria-expanded', isOpen);
+        hamburger.textContent = isOpen ? '✕' : '☰';
+      });
+
+      // Close when clicking outside header
+      document.addEventListener('click', function (event) {
+        if (!event.target.closest('header') && navMenu.classList.contains('active')) {
+          navMenu.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          hamburger.textContent = '☰';
+        }
+      });
+
+      // Close when clicking any link
+      navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function () {
+          navMenu.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          hamburger.textContent = '☰';
+        });
+      });
     });
   </script>
 </body>
