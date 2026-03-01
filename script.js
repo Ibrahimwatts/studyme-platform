@@ -54,7 +54,7 @@ async function loginWithGoogle() {
   }
 }
 
-// Aggressive logout with guaranteed redirect
+// Aggressive logout with guaranteed auto-redirect to index.html
 async function logout() {
   const client = initializeSupabase();
   if (!client) return;
@@ -64,19 +64,23 @@ async function logout() {
     const { error } = await client.auth.signOut();
     if (error) throw error;
 
-    // Clear all Supabase tokens
+    // Clear all Supabase-related storage keys
     localStorage.removeItem('sb-' + new URL(SUPABASE_URL).hostname + '-auth-token');
     localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('supabase.auth.refresh_token');
     sessionStorage.removeItem('supabase.auth.token');
     sessionStorage.removeItem('supabase.auth.refresh_token');
 
-    console.log('Logout successful - session fully cleared');
+    // Nuclear option: clear ALL storage to prevent any auto-login
+    localStorage.clear();
+    sessionStorage.clear();
+
+    console.log('Logout successful - all session data cleared');
 
     // Force immediate redirect to landing page (index.html)
     window.location.replace('/');  // replace() prevents back-button re-login
 
-    // Extra fallback: reload after short delay to break any cache
+    // Extra fallback: reload after tiny delay to break browser cache/session
     setTimeout(() => {
       window.location.reload(true);
     }, 300);
@@ -107,6 +111,7 @@ async function updateAuthUI() {
         greeting.style.display = 'inline' || greeting.classList.remove('hidden');
       });
 
+      // If on landing (index.html or /), redirect to home
       if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         window.location.href = '/home.html';
       }
@@ -115,6 +120,7 @@ async function updateAuthUI() {
       logoutBtns.forEach(btn => (btn.style.display = 'none' || btn.classList.add('hidden')));
       userGreetings.forEach(greeting => greeting.style.display = 'none' || greeting.classList.add('hidden'));
 
+      // If on protected page, redirect to landing
       if (window.location.pathname.includes('/home.html') || 
           window.location.pathname.includes('/dashboard.html') || 
           window.location.pathname.includes('/admin.html')) {
@@ -158,17 +164,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (event === 'SIGNED_IN') {
         window.location.href = '/home.html';
       } else if (event === 'SIGNED_OUT') {
-        window.location.replace('/');  // Force replace on sign out event too
+        window.location.replace('/');  // Force replace on sign out event
       }
     });
   }
 
-  // Global handler for any #signout-btn on the page
+  // Global handler for #signout-btn (works on any page)
   const signoutBtn = document.getElementById('signout-btn');
   if (signoutBtn) {
     signoutBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      await logout();  // This now guarantees redirect to index.html
+      await logout();  // Triggers full logout + auto redirect to index.html
     });
   }
 
