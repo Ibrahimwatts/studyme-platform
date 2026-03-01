@@ -219,7 +219,7 @@
 
   <script src="script.js"></script>
 
-  <!-- Featured videos loading -->
+  <!-- Featured videos loading – unchanged -->
   <script>
     window.addEventListener('load', async function () {
       const container = document.getElementById('featured-videos-container');
@@ -267,7 +267,7 @@
     });
   </script>
 
-  <!-- Hamburger toggle + Sign Out handler -->
+  <!-- Hamburger toggle + Sign Out handler with full logout & auto refresh -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
@@ -281,28 +281,33 @@
         hamburger.setAttribute('aria-expanded', !expanded);
       });
 
-      // Sign Out - full logout + automatic redirect to index.html
+      // Sign Out - full logout + automatic redirect + auto refresh
       if (signoutBtn) {
         signoutBtn.addEventListener('click', async (e) => {
           e.preventDefault();
+          console.log('Sign Out clicked - starting logout process');
+
           try {
-            // Call the logout function from script.js
+            // Call logout from script.js (clears session)
             await logout();
 
-            // Extra aggressive cleanup (clears ALL storage)
+            // Extra aggressive cleanup (clears ALL browser storage)
             localStorage.clear();
             sessionStorage.clear();
 
-            // Immediate redirect to landing page (index.html)
-            window.location.replace('/');  // or '/index.html' if your file is named that
+            // Immediate redirect to index.html (landing page)
+            window.location.replace('/');
 
-            // Fallback: force reload after tiny delay to break cache
+            // Auto-refresh after short delay to ensure clean state (no manual refresh needed)
             setTimeout(() => {
-              window.location.reload(true);
-            }, 200);
+              console.log('Auto-refreshing page to complete logout');
+              window.location.reload(true); // true = force reload from server, no cache
+            }, 800);
           } catch (err) {
             console.error('Sign out failed:', err);
-            alert('Sign out failed. Please try again or refresh.');
+            // Even on error - force redirect and refresh
+            window.location.replace('/');
+            setTimeout(() => window.location.reload(true), 800);
           }
         });
       }
