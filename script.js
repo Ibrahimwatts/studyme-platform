@@ -1,4 +1,4 @@
-// script.js - Studyme Platform JavaScript (FINAL: reliable logout + auto-refresh)
+// script.js - Studyme Platform JavaScript (FINAL: reliable logout + auto-redirect + auto-refresh)
 
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
@@ -43,7 +43,7 @@ async function loginWithGoogle() {
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/home.html'
+        redirectTo: window.location.origin + '/home'
       }
     });
 
@@ -66,15 +66,15 @@ async function logout() {
   }
 
   try {
-    // Step 1: Sign out from Supabase
+    // 1. Sign out from Supabase
     const { error } = await client.auth.signOut();
     if (error) {
-      console.warn('[logout] Supabase signOut had an error:', error.message);
+      console.warn('[logout] Supabase signOut error:', error.message);
     } else {
       console.log('[logout] Supabase signOut successful');
     }
 
-    // Step 2: Clear all possible Supabase storage keys
+    // 2. Clear Supabase-specific keys
     const hostnameKey = 'sb-' + new URL(SUPABASE_URL).hostname + '-auth-token';
     localStorage.removeItem(hostnameKey);
     localStorage.removeItem('supabase.auth.token');
@@ -82,26 +82,26 @@ async function logout() {
     sessionStorage.removeItem('supabase.auth.token');
     sessionStorage.removeItem('supabase.auth.refresh_token');
 
-    // Step 3: Wipe ALL storage to ensure nothing is remembered
+    // 3. Wipe ALL storage to ensure session is forgotten
     localStorage.clear();
     sessionStorage.clear();
 
     console.log('[logout] All storage cleared - session forgotten');
 
-    // Step 4: Immediate redirect to landing page (index.html)
-    console.log('[logout] Redirecting to index.html now...');
+    // 4. Immediate redirect to landing page (index.html)
+    console.log('[logout] Redirecting to index.html ...');
     window.location.replace('/');
 
-    // Step 5: Force auto-refresh after redirect (breaks any remaining cache)
+    // 5. Force auto-refresh after redirect (ensures clean state, no manual refresh needed)
     setTimeout(() => {
-      console.log('[logout] Auto-refresh triggered to ensure clean state');
+      console.log('[logout] Auto-refresh triggered to complete logout');
       window.location.reload(true); // true = force reload from server, no cache
-    }, 600);
+    }, 800);
   } catch (err) {
     console.error('[logout] Critical error during logout:', err.message || err);
     // Even on error - force redirect and refresh
     window.location.replace('/');
-    setTimeout(() => window.location.reload(true), 600);
+    setTimeout(() => window.location.reload(true), 800);
   }
 }
 
@@ -127,16 +127,16 @@ async function updateAuthUI() {
       });
 
       if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-        window.location.href = '/home.html';
+        window.location.href = '/home';
       }
     } else {
       loginBtns.forEach(btn => (btn.style.display = 'inline-block'));
       logoutBtns.forEach(btn => (btn.style.display = 'none' || btn.classList.add('hidden')));
       userGreetings.forEach(greeting => greeting.style.display = 'none' || greeting.classList.add('hidden'));
 
-      if (window.location.pathname.includes('/home.html') || 
-          window.location.pathname.includes('/dashboard.html') || 
-          window.location.pathname.includes('/admin.html')) {
+      if (window.location.pathname.includes('/home') || 
+          window.location.pathname.includes('/dashboard') || 
+          window.location.pathname.includes('/admin')) {
         window.location.href = '/';
       }
     }
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initializeSupabase();
 
   // Force logout lingering sessions on login/landing pages
-  if (window.location.pathname.includes('/login.html') || 
+  if (window.location.pathname.includes('/login') || 
       window.location.pathname === '/' || 
       window.location.pathname === '/index.html') {
     try {
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       await updateAuthUI();
       
       if (event === 'SIGNED_IN') {
-        window.location.href = '/home.html';
+        window.location.href = '/home';
       } else if (event === 'SIGNED_OUT') {
         console.log('[auth change] SIGNED_OUT detected - forcing redirect');
         window.location.replace('/');
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Global handler for Sign Out button (works on home.html and any other page)
+  // Global handler for Sign Out button
   const signoutBtn = document.getElementById('signout-btn');
   if (signoutBtn) {
     console.log('[script.js] Found #signout-btn - attaching listener');
