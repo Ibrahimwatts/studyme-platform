@@ -1,4 +1,5 @@
-// script.js - Studyme Platform JavaScript (UPDATED: reliable auto-redirect on signout)
+// script.js - Studyme Platform JavaScript
+// FINAL VERSION: aggressive logout + guaranteed immediate redirect to index.html
 
 const SUPABASE_URL = 'https://bszfkctapcyhgjdoxtqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzemZrY3RhcGN5aGdqZG94dHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMDc2OTksImV4cCI6MjA4Njg4MzY5OX0.5i9eEunzNHeSArGROsTzkQC-LwMtE1CoIxrbshf6BX4';
@@ -8,22 +9,22 @@ let supabaseClient = null;
 
 function initializeSupabase() {
   if (window.supabaseClient) {
-    console.log('Supabase already initialized - reusing existing client');
+    console.log('[script.js] Supabase already initialized - reusing client');
     return window.supabaseClient;
   }
 
   if (typeof supabase === 'undefined') {
-    console.error('Supabase library not loaded. Check CDN script in <head>');
+    console.error('[script.js] Supabase library not loaded. Check <script> in <head>');
     return null;
   }
 
   try {
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     window.supabaseClient = supabaseClient;
-    console.log('SUCCESS: Supabase client initialized globally');
+    console.log('[script.js] SUCCESS: Supabase client initialized globally');
     return supabaseClient;
   } catch (err) {
-    console.error('Failed to initialize Supabase:', err.message || err);
+    console.error('[script.js] Failed to initialize Supabase:', err.message || err);
     return null;
   }
 }
@@ -40,6 +41,7 @@ async function loginWithGoogle() {
   }
 
   try {
+    console.log('[loginWithGoogle] Starting Google OAuth flow...');
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -49,44 +51,58 @@ async function loginWithGoogle() {
 
     if (error) throw error;
   } catch (err) {
-    console.error('Google login error:', err.message || err);
+    console.error('[loginWithGoogle] Error:', err.message || err);
     alert('Login failed: ' + (err.message || 'Unknown error'));
   }
 }
 
-// Aggressive logout with guaranteed auto-redirect to index.html
+// Aggressive logout with guaranteed redirect
 async function logout() {
+  console.log('[logout] Logout button clicked - starting full logout...');
+
   const client = initializeSupabase();
-  if (!client) return;
+  if (!client) {
+    console.warn('[logout] Supabase client not available');
+    window.location.replace('/');
+    return;
+  }
 
   try {
-    // Sign out from Supabase
+    // 1. Sign out from Supabase
     const { error } = await client.auth.signOut();
-    if (error) throw error;
+    if (error) {
+      console.warn('[logout] Supabase signOut failed:', error.message);
+    } else {
+      console.log('[logout] Supabase signOut successful');
+    }
 
-    // Clear all Supabase-related storage keys
-    localStorage.removeItem('sb-' + new URL(SUPABASE_URL).hostname + '-auth-token');
+    // 2. Clear ALL possible Supabase storage keys
+    const hostnameKey = 'sb-' + new URL(SUPABASE_URL).hostname + '-auth-token';
+    localStorage.removeItem(hostnameKey);
     localStorage.removeItem('supabase.auth.token');
     localStorage.removeItem('supabase.auth.refresh_token');
     sessionStorage.removeItem('supabase.auth.token');
     sessionStorage.removeItem('supabase.auth.refresh_token');
 
-    // Nuclear option: clear ALL storage to prevent any auto-login
+    // 3. Nuclear option: wipe ALL local & session storage
     localStorage.clear();
     sessionStorage.clear();
 
-    console.log('Logout successful - all session data cleared');
+    console.log('[logout] All storage cleared successfully');
 
-    // Force immediate redirect to landing page (index.html)
-    window.location.replace('/');  // replace() prevents back-button re-login
+    // 4. Force immediate redirect to index.html (landing page)
+    console.log('[logout] Redirecting to index.html ...');
+    window.location.replace('/');   // Main redirect
 
-    // Extra fallback: reload after tiny delay to break browser cache/session
+    // 5. Extra fallback - reload after 300ms to break any cache/session
     setTimeout(() => {
+      console.log('[logout] Fallback reload triggered');
       window.location.reload(true);
     }, 300);
   } catch (err) {
-    console.error('Logout failed:', err.message || err);
-    alert('Logout failed: ' + (err.message || 'Unknown error'));
+    console.error('[logout] Critical error during logout:', err);
+    // Even if error, force redirect anyway
+    window.location.replace('/');
   }
 }
 
@@ -103,24 +119,32 @@ async function updateAuthUI() {
 
     if (user) {
       loginBtns.forEach(btn => (btn.style.display = 'none'));
-      logoutBtns.forEach(btn => (btn.style.display = 'inline-block' || btn.classList.remove('hidden')));
+      logoutBtns.forEach(btn => {
+        btn.style.display = 'inline-block';
+        if (btn.classList) btn.classList.remove('hidden');
+      });
       
       const name = user.user_metadata?.full_name || user.email.split('@')[0];
       userGreetings.forEach(greeting => {
         greeting.textContent = `Welcome, ${name}`;
-        greeting.style.display = 'inline' || greeting.classList.remove('hidden');
+        greeting.style.display = 'inline';
+        if (greeting.classList) greeting.classList.remove('hidden');
       });
 
-      // If on landing (index.html or /), redirect to home
       if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         window.location.href = '/home.html';
       }
     } else {
       loginBtns.forEach(btn => (btn.style.display = 'inline-block'));
-      logoutBtns.forEach(btn => (btn.style.display = 'none' || btn.classList.add('hidden')));
-      userGreetings.forEach(greeting => greeting.style.display = 'none' || greeting.classList.add('hidden'));
+      logoutBtns.forEach(btn => {
+        btn.style.display = 'none';
+        if (btn.classList) btn.classList.add('hidden');
+      });
+      userGreetings.forEach(greeting => {
+        greeting.style.display = 'none';
+        if (greeting.classList) greeting.classList.add('hidden');
+      });
 
-      // If on protected page, redirect to landing
       if (window.location.pathname.includes('/home.html') || 
           window.location.pathname.includes('/dashboard.html') || 
           window.location.pathname.includes('/admin.html')) {
@@ -136,7 +160,7 @@ async function updateAuthUI() {
 document.addEventListener('DOMContentLoaded', async () => {
   initializeSupabase();
 
-  // On login page or landing → ensure no lingering session
+  // Force logout lingering sessions on login/landing pages
   if (window.location.pathname.includes('/login.html') || 
       window.location.pathname === '/' || 
       window.location.pathname === '/index.html') {
@@ -145,7 +169,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (session) {
         console.log('Lingering session found on login/landing → signing out');
         await supabase.auth.signOut();
-        localStorage.removeItem('sb-' + new URL(SUPABASE_URL).hostname + '-auth-token');
         localStorage.clear();
         sessionStorage.clear();
         window.location.reload();
@@ -159,23 +182,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     await updateAuthUI();
 
     window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      console.log('[auth change]', event);
       await updateAuthUI();
       
       if (event === 'SIGNED_IN') {
         window.location.href = '/home.html';
       } else if (event === 'SIGNED_OUT') {
-        window.location.replace('/');  // Force replace on sign out event
+        console.log('[auth change] SIGNED_OUT → forcing redirect');
+        window.location.replace('/');
       }
     });
   }
 
-  // Global handler for #signout-btn (works on any page)
+  // Global handler for Sign Out button (works on home.html and any other page)
   const signoutBtn = document.getElementById('signout-btn');
   if (signoutBtn) {
+    console.log('[script.js] Found #signout-btn - attaching listener');
     signoutBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      await logout();  // Triggers full logout + auto redirect to index.html
+      console.log('[signout-btn] Clicked - starting logout');
+      await logout();  // This MUST trigger redirect automatically
     });
+  } else {
+    console.warn('[script.js] No #signout-btn found on this page');
   }
 
   console.log('Studyme shared script loaded');
