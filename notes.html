@@ -9,14 +9,6 @@
   <!-- Reliable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Faster pdf.js from unpkg CDN -->
-  <script src="https://unpkg.com/pdfjs-dist@3.11.338/build/pdf.min.js"></script>
-  <script>
-    // Set worker source immediately
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.338/build/pdf.worker.min.js';
-  </script>
-  <link rel="stylesheet" href="https://unpkg.com/pdfjs-dist@3.11.338/web/pdf_viewer.css">
-
   <!-- Inline mobile menu fix -->
   <style>
     @media (max-width: 768px) {
@@ -110,7 +102,7 @@
       border: 1px solid #ddd;
       border-radius: 8px;
       margin-top: 1rem;
-      overflow: auto;
+      overflow: hidden;
       background: #f8f8f8;
     }
 
@@ -271,7 +263,7 @@
             return;
           }
 
-          data.forEach((note, index) => {
+          data.forEach(note => {
             const card = document.createElement('div');
             card.className = 'content-card';
             card.innerHTML = `
@@ -282,70 +274,19 @@
 
               ${note.pdf_url ? `
                 <p><strong>Preview (read online only):</strong></p>
-                <div id="pdf-viewer-${index}" class="pdf-viewer">
-                  <p class="loading-pdf">Loading PDF preview...</p>
-                </div>
+                <iframe 
+                  src="https://docs.google.com/gview?url=${encodeURIComponent(note.pdf_url)}&embedded=true" 
+                  class="pdf-viewer" 
+                  frameborder="0">
+                </iframe>
+                <p class="loading-pdf">Loading PDF preview... (this may take a few seconds)</p>
               ` : '<p>No attached document.</p>'}
             `;
             container.appendChild(card);
-
-            if (note.pdf_url) {
-              renderPDF(note.pdf_url, `pdf-viewer-${index}`);
-            }
           });
         } catch (err) {
           console.error('Load error:', err.message || err);
           container.innerHTML = '<p style="color:red;">Failed to load notes: ' + (err.message || 'Unknown error') + '</p>';
-        }
-      }
-
-      // Wait for pdf.js to be fully ready
-      async function waitForPdfJs() {
-        return new Promise((resolve) => {
-          const check = () => {
-            if (typeof pdfjsLib !== 'undefined' && pdfjsLib.GlobalWorkerOptions.workerSrc) {
-              resolve();
-            } else {
-              setTimeout(check, 100);
-            }
-          };
-          check();
-        });
-      }
-
-      // Render PDF using pdf.js
-      async function renderPDF(url, viewerId) {
-        const viewer = document.getElementById(viewerId);
-        viewer.innerHTML = '<p class="loading-pdf">Loading PDF...</p>';
-
-        try {
-          await waitForPdfJs();
-
-          const loadingTask = pdfjsLib.getDocument(url);
-          const pdf = await loadingTask.promise;
-
-          viewer.innerHTML = '';
-
-          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-            const page = await pdf.getPage(pageNum);
-            const scale = 1.5;
-            const viewport = page.getViewport({ scale });
-
-            const canvas = document.createElement('canvas');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            canvas.style.display = 'block';
-            canvas.style.margin = '0 auto 10px';
-            canvas.style.borderBottom = '1px solid #ddd';
-
-            const context = canvas.getContext('2d');
-            await page.render({ canvasContext: context, viewport });
-
-            viewer.appendChild(canvas);
-          }
-        } catch (err) {
-          console.error('PDF render error:', err);
-          viewer.innerHTML = '<p class="error-pdf">Failed to load PDF preview: ' + (err.message || 'Unknown error') + '</p>';
         }
       }
 
