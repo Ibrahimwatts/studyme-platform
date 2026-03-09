@@ -9,9 +9,13 @@
   <!-- Reliable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- pdf.js CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf_viewer.min.css">
+  <!-- Faster pdf.js from unpkg CDN -->
+  <script src="https://unpkg.com/pdfjs-dist@3.11.338/build/pdf.min.js"></script>
+  <script>
+    // Set worker source immediately
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.338/build/pdf.worker.min.js';
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/pdfjs-dist@3.11.338/web/pdf_viewer.css">
 
   <!-- Inline mobile menu fix -->
   <style>
@@ -121,6 +125,13 @@
       color: #555;
       font-style: italic;
       margin-top: 1rem;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
     }
 
     .error-pdf {
@@ -288,24 +299,17 @@
         }
       }
 
-      // Wait for pdf.js to be fully loaded before rendering
+      // Wait for pdf.js to be fully ready
       async function waitForPdfJs() {
-        return new Promise((resolve, reject) => {
-          if (typeof pdfjsLib !== 'undefined' && pdfjsLib.GlobalWorkerOptions.workerSrc) {
-            resolve();
-          } else {
-            const interval = setInterval(() => {
-              if (typeof pdfjsLib !== 'undefined' && pdfjsLib.GlobalWorkerOptions.workerSrc) {
-                clearInterval(interval);
-                resolve();
-              }
-            }, 100);
-
-            setTimeout(() => {
-              clearInterval(interval);
-              reject(new Error('pdf.js failed to load after timeout'));
-            }, 10000); // 10s timeout
-          }
+        return new Promise((resolve) => {
+          const check = () => {
+            if (typeof pdfjsLib !== 'undefined' && pdfjsLib.GlobalWorkerOptions.workerSrc) {
+              resolve();
+            } else {
+              setTimeout(check, 100);
+            }
+          };
+          check();
         });
       }
 
@@ -315,7 +319,6 @@
         viewer.innerHTML = '<p class="loading-pdf">Loading PDF...</p>';
 
         try {
-          // Wait for pdf.js to be ready
           await waitForPdfJs();
 
           const loadingTask = pdfjsLib.getDocument(url);
