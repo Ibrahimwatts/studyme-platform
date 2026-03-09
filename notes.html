@@ -9,8 +9,12 @@
   <!-- Reliable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- Mozilla pdf.js CDN for PDF rendering -->
+  <!-- Mozilla pdf.js CDN - load worker too -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.min.js"></script>
+  <script>
+    // Set worker source for pdf.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.worker.min.js';
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf_viewer.min.css">
 
   <!-- Inline mobile menu fix – same as other pages -->
@@ -101,10 +105,10 @@
       border-radius: 6px;
     }
 
-    /* Note viewer styling */
+    /* PDF viewer styling */
     .pdf-viewer {
       width: 100%;
-      height: 600px;
+      height: 700px;
       border: 1px solid #ddd;
       border-radius: 8px;
       margin-top: 1rem;
@@ -119,18 +123,13 @@
       word-wrap: break-word;
     }
 
-    .doc-viewer {
-      width: 100%;
-      min-height: 400px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+    .loading-pdf {
+      color: #555;
+      font-style: italic;
       margin-top: 1rem;
-      padding: 1rem;
-      overflow: auto;
-      background: #fff;
     }
 
-    .unsupported-format {
+    .error-pdf {
       color: red;
       font-weight: bold;
       margin-top: 1rem;
@@ -252,12 +251,10 @@
             .select('*')
             .order('created_at', { ascending: false });
 
-          // Apply subject filter
           if (currentSubject !== 'all') {
             query = query.ilike('subject', `%${currentSubject}%`);
           }
 
-          // Apply form filter
           if (currentForm !== 'all') {
             query = query.eq('form', currentForm);
           }
@@ -283,17 +280,19 @@
               <!-- Text content -->
               ${note.body ? `<div class="note-body">${note.body.replace(/\n/g, '<br>')}</div>` : '<p>No text content available.</p>'}
 
-              <!-- PDF/Document Viewer -->
+              <!-- PDF Viewer -->
               ${note.pdf_url ? `
                 <p><strong>Preview (read online only):</strong></p>
-                <div id="viewer-${index}" class="pdf-viewer"></div>
-              ` : ''}
+                <div id="pdf-viewer-${index}" class="pdf-viewer">
+                  <p class="loading-pdf">Loading PDF preview...</p>
+                </div>
+              ` : '<p>No attached document.</p>'}
             `;
             container.appendChild(card);
 
-            // Render PDF if exists (using pdf.js)
+            // Render PDF if exists
             if (note.pdf_url) {
-              renderPDF(note.pdf_url, `viewer-${index}`);
+              renderPDF(note.pdf_url, `pdf-viewer-${index}`);
             }
           });
         } catch (err) {
@@ -302,26 +301,33 @@
         }
       }
 
-      // Function to render PDF using pdf.js
+      // Render PDF using pdf.js (waits for library to load)
       async function renderPDF(url, viewerId) {
+        const viewer = document.getElementById(viewerId);
+        viewer.innerHTML = '<p class="loading-pdf">Loading PDF...</p>';
+
         try {
-          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.worker.min.js';
+          // Wait for pdf.js to be ready
+          if (typeof pdfjsLib === 'undefined') {
+            throw new Error('pdf.js library not loaded');
+          }
 
           const loadingTask = pdfjsLib.getDocument(url);
           const pdf = await loadingTask.promise;
 
-          const viewer = document.getElementById(viewerId);
+          viewer.innerHTML = ''; // Clear loading message
 
           for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
             const page = await pdf.getPage(pageNum);
-            const scale = 1.5; // Adjust scale for better view
+            const scale = 1.5;
             const viewport = page.getViewport({ scale });
 
-            // Create canvas for each page
             const canvas = document.createElement('canvas');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
-            canvas.style.borderBottom = '1px solid #ddd'; // Separate pages
+            canvas.style.display = 'block';
+            canvas.style.margin = '0 auto 10px';
+            canvas.style.borderBottom = '1px solid #ddd';
 
             const context = canvas.getContext('2d');
             await page.render({ canvasContext: context, viewport });
@@ -330,11 +336,11 @@
           }
         } catch (err) {
           console.error('PDF render error:', err);
-          document.getElementById(viewerId).innerHTML = '<p style="color:red;">Failed to load preview: ' + (err.message || 'Unknown error') + '</p>';
+          viewer.innerHTML = '<p class="error-pdf">Failed to load PDF preview: ' + (err.message || 'Unknown error') + '</p>';
         }
       }
 
-      // Subject filter clicks
+      // Subject & Form filter clicks
       subjectLinks.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
@@ -344,7 +350,6 @@
         });
       });
 
-      // Form filter clicks
       formLinks.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
@@ -354,12 +359,12 @@
         });
       });
 
-      // Initial load (shows all)
+      // Initial load
       loadRevisionNotes();
     });
   </script>
 
-  <!-- Hamburger toggle script – same working version -->
+  <!-- Hamburger toggle script -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hamburger = document.querySelector('.hamburger');
@@ -368,7 +373,6 @@
       hamburger.addEventListener('click', () => {
         navMenu.classList.toggle('active');
         
-        // Update ARIA for accessibility
         const expanded = hamburger.getAttribute('aria-expanded') === 'true';
         hamburger.setAttribute('aria-expanded', !expanded);
       });
