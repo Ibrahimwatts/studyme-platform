@@ -9,6 +9,10 @@
   <!-- Reliable Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
+  <!-- Mozilla pdf.js CDN for PDF rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf_viewer.min.css">
+
   <!-- Inline mobile menu fix – same as other pages -->
   <style>
     @media (max-width: 768px) {
@@ -97,20 +101,39 @@
       border-radius: 6px;
     }
 
-    /* PDF viewer styling */
+    /* Note viewer styling */
     .pdf-viewer {
       width: 100%;
       height: 600px;
       border: 1px solid #ddd;
       border-radius: 8px;
       margin-top: 1rem;
-      overflow: hidden;
+      overflow: auto;
+      background: #f8f8f8;
     }
 
     .note-body {
       margin-top: 1rem;
       line-height: 1.6;
       white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .doc-viewer {
+      width: 100%;
+      min-height: 400px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 1rem;
+      padding: 1rem;
+      overflow: auto;
+      background: #fff;
+    }
+
+    .unsupported-format {
+      color: red;
+      font-weight: bold;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -250,7 +273,7 @@
             return;
           }
 
-          data.forEach(note => {
+          data.forEach((note, index) => {
             const card = document.createElement('div');
             card.className = 'content-card';
             card.innerHTML = `
@@ -258,19 +281,56 @@
               <p class="note-meta">${note.subject || '?'} • ${note.form || '?'}</p>
               
               <!-- Text content -->
-              ${note.body ? `<div class="note-body">${note.body.replace(/\n/g, '<br>')}</div>` : ''}
+              ${note.body ? `<div class="note-body">${note.body.replace(/\n/g, '<br>')}</div>` : '<p>No text content available.</p>'}
 
-              <!-- PDF viewer (embedded, no download) -->
+              <!-- PDF/Document Viewer -->
               ${note.pdf_url ? `
-                <p><strong>PDF Preview (read online only):</strong></p>
-                <iframe src="${note.pdf_url}" class="pdf-viewer"></iframe>
-              ` : '<p>No PDF attached.</p>'}
+                <p><strong>Preview (read online only):</strong></p>
+                <div id="viewer-${index}" class="pdf-viewer"></div>
+              ` : ''}
             `;
             container.appendChild(card);
+
+            // Render PDF if exists (using pdf.js)
+            if (note.pdf_url) {
+              renderPDF(note.pdf_url, `viewer-${index}`);
+            }
           });
         } catch (err) {
           console.error('Load error:', err.message || err);
           container.innerHTML = '<p style="color:red;">Failed to load notes: ' + (err.message || 'Unknown error') + '</p>';
+        }
+      }
+
+      // Function to render PDF using pdf.js
+      async function renderPDF(url, viewerId) {
+        try {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.338/pdf.worker.min.js';
+
+          const loadingTask = pdfjsLib.getDocument(url);
+          const pdf = await loadingTask.promise;
+
+          const viewer = document.getElementById(viewerId);
+
+          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const scale = 1.5; // Adjust scale for better view
+            const viewport = page.getViewport({ scale });
+
+            // Create canvas for each page
+            const canvas = document.createElement('canvas');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.style.borderBottom = '1px solid #ddd'; // Separate pages
+
+            const context = canvas.getContext('2d');
+            await page.render({ canvasContext: context, viewport });
+
+            viewer.appendChild(canvas);
+          }
+        } catch (err) {
+          console.error('PDF render error:', err);
+          document.getElementById(viewerId).innerHTML = '<p style="color:red;">Failed to load preview: ' + (err.message || 'Unknown error') + '</p>';
         }
       }
 
